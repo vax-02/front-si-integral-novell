@@ -1,0 +1,538 @@
+<div class="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100">
+
+  <nav
+    class="flex items-center justify-between px-10 py-3 border-b border-slate-200 sticky top-0 bg-white/95 backdrop-blur-md z-50 shadow-sm">
+
+    <!-- LOGO -->
+    <div class="flex items-center gap-4 group cursor-pointer select-none">
+      <div
+        class="h-14 w-12 bg-slate-900 flex items-center justify-center relative overflow-hidden rounded-md shadow-md transition-transform duration-300 group-hover:scale-105">
+
+        <img src="assets/img/logo.jpg" alt="Logo" class="h-full w-full object-cover opacity-90">
+        <div
+          class="absolute inset-0 bg-blue-700/80 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+        </div>
+      </div>
+
+      <div class="leading-tight">
+        <span class="block text-[9px] uppercase tracking-[0.35em] text-blue-700 font-extrabold">
+          Instituto Técnico Superior
+        </span>
+        <h2 class="font-serif text-2xl font-bold tracking-tight text-slate-900 uppercase">
+          Novell
+        </h2>
+      </div>
+    </div>
+
+    <!-- MENÚ -->
+    <div class="hidden lg:flex items-center gap-12 text-[11px] uppercase tracking-widest font-bold text-slate-800">
+
+      <a href="#" class="relative pb-2 hover:text-blue-700 transition-colors
+             after:content-[''] after:absolute after:left-0 after:-bottom-0.5
+             after:h-[2px] after:w-0 after:bg-blue-700 hover:after:w-full after:transition-all">
+        Inicio
+      </a>
+
+      <a href="#institucion" class="relative pb-2 hover:text-blue-700 transition-colors
+             after:content-[''] after:absolute after:left-0 after:-bottom-0.5
+             after:h-[2px] after:w-0 after:bg-blue-700 hover:after:w-full after:transition-all">
+        Institución
+      </a>
+
+      <a href="#carreras" class="relative pb-2 hover:text-blue-700 transition-colors
+             after:content-[''] after:absolute after:left-0 after:-bottom-0.5
+             after:h-[2px] after:w-0 after:bg-blue-700 hover:after:w-full after:transition-all">
+        Carreras
+      </a>
+
+      <a href="#contactanos" class="relative pb-2 hover:text-blue-700 transition-colors
+             after:content-[''] after:absolute after:left-0 after:-bottom-0.5
+             after:h-[2px] after:w-0 after:bg-blue-700 hover:after:w-full after:transition-all">
+        Contáctanos
+      </a>
+
+      <!-- BOTÓN -->
+      <button class="ml-4 bg-blue-800 text-white px-8 py-3 text-[10px] tracking-widest
+             hover:bg-blue-700 active:scale-95 transition-all duration-300
+             shadow-lg shadow-blue-900/20 rounded-sm"
+             routerLink="/login">
+        Ingresar
+      </button>
+
+    </div>
+
+  </nav>
+
+  <header class="relative overflow-hidden bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800">
+    <!-- Decoraciones -->
+    <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[140px]"></div>
+    <div class="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[140px]"></div>
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10">
+    </div>
+
+    <div class="max-w-7xl mx-auto px-8 py-6 pb-14 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+      <!-- TEXTO -->
+      <div class="space-y-6">
+        <div class="space-y-6">
+          <span class="inline-block text-blue-200 uppercase tracking-[0.4em] text-xs font-semibold">
+            Educación Técnica de Alto Nivel
+          </span>
+
+          <h1 class="text-5xl md:text-6xl font-serif font-bold text-white leading-[0.95] tracking-tight">
+            Construye tu <br>
+            <span class="bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+              futuro profesional
+            </span>
+          </h1>
+
+          <p class="text-sm text-blue-100 max-w-xl leading-relaxed">
+            Conviértete en un profesional competitivo en solo 3 años con
+            programas académicos actualizados, docentes especializados y
+            formación orientada al mercado laboral.
+          </p>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="flex flex-col sm:flex-row gap-10">
+
+          <button
+            class="bg-white text-blue-800 px-10 py-3 font-bold text-sm uppercase tracking-wider hover:bg-blue-100 transition-all shadow-2xl hover:-translate-y-1">
+            Inscribirse ahora
+          </button>
+
+          <button class="group flex items-center gap-4 text-white font-semibold uppercase tracking-wider text-sm">
+            <span class="w-14 h-[2px] bg-white group-hover:w-20 transition-all duration-300"></span>
+            Ver carreras
+          </button>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="flex gap-10 pt-3">
+          <div>
+            <p class="text-3xl font-bold text-white">30+</p>
+            <p class="text-blue-200 text-sm">Años de experiencia</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-white">5+</p>
+            <p class="text-blue-200 text-sm">Programas técnicos</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-white">1.5k</p>
+            <p class="text-blue-200 text-sm">Estudiantes graduados</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- IMAGEN -->
+      <div class="relative flex justify-center">
+
+        <!-- Marco decorativo -->
+        <div class="absolute w-[420px] h-[520px] border-2 border-white/20 rounded-3xl rotate-6"></div>
+
+        <div
+          class="relative w-[420px] h-[520px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 backdrop-blur-md bg-white/5">
+
+          <img src="https://images.unsplash.com/photo-1523240715181-310f9d7a5738?q=80&w=2070"
+            class="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 hover:brightness-100 transition-all duration-700"
+            alt="Estudiantes">
+
+          <!-- Overlay degradado -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- Tarjeta flotante -->
+        <div class="absolute -bottom-10 -left-10 bg-white shadow-2xl rounded-2xl p-4 w-64 border border-slate-100">
+          <p class="text-sm text-slate-500">Inscripciones abiertas</p>
+          <p class="text-2xl font-bold text-slate-900">Gestión 2026</p>
+          <div class="w-100 h-1 bg-blue-600 mt-3"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <section id="institucion" class="py-32 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-10">
+
+      <!-- TÍTULO -->
+      <div class="mb-20 text-center max-w-3xl mx-auto">
+        <h2 class="text-5xl font-serif font-bold text-slate-900 mb-6">
+          Nuestra Institución
+        </h2>
+        <p class="text-slate-500 leading-relaxed">
+          Formamos profesionales técnicos con excelencia académica, valores éticos
+          y compromiso social, respaldados por infraestructura moderna y docentes calificados.
+        </p>
+      </div>
+
+      <!-- CARDS -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+       
+
+        <!-- INFRAESTRUCTURA -->
+        <div
+          class="group bg-white border border-slate-200 hover:border-blue-500 transition-all rounded-xl overflow-hidden shadow-sm hover:shadow-xl">
+          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2070"
+            class="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+            alt="Infraestructura">
+          <div class="p-8 space-y-4">
+            <h4 class="text-xl font-bold text-slate-900">Infraestructura</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Contamos con laboratorios tecnológicos modernos, aulas equipadas y
+              espacios diseñados para el aprendizaje práctico y colaborativo.
+            </p>
+            <div class="pt-4">
+              <span class="text-xs font-bold uppercase tracking-widest text-blue-600">
+                Tecnología moderna
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCENTES -->
+        <div
+          class="group bg-white border border-slate-200 hover:border-blue-500 transition-all rounded-xl overflow-hidden shadow-sm hover:shadow-xl">
+          <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?q=80&w=2070"
+            class="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Docentes">
+          <div class="p-8 space-y-4">
+            <h4 class="text-xl font-bold text-slate-900">Docentes Calificados</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Profesionales especializados con experiencia en el sector productivo
+              y formación pedagógica para garantizar enseñanza de calidad.
+            </p>
+            <div class="pt-4">
+              <span class="text-xs font-bold uppercase tracking-widest text-blue-600">
+                Excelencia académica
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VALORES -->
+        <div
+          class="group bg-white border border-slate-200 hover:border-blue-500 transition-all rounded-xl overflow-hidden shadow-sm hover:shadow-xl">
+          <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070"
+            class="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Valores">
+          <div class="p-8 space-y-4">
+            <h4 class="text-xl font-bold text-slate-900">Valores Institucionales</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Promovemos responsabilidad, ética profesional, innovación tecnológica
+              y compromiso con el desarrollo sostenible de la sociedad.
+            </p>
+            <div class="pt-4">
+              <span class="text-xs font-bold uppercase tracking-widest text-blue-600">
+                Formación integral
+              </span>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </div>
+    </div>
+  </section>
+
+  <section id="carreras" class="py-32 bg-white">
+    <div class="max-w-7xl mx-auto px-10">
+
+      <!-- Título -->
+      <div class="mb-20 text-center max-w-3xl mx-auto">
+        <h2 class="text-5xl font-serif font-bold text-slate-900 mb-6">
+          Nuestras Carreras Profesionales
+        </h2>
+        <p class="text-slate-500 leading-relaxed">
+          Programas diseñados para formar profesionales competitivos, con enfoque práctico
+          y alta demanda en el mercado laboral nacional e internacional.
+        </p>
+      </div>
+
+      <!-- CARDS -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+        <!-- CARD -->
+        <div
+          class="group bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-500 transition-all rounded-xl overflow-hidden shadow-sm hover:shadow-xl">
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070"
+            class="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="p-8 space-y-4">
+            <h4 class="text-xl font-bold text-slate-900">Sistemas Informáticos</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Formación en desarrollo de software, bases de datos, redes y ciberseguridad.
+              Domina tecnologías modernas y conviértete en un profesional del área tecnológica.
+            </p>
+            <div class="flex justify-between items-center pt-4">
+              <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Duración: 3 años</span>
+              <button class="text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                Ver más →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD -->
+        <div
+          class="group bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-500 transition-all rounded-xl overflow-hidden shadow-sm hover:shadow-xl">
+          <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070"
+            class="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="p-8 space-y-4">
+            <h4 class="text-xl font-bold text-slate-900">Administración de Empresas</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Aprende gestión empresarial, liderazgo estratégico, finanzas corporativas
+              y dirección de organizaciones modernas.
+            </p>
+            <div class="flex justify-between items-center pt-4">
+              <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Duración: 3 años</span>
+              <button class="text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                Ver más →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD -->
+        <div
+          class="group bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-500 transition-all rounded-xl overflow-hidden shadow-sm hover:shadow-xl">
+          <img src="https://images.unsplash.com/photo-1554224154-26032ffc0d07?q=80&w=2070"
+            class="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="p-8 space-y-4">
+            <h4 class="text-xl font-bold text-slate-900">Contaduría General</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Especialízate en contabilidad financiera, auditoría, tributación y gestión
+              de recursos económicos empresariales.
+            </p>
+            <div class="flex justify-between items-center pt-4">
+              <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Duración: 3 años</span>
+              <button class="text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                Ver más →
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+  <section id="contactanos" class="py-32 bg-white">
+    <div class="max-w-7xl mx-auto px-10">
+
+      <!-- TÍTULO -->
+      <div class="mb-20 text-center max-w-3xl mx-auto">
+        <h2 class="text-5xl font-serif font-bold text-slate-900 mb-6">
+          Contáctanos
+        </h2>
+        <p class="text-slate-500 leading-relaxed">
+          ¿Tienes dudas sobre nuestras carreras o el proceso de admisión?
+          Nuestro equipo está listo para ayudarte.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-16 items-start">
+
+        <!-- FORMULARIO -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl shadow-sm p-10">
+
+          <h3 class="text-2xl font-bold text-slate-900 mb-8">
+            Envíanos un mensaje
+          </h3>
+
+          <form class="space-y-6">
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                Nombre completo
+              </label>
+              <input type="text"
+                class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Tu nombre">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                Correo electrónico
+              </label>
+              <input type="email"
+                class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="tucorreo&#64;email.com">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                Asunto
+              </label>
+              <input type="text"
+                class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Motivo del mensaje">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                Mensaje
+              </label>
+              <textarea rows="5"
+                class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Escribe tu mensaje aquí..."></textarea>
+            </div>
+
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+              Enviar mensaje
+            </button>
+
+          </form>
+        </div>
+
+        <!-- INFORMACIÓN -->
+        <div class="space-y-8">
+
+          <!-- CARD -->
+          <div class="flex gap-6 p-8 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition">
+            <div class="text-3xl">📍</div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Dirección</h4>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                Av. Principal #123<br>
+                Zona Central, Ciudad<br>
+                Bolivia
+              </p>
+            </div>
+          </div>
+
+          <!-- CARD -->
+          <div class="flex gap-6 p-8 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition">
+            <div class="text-3xl">📞</div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Teléfonos</h4>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                +591 70000000<br>
+                +591 22000000
+              </p>
+            </div>
+          </div>
+
+          <!-- CARD -->
+          <div class="flex gap-6 p-8 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition">
+            <div class="text-3xl">✉️</div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Correo electrónico</h4>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                info&#64;instituto.edu.bo<br>
+                admisiones&#64;instituto.edu.bo
+              </p>
+            </div>
+          </div>
+
+          <!-- CARD -->
+          <div class="flex gap-6 p-8 border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition">
+            <div class="text-3xl">⏰</div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Horarios de atención</h4>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                Lunes a Viernes<br>
+                8:00 AM — 6:00 PM
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+
+  <footer class="bg-blue-800 text-slate-300 pt-20 pb-10">
+    <div class="max-w-7xl mx-auto px-10">
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+
+        <!-- INSTITUCIÓN -->
+        <div>
+          <h3 class="text-white text-xl font-semibold mb-6">Institución</h3>
+          <p class="text-sm leading-relaxed text-slate-400">
+            Formamos profesionales altamente capacitados con valores éticos,
+            pensamiento crítico e innovación tecnológica para enfrentar
+            los desafíos del mundo moderno.
+          </p>
+
+          <div class="flex gap-4 mt-6 text-lg">
+            <a href="#" class="hover:text-white transition">🌐</a>
+            <a href="#" class="hover:text-white transition">📘</a>
+            <a href="#" class="hover:text-white transition">📸</a>
+            <a href="#" class="hover:text-white transition">▶️</a>
+          </div>
+        </div>
+
+        <!-- ENLACES -->
+        <div>
+          <h3 class="text-white text-xl font-semibold mb-6">Enlaces rápidos</h3>
+          <ul class="space-y-3 text-sm">
+            <li><a href="#" class="hover:text-white transition">Inicio</a></li>
+            <li><a href="#" class="hover:text-white transition">Carreras</a></li>
+            <li><a href="#" class="hover:text-white transition">Admisiones</a></li>
+            <li><a href="#" class="hover:text-white transition">Becas</a></li>
+            <li><a href="#" class="hover:text-white transition">Contacto</a></li>
+          </ul>
+        </div>
+
+        <!-- SERVICIOS -->
+        <div>
+          <h3 class="text-white text-xl font-semibold mb-6">Servicios</h3>
+          <ul class="space-y-3 text-sm">
+            <li><a href="#" class="hover:text-white transition">Campus Virtual</a></li>
+            <li><a href="#" class="hover:text-white transition">Biblioteca</a></li>
+            <li><a href="#" class="hover:text-white transition">Bolsa de Trabajo</a></li>
+            <li><a href="#" class="hover:text-white transition">Investigación</a></li>
+            <li><a href="#" class="hover:text-white transition">Extensión Académica</a></li>
+          </ul>
+        </div>
+
+        <!-- CONTACTO -->
+        <div>
+          <h3 class="text-white text-xl font-semibold mb-6">Contáctanos</h3>
+          <ul class="space-y-4 text-sm text-slate-400">
+            <li class="flex gap-3">
+              <span>📍</span>
+              <span>Av. Principal #123<br>Zona Central, Bolivia</span>
+            </li>
+            <li class="flex gap-3">
+              <span>📞</span>
+              <span>+591 70000000</span>
+            </li>
+            <li class="flex gap-3">
+              <span>✉️</span>
+              <span>info&#64;instituto.edu.bo</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- DIVISOR -->
+      <div class="border-t border-slate-700 pt-8">
+
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+
+          <p class="text-sm text-slate-500">
+            © 2026 Instituto Educativo. Todos los derechos reservados.
+          </p>
+
+          <div class="flex gap-8 text-sm">
+            <a href="#" class="hover:text-white transition">Política de privacidad</a>
+            <a href="#" class="hover:text-white transition">Términos y condiciones</a>
+            <a href="#" class="hover:text-white transition">Mapa del sitio</a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </footer>
+</div>

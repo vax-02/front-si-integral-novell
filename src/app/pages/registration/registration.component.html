@@ -1,0 +1,201 @@
+<div class="p-8 bg-slate-50 min-h-screen space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800">Inscripción de Nuevo Estudiante</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Registro académico y administrativo del estudiante
+      </p>
+    </div>
+
+    <button class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-lg transition">
+      Cancelar
+    </button>
+  </div>
+
+  <!-- FORMULARIO -->
+  <form class="space-y-10">
+
+    <!-- INFORMACIÓN PERSONAL -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-100 px-6 py-4 border-b border-slate-200">
+        <h3 class="font-semibold text-slate-700">Información Personal</h3>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-3 gap-6">
+
+        <div>
+          <label class="label">Nombres</label>
+          <input class="input" placeholder="Juan Carlos">
+        </div>
+
+        <div>
+          <label class="label">Apellido Paterno</label>
+          <input class="input" placeholder="Pérez">
+        </div>
+
+        <div>
+          <label class="label">Apellido Materno</label>
+          <input class="input" placeholder="García">
+        </div>
+
+        <div>
+          <label class="label">CI / DNI</label>
+          <input class="input" placeholder="12345678">
+        </div>
+
+        <div>
+          <label class="label">Fecha de Nacimiento</label>
+          <input type="date" class="input">
+        </div>
+
+        <div>
+          <label class="label">Género</label>
+          <select class="input">
+            <option>Seleccionar</option>
+            <option>Masculino</option>
+            <option>Femenino</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- INFORMACIÓN DE CONTACTO -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-100 px-6 py-4 border-b border-slate-200">
+        <h3 class="font-semibold text-slate-700">Información de Contacto</h3>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-3 gap-6">
+
+        <div>
+          <label class="label">Correo Electrónico</label>
+          <input type="email" class="input" placeholder="correoxemail.com">
+        </div>
+
+        <div>
+          <label class="label">Teléfono</label>
+          <input class="input" placeholder="77777777">
+        </div>
+
+        <div>
+          <label class="label">Teléfono de Emergencia</label>
+          <input class="input" placeholder="Contacto familiar">
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="label">Dirección</label>
+          <input class="input" placeholder="Zona, calle, número de vivienda">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- INFORMACIÓN ACADÉMICA -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-100 px-6 py-4 border-b border-slate-200">
+        <h3 class="font-semibold text-slate-700">Información Académica</h3>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-3 gap-6">
+
+        <div>
+          <label class="label">Carrera</label>
+          <select class="input">
+            <option>Seleccionar carrera</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Turno</label>
+          <select class="input">
+            <option>Mañana</option>
+            <option>Tarde</option>
+            <option>Noche</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Modalidad</label>
+          <select class="input">
+            <option>Presencial</option>
+            <option>Semipresencial</option>
+            <option>Virtual</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Gestión Académica</label>
+          <select class="input">
+            <option>2026</option>
+            <option>2025</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Semestre de Ingreso</label>
+          <select class="input">
+            <option>Primer Semestre</option>
+            <option>Segundo Semestre</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Tipo de Estudiante</label>
+          <select class="input">
+            <option>Nuevo</option>
+            <option>Traspaso</option>
+            <option>Reincorporación</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-100 px-6 py-4 border-b border-slate-200">
+        <h3 class="font-semibold text-slate-700">Documentos Requeridos</h3>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-2 gap-6">
+
+        <div class="file-upload">
+          <label>Certificado de Nacimiento</label>
+          <input type="file">
+        </div>
+
+        <div class="file-upload">
+          <label>Título de Bachiller</label>
+          <input type="file">
+        </div>
+
+        <div class="file-upload">
+          <label>Fotografía 3x3</label>
+          <input type="file">
+        </div>
+
+        <div class="file-upload">
+          <label>Copia de CI</label>
+          <input type="file">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="flex justify-end gap-4 pt-6 border-t border-slate-200">
+      <button type="button" class="px-6 py-3 rounded-lg border border-slate-300 hover:bg-slate-100 transition">
+        Guardar Borrador
+      </button>
+
+      <button type="submit" class="px-8 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition">
+        Registrar Estudiante
+      </button>
+    </div>
+
+  </form>
+</div>

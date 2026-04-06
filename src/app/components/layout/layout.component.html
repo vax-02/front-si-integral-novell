@@ -1,0 +1,216 @@
+<div class="flex h-screen bg-slate-50 font-sans text-slate-900">
+
+  <!-- SIDEBAR -->
+  <aside [class.w-60]="!collapsed" [class.w-20]="collapsed"
+    class="bg-white border-r border-slate-200 transition-all duration-300 flex flex-col shadow-xl">
+
+    <div class="flex items-center p-5 h-20" [ngClass]="collapsed ? 'justify-center' : 'justify-between'">
+
+      <!-- LOGO -->
+      <div *ngIf="!collapsed" class="flex items-center gap-3 overflow-hidden">
+        <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white">
+          N
+        </div>
+
+        <span class="text-xl font-bold whitespace-nowrap">
+          Novell
+        </span>
+      </div>
+
+      <!-- BOTÓN -->
+      <button (click)="toggleSidebar()" class="p-2 rounded-lg hover:bg-slate-100">
+
+        <i class="fa-solid" [ngClass]="collapsed ? 'fa-arrow-right' : 'fa-arrow-left'">
+        </i>
+
+      </button>
+
+    </div>
+    <!-- NAV -->
+    <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+
+      <!-- DASHBOARD -->
+      <a routerLink="/home/dashboard" routerLinkActive="bg-blue-50 text-blue-700"
+        class="flex items-center p-3 rounded-xl hover:bg-slate-50 group transition"
+        [ngClass]="collapsed ? 'justify-center' : 'gap-4'">
+
+        <i class="fa-solid fa-chart-line text-slate-500 group-hover:text-blue-600"></i>
+
+        <span *ngIf="!collapsed">Dashboard</span>
+      </a>
+
+      <!-- ACADÉMICO -->
+      <div>
+
+        <div (click)="toggleAcademico()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed ? 'justify-center' : 'justify-between'">
+
+          <div class="flex items-center" [ngClass]="collapsed ? '' : 'gap-4'">
+            <i class="fa-solid fa-graduation-cap text-slate-500 group-hover:text-blue-600"></i>
+            <span *ngIf="!collapsed" class="text-xs font-bold uppercase text-slate-400">
+              Académico
+            </span>
+          </div>
+
+          <i *ngIf="!collapsed" class="fa-solid fa-chevron-down transition-transform"
+            [class.rotate-180]="openAcademico">
+          </i>
+
+        </div>
+
+        <!-- SUBMENU -->
+        <div *ngIf="!collapsed && openAcademico" class="ml-6 space-y-1">
+
+          <a routerLink="/home/students" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">Estudiantes</a>
+
+          <a routerLink="/home/docentes" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">Docentes</a>
+
+          <a routerLink="/home/califications" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">Calificaciones</a>
+
+          <a routerLink="/home/programs" class="block py-2 text-sm hover:text-blue-600">
+            Carreras
+          </a>
+          <a routerLink="/home/programs" class="block py-2 text-sm hover:text-blue-600">
+            Capacitaciones
+          </a>
+        </div>
+
+      </div>
+
+      <!-- FINANZAS -->
+      <div>
+
+        <div (click)="toggleFinanzas()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed ? 'justify-center' : 'justify-between'">
+
+          <div class="flex items-center" [ngClass]="collapsed ? '' : 'gap-4'">
+            <i class="fa-solid fa-money-bill-wave text-slate-500 group-hover:text-blue-600"></i>
+            <span *ngIf="!collapsed" class="text-xs font-bold uppercase text-slate-400">
+              Finanzas
+            </span>
+          </div>
+
+          <i *ngIf="!collapsed" class="fa-solid fa-chevron-down" [class.rotate-180]="openFinanzas">
+          </i>
+
+        </div>
+
+        <div *ngIf="!collapsed && openFinanzas" class="ml-6">
+          <a routerLink="/home/payments" class="block py-2 text-sm hover:text-blue-600">
+            Pagos
+          </a>
+        </div>
+
+      </div>
+
+      <!-- ADMIN -->
+      <div>
+
+        <div (click)="toggleAdmin()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed ? 'justify-center' : 'justify-between'">
+
+          <div class="flex items-center" [ngClass]="collapsed ? '' : 'gap-4'">
+            <i class="fa-solid fa-screwdriver-wrench text-slate-500 group-hover:text-blue-600"></i>
+            <span *ngIf="!collapsed" class="text-xs font-bold uppercase text-slate-400">
+              Administración
+            </span>
+          </div>
+
+          <i *ngIf="!collapsed" class="fa-solid fa-chevron-down" [class.rotate-180]="openAdmin">
+          </i>
+
+        </div>
+
+        <div *ngIf="!collapsed && openAdmin" class="ml-6 space-y-1">
+
+          <a routerLink="/home/attendance" class="block py-2 text-sm hover:text-blue-600">
+            Asistencia
+          </a>
+
+
+
+          <a routerLink="/home/users" class="block py-2 text-sm hover:text-blue-600">
+            Usuarios
+          </a>
+
+          <a routerLink="/home/reports" class="block py-2 text-sm hover:text-blue-600">
+            Reportes
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- CONFIG -->
+      <div>
+
+        <div (click)="toggleConfig()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed ? 'justify-center' : 'justify-between'">
+
+          <div class="flex items-center" [ngClass]="collapsed ? '' : 'gap-4'">
+            <i class="fa-solid fa-gear text-slate-500 group-hover:text-blue-600"></i>
+            <span *ngIf="!collapsed" class="text-xs font-bold uppercase text-slate-400">
+              Configuración
+            </span>
+          </div>
+
+          <i *ngIf="!collapsed" class="fa-solid fa-chevron-down" [class.rotate-180]="openConfig">
+          </i>
+
+        </div>
+
+        <div *ngIf="!collapsed && openConfig" class="ml-6 space-y-1">
+          <a routerLink="/home/profile" class="block py-2 text-sm hover:text-blue-600">
+            Perfil
+          </a>
+
+          <a routerLink="/home/password" class="block py-2 text-sm hover:text-blue-600">
+            Contraseña
+          </a>
+          <a class="block py-2 text-sm hover:text-blue-600">Institución</a>
+
+        </div>
+
+      </div>
+
+    </nav>
+
+
+    <!-- PROFILE -->
+    <!-- PROFILE -->
+    <div class="border-t p-3">
+
+      <div class="flex items-center w-full" [ngClass]="collapsed ? 'flex-col gap-2 justify-center' : 'justify-between'">
+
+        <!-- USUARIO -->
+        <div class="flex items-center" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
+
+          <img src="https://i.pravatar.cc/100" class="w-10 h-10 rounded-full" />
+
+          <div *ngIf="!collapsed">
+            <p class="text-sm font-bold">Javier C.</p>
+            <p class="text-xs text-slate-500">Administrador</p>
+          </div>
+
+        </div>
+
+        <!-- LOGOUT -->
+        <button (click)="logout()" class="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition">
+
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

@@ -1,0 +1,637 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Docentes</h1>
+      <p class="text-sm text-slate-500">Administra la información académica y laboral del personal docente.</p>
+    </div>
+
+
+    <app-button label="Agregar" variant="primary" (click)="openAddDocente()"> </app-button>
+  </div>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Total Docentes</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">86</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Activos</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">72</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Licencia</p>
+      <h3 class="text-2xl font-bold text-amber-500 mt-1">8</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Tiempo Completo</p>
+      <h3 class="text-2xl font-bold text-indigo-600 mt-1">54</h3>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+    <div class="grid md:grid-cols-4 gap-4">
+
+      <input type="text" placeholder="Buscar por nombre o CI..."
+        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+        <option>Carrera</option>
+        <option>Sistemas Informáticos</option>
+        <option>Administración</option>
+        <option>Contaduría</option>
+      </select>
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+        <option>Estado</option>
+        <option>Activo</option>
+        <option>Licencia</option>
+        <option>Retirado</option>
+      </select>
+
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+    </div>
+  </div>
+
+
+  <!-- TABLA  -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de docentes</span>
+      <span class="text-xs text-slate-400">1,338 docentes registrados</span>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-4 text-left">Docente</th>
+          <th class="p-4 text-center">C.I.</th>
+          <th class="p-4 text-center">Grado Academico</th>
+          <th class="p-4 text-center">Estado</th>
+          <th class="p-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100">
+
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4">
+            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
+            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
+          </td>
+          <td class="p-4 text-center">12345678</td>
+          <td class="p-4 text-center">
+            <span
+              class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold">Administrador</span>
+          </td>
+          <td class="p-4 text-center">
+            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
+          </td>
+          <td class="p-4 text-center space-x-2">
+            <app-button icon="fa-solid fa-eye" [variant]="'primary'" title="Ver" (click)="openViewDocente()">
+            </app-button>
+            <app-button icon="fa-solid fa-pen" [variant]="'secondary'" title="Editar">
+            </app-button>
+            <app-button icon="fa-solid fa-ellipsis" [variant]="'tertiary'" title="bajas/readmision"
+              (click)="openOptionDocente()"></app-button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!--MODALS-->
+  <app-base-modal [isOpen]="modalAddDocente" title="Agregar información de Docente" subtitle="Información general"
+    size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalAddDocente = false">
+    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8">
+
+      <!-- ===================== -->
+      <!-- DATOS PERSONALES -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Datos Personales
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-4">
+
+          <input placeholder="Nombres"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <input placeholder="Apellido Paterno"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <input placeholder="Apellido Materno"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <input placeholder="C.I."
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <input type="date"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition text-slate-500">
+
+          <select
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+            <option>Género</option>
+            <option>Masculino</option>
+            <option>Femenino</option>
+          </select>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- CONTACTO -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Contacto
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-4">
+
+          <input placeholder="Correo electrónico"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <input placeholder="Teléfono"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <input placeholder="Dirección"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition md:col-span-2">
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- INFORMACIÓN PROFESIONAL -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Información Profesional
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-4">
+
+          <!-- ESPECIALIDADES DINÁMICAS -->
+          <div class="md:col-span-3">
+            <label class="text-sm text-slate-500 mb-1 block">Especialidades</label>
+
+            <div
+              class="flex flex-wrap gap-2 p-3 border border-slate-300 rounded-xl focus-within:ring-2 focus-within:ring-blue-500">
+
+              <!-- TAGS -->
+              <span *ngFor="let esp of especialidades; let i = index"
+                class="flex items-center gap-2 bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+                {{ esp }}
+                <button type="button" (click)="removeEspecialidad(i)" class="text-blue-500 hover:text-red-500">
+                  ✕
+                </button>
+              </span>
+
+              <!-- INPUT -->
+              <input [(ngModel)]="especialidadInput" (keydown.enter)="addEspecialidad()"
+                placeholder="Escribe y presiona Enter..."
+                class="flex-1 min-w-[150px] outline-none border-none text-sm bg-transparent">
+            </div>
+          </div>
+          <!-- GRADO -->
+          <input placeholder="Grado académico (Lic., Ing., MSc, etc.)"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition md:col-span-2">
+
+          <!-- TIPO -->
+          <select
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+            <option>Tipo de Docente</option>
+            <option>Tiempo Completo</option>
+            <option>Medio Tiempo</option>
+            <option>Por Horas</option>
+          </select>
+
+        </div>
+      </div>
+      <!-- ===================== -->
+      <!-- INFORMACIÓN LABORAL -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Información Laboral
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-4">
+
+          <input type="date"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition"
+            placeholder="Fecha de ingreso">
+
+          <input placeholder="Salario (Bs.)" type="number"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+
+          <select
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+            <option>Estado</option>
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </select>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- DOCUMENTOS -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Documentos
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-4">
+
+          <label
+            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            Hoja de Vida (CV)
+          </label>
+
+          <label
+            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            Título Profesional
+          </label>
+
+          <label
+            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            C.I. (Copia)
+          </label>
+
+          <label
+            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            Certificados
+          </label>
+
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
+
+  <app-base-modal [isOpen]="modalViewDocente" title="Ver información de Docente" subtitle="Información general"
+    size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalViewDocente = false">
+    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8">
+
+      <!-- ===================== -->
+      <!-- PERFIL -->
+      <!-- ===================== -->
+      <div class="flex items-center gap-4">
+        <div
+          class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+          JP
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Juan Pérez</h2>
+          <p class="text-sm text-slate-500">Docente</p>
+        </div>
+
+        <div class="ml-auto">
+          <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-600">
+            Activo
+          </span>
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- DATOS PERSONALES -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Datos Personales
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Nombres</p>
+            <p class="font-semibold text-slate-800">Juan</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Apellido Paterno</p>
+            <p class="font-semibold text-slate-800">Pérez</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Apellido Materno</p>
+            <p class="font-semibold text-slate-800">García</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">C.I.</p>
+            <p class="font-semibold text-slate-800">12345678</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Fecha de Nacimiento</p>
+            <p class="font-semibold text-slate-800">01/01/1990</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Género</p>
+            <p class="font-semibold text-slate-800">Masculino</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- CONTACTO -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Contacto
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Correo</p>
+            <p class="font-semibold text-slate-800">docente&#64;email.com</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Teléfono</p>
+            <p class="font-semibold text-slate-800">78945612</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl md:col-span-2">
+            <p class="text-slate-500">Dirección</p>
+            <p class="font-semibold text-slate-800">Av. Principal 456</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- INFORMACIÓN PROFESIONAL -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Información Profesional
+        </h3>
+
+        <div class="space-y-4 text-sm">
+
+          <!-- ESPECIALIDADES -->
+          <div>
+            <p class="text-slate-500 mb-2">Especialidades</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+                Programación
+              </span>
+              <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+                Base de Datos
+              </span>
+              <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+                Redes
+              </span>
+            </div>
+          </div>
+
+          <!-- OTROS DATOS -->
+          <div class="grid md:grid-cols-3 gap-4">
+
+
+            <div class="bg-slate-50 p-3 rounded-xl md:col-span-2">
+              <p class="text-slate-500">Grado Académico</p>
+              <p class="font-semibold text-slate-800">Ingeniero en Sistemas</p>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl">
+              <p class="text-slate-500">Tipo</p>
+              <p class="font-semibold text-slate-800">Tiempo Completo</p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- INFORMACIÓN LABORAL -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Información Laboral
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Fecha de Ingreso</p>
+            <p class="font-semibold text-slate-800">01/02/2024</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Salario</p>
+            <p class="font-semibold text-green-600">Bs. 3500</p>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <p class="text-slate-500">Estado</p>
+            <p class="font-semibold text-green-600">Activo</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- DOCUMENTOS -->
+      <!-- ===================== -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Documentos
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+
+          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+            <span>Hoja de Vida</span>
+            <span class="text-green-600 font-semibold">✔</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+            <span>Título Profesional</span>
+            <span class="text-green-600 font-semibold">✔</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+            <span>C.I.</span>
+            <span class="text-green-600 font-semibold">✔</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+            <span>Certificados</span>
+            <span class="text-red-500 font-semibold">✖</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </app-base-modal>
+
+
+
+  <app-base-modal [isOpen]="modalOptionDocente" title="Gestión de Docente" subtitle="Acciones administrativas" size="lg"
+    confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalOptionDocente = false">
+
+    <div class="space-y-6">
+
+      <!-- INFO DOCENTE -->
+      <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-700">
+          JP
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-slate-800">Juan Pérez</h3>
+          <p class="text-sm text-slate-500">Docente • Programación</p>
+        </div>
+      </div>
+
+      <!-- TABS ACCIONES -->
+      <div class="w-full bg-slate-100 p-2 rounded-2xl">
+        <div class="flex w-full gap-2">
+
+          <button (click)="tabDoc='asignar'"
+            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='asignar' 
+            ? 'bg-blue-600 text-white shadow' 
+            : 'text-slate-500 hover:bg-white hover:text-blue-600'">
+            <i class="fa-solid fa-plus"></i> Asignar
+          </button>
+
+          <button (click)="tabDoc='quitar'"
+            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='quitar' 
+            ? 'bg-red-600 text-white shadow' 
+            : 'text-slate-500 hover:bg-white hover:text-red-600'">
+            <i class="fa-solid fa-minus"></i> Quitar
+          </button>
+
+          <button (click)="tabDoc='estado'"
+            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='estado' 
+            ? 'bg-yellow-500 text-white shadow' 
+            : 'text-slate-500 hover:bg-white hover:text-yellow-600'">
+            <i class="fa-solid fa-toggle-on"></i> Estado
+          </button>
+
+          <button (click)="tabDoc='baja'"
+            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='baja' 
+            ? 'bg-red-700 text-white shadow' 
+            : 'text-slate-500 hover:bg-white hover:text-red-700'">
+            <i class="fa-solid fa-user-xmark"></i> Baja
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- ASIGNAR MATERIA -->
+      <!-- ===================== -->
+      <div *ngIf="tabDoc==='asignar'" class="space-y-4">
+
+        <h3 class="font-semibold text-slate-700">Asignar materia</h3>
+
+        <select class="w-full input">
+          <option>Seleccionar materia</option>
+          <option>Programación I</option>
+        </select>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <select class="input">
+            <option>Año</option>
+            <option>1er Año</option>
+          </select>
+
+          <select class="input">
+            <option>Turno</option>
+            <option>Mañana</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- ===================== -->
+      <!-- QUITAR MATERIA -->
+      <!-- ===================== -->
+      <div *ngIf="tabDoc==='quitar'" class="space-y-4">
+
+        <h3 class="font-semibold text-slate-700">Quitar materia asignada</h3>
+
+        <select class="w-full input">
+          <option>Seleccionar materia</option>
+          <option>Programación I</option>
+        </select>
+
+        <textarea class="input" placeholder="Motivo (opcional)"></textarea>
+
+      </div>
+
+      <!-- ===================== -->
+      <!-- ESTADO -->
+      <!-- ===================== -->
+      <div *ngIf="tabDoc==='estado'" class="space-y-4">
+
+        <h3 class="font-semibold text-slate-700">Cambiar estado</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <button (click)="estado='activo'" [ngClass]="estado==='activo' 
+            ? 'bg-green-600 text-white' 
+            : 'bg-white hover:bg-green-50'" class="p-4 rounded-xl border flex flex-col items-center gap-2 transition">
+            <i class="fa-solid fa-check"></i>
+            Activo
+          </button>
+
+          <button (click)="estado='inactivo'" [ngClass]="estado==='inactivo' 
+            ? 'bg-red-600 text-white' 
+            : 'bg-white hover:bg-red-50'" class="p-4 rounded-xl border flex flex-col items-center gap-2 transition">
+            <i class="fa-solid fa-xmark"></i>
+            Inactivo
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- ===================== -->
+      <!-- BAJA DOCENTE -->
+      <!-- ===================== -->
+      <div *ngIf="tabDoc==='baja'" class="space-y-4">
+
+        <h3 class="font-semibold text-red-600">Dar de baja docente</h3>
+
+        <input type="date" class="input">
+
+        <textarea class="input" placeholder="Motivo de la baja"></textarea>
+
+        <div class="bg-red-50 border border-red-200 p-3 rounded-xl text-sm text-red-600 flex gap-2">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Esta acción eliminará al docente de futuras asignaciones.
+        </div>
+
+      </div>
+
+    </div>
+
+  </app-base-modal>
+</div>

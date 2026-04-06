@@ -1,0 +1,141 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-slate-700">Asistencia de Docentes</h1>
+
+    <div class="flex gap-3">
+      <app-button label="Registrar Asistencia" type="primary"></app-button>
+    </div>
+  </div>
+
+    <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Docentes Activos</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">42</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Presentes hoy</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">20</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Retrasos</p>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">3</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Faltas</p>
+      <h3 class="text-2xl font-bold text-red-600 mt-1">1</h3>
+    </div>
+
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
+    <input placeholder="Buscar docente..." class="input">
+    <select class="input">
+      <option>Todas las materias</option>
+    </select>
+    <select class="input">
+      <option>Todos los estados</option>
+      <option>Presente</option>
+      <option>Retraso</option>
+      <option>Falta</option>
+      <option>Justificado</option>
+    </select>
+    <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+  </div>
+
+  <!-- TABLA DE ASISTENCIA -->
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+
+
+    <table class="w-full text-sm">
+      <thead class="bg-blue-50 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-3 text-left">Docente</th>
+          <th class="p-3">Materia</th>
+          <th class="p-3">Horario</th>
+          <th class="p-3">Ingreso</th>
+          <th class="p-3">Salida</th>
+          <th class="p-3">Estado</th>
+          <th class="p-3">Observación</th>
+          <th class="p-3">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr class="hover:bg-blue-50/40">
+          <td class="p-3 font-semibold">Carlos Mendoza</td>
+          <td class="p-3">Base de Datos II</td>
+          <td class="p-3">08:00 - 10:00</td>
+          <td class="p-3"><input type="time" class="time-input" value="08:02"></td>
+          <td class="p-3"><input type="time" class="time-input" value="10:00"></td>
+          <td class="p-3">
+            <select class="status-present">
+              <option>Presente</option>
+              <option>Retraso</option>
+              <option>Falta</option>
+              <option>Justificado</option>
+            </select>
+          </td>
+          <td class="p-3"><input placeholder="Observación" class="obs-input"></td>
+          <td class="p-3">
+            <button class="btn-save">Guardar</button>
+          </td>
+        </tr>
+
+        <tr class="hover:bg-blue-50/40">
+          <td class="p-3 font-semibold">María López</td>
+          <td class="p-3">Programación Web</td>
+          <td class="p-3">10:00 - 12:00</td>
+          <td class="p-3"><input type="time" class="time-input"></td>
+          <td class="p-3"><input type="time" class="time-input"></td>
+          <td class="p-3">
+            <select class="status-absent">
+              <option>Falta</option>
+              <option>Presente</option>
+              <option>Retraso</option>
+              <option>Justificado</option>
+            </select>
+          </td>
+          <td class="p-3"><input placeholder="Observación" class="obs-input"></td>
+          <td class="p-3">
+            <button class="btn-save">Guardar</button>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+    <h3 class="font-bold text-slate-700 mb-4">Historial de Asistencia</h3>
+
+    <div class="space-y-4 text-sm">
+
+      <div class="border-l-4 border-green-400 pl-4">
+        <p class="font-semibold text-slate-700">Asistencia registrada</p>
+        <p class="text-slate-500">Docente: Carlos Mendoza</p>
+        <p class="text-slate-500">Estado: Presente</p>
+        <p class="text-xs text-slate-400">07/03/2026 — 08:05</p>
+      </div>
+
+      <div class="border-l-4 border-red-400 pl-4">
+        <p class="font-semibold text-slate-700">Inasistencia registrada</p>
+        <p class="text-slate-500">Docente: María López</p>
+        <p class="text-slate-500">Estado: Falta</p>
+        <p class="text-xs text-slate-400">07/03/2026 — 10:15</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!--MODALS-->
+  
+</div>

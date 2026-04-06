@@ -1,0 +1,237 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800">Centro de Reportes Académicos</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Visualiza estadísticas y genera reportes administrativos
+      </p>
+    </div>
+
+    <app-button label="Exportar reporte global" ></app-button>
+  </div>
+
+    <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Asistencia promedio</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">42</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Rendimiento promedio</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">20</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Pagos completados</p>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">3</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Pagos pendientes</p>
+      <h3 class="text-2xl font-bold text-red-600 mt-1">1</h3>
+    </div>
+
+  </div>
+
+    <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-5 gap-4">
+    <select class="input">
+      <option>Tipo de reporte</option>
+      <option>Asistencia</option>
+      <option>Calificaciones</option>
+      <option>Pagos</option>
+      <option>Docentes</option>
+      <option>Estudiantes</option>
+    </select>
+
+    <select class="input">
+      <option>Gestión</option>
+      <option>2026</option>
+      <option>2025</option>
+    </select>
+    <select class="input">
+      <option>Periodo</option>
+      <option>1er Semestre</option>
+      <option>2do Semestre</option>
+      <option>Anual</option>
+    </select>
+
+    <select class="input">
+      <option>Carrera</option>
+      <option>Todas</option>
+    </select>
+    
+    <app-button label="Generar" variant="secondary" [fullWidth]="true"></app-button>
+  </div>
+
+
+
+  <!-- REPORTES POR MÓDULO -->
+  <div class="grid lg:grid-cols-3 gap-8">
+
+    <!-- ASISTENCIA -->
+    <div class="card p-6 space-y-6 rounded-xl shadow-sm border border-blue-100 bg-white">
+      <div class="flex justify-between items-center">
+        <h3 class="font-semibold text-slate-700">Reporte de Asistencia</h3>
+        <span class="badge-indigo">Actualizado</span>
+      </div>
+
+      <div class="space-y-4 text-sm">
+
+        <div class="flex justify-between">
+          <span>Asistencia Estudiantil</span>
+          <span class="font-semibold text-indigo-600">91%</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Asistencia Docentes</span>
+          <span class="font-semibold text-indigo-600">97%</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Clases Dictadas</span>
+          <span class="font-semibold">1,240</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Clases Suspendidas</span>
+          <span class="font-semibold text-rose-500">32</span>
+        </div>
+
+      </div>
+
+      <button class="btn-report-indigo">
+        Ver Reporte Detallado
+      </button>
+    </div>
+
+    <!-- CALIFICACIONES -->
+    <div class="card p-6 space-y-6 rounded-xl shadow-sm border border-blue-100 bg-white">
+      <div class="flex justify-between items-center">
+        <h3 class="font-semibold text-slate-700">Reporte de Calificaciones</h3>
+        <span class="badge-emerald">Académico</span>
+      </div>
+
+      <div class="space-y-4 text-sm">
+
+        <div class="flex justify-between">
+          <span>Promedio General</span>
+          <span class="font-semibold text-emerald-600">78 / 100</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Estudiantes Aprobados</span>
+          <span class="font-semibold">1,120</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Estudiantes Reprobados</span>
+          <span class="font-semibold text-rose-500">148</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Mejor Rendimiento</span>
+          <span class="font-semibold">Sistemas Informáticos</span>
+        </div>
+
+      </div>
+
+      <button class="btn-report-emerald">
+        Ver Reporte Detallado
+      </button>
+    </div>
+
+    <!-- PAGOS -->
+    <div class="card p-6 space-y-6 rounded-xl shadow-sm border border-blue-100 bg-white">
+      <div class="flex justify-between items-center">
+        <h3 class="font-semibold text-slate-700">Reporte Financiero</h3>
+        <span class="badge-amber">Finanzas</span>
+      </div>
+
+      <div class="space-y-4 text-sm">
+
+        <div class="flex justify-between">
+          <span>Ingresos Totales</span>
+          <span class="font-semibold text-emerald-600">Bs 245,000</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Pagos Pendientes</span>
+          <span class="font-semibold text-rose-500">Bs 32,000</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Pagos del Mes</span>
+          <span class="font-semibold">Bs 54,000</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Método más usado</span>
+          <span class="font-semibold">Transferencia</span>
+        </div>
+
+      </div>
+
+      <button class="btn-report-amber">
+        Ver Reporte Detallado
+      </button>
+    </div>
+
+  </div>
+
+
+   <!-- TABLA DE ASISTENCIA -->
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+   <div class="card-header flex justify-between items-center">
+      <span>Historial de Reportes Generados</span>
+      <span class="text-xs text-slate-400">Descargables</span>
+    </div>
+
+
+    <table class="w-full text-sm">
+      <thead class="bg-blue-50 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-3 text-left">Reporte</th>
+          <th class="p-3">Tipo</th>
+          <th class="p-3">Perido</th>
+          <th class="p-3">Fecha</th>
+          <th class="p-3">Generado por</th>
+          <th class="p-3">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+  <!-- TABLA DE REPORTES GENERADOS -->
+        <tr class="hover:bg-slate-50">
+          <td class="td-left font-semibold">Asistencia General</td>
+          <td class="td">Asistencia</td>
+          <td class="td">1er Semestre 2026</td>
+          <td class="td">07/03/2026</td>
+          <td class="td">Admin</td>
+          <td class="td space-x-2">
+            <button class="btn-table-view">Ver</button>
+            <button class="btn-table-download">Descargar</button>
+          </td>
+        </tr>
+
+        <tr class="hover:bg-slate-50">
+          <td class="td-left font-semibold">Reporte Financiero</td>
+          <td class="td">Pagos</td>
+          <td class="td">Febrero 2026</td>
+          <td class="td">01/03/2026</td>
+          <td class="td">Admin</td>
+          <td class="td space-x-2">
+            <button class="btn-table-view">Ver</button>
+            <button class="btn-table-download">Descargar</button>
+          </td>
+        </tr>
+
+
+      </tbody>
+    </table>
+  </div>
+</div>

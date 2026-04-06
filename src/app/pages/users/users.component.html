@@ -1,0 +1,159 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Usuarios</h1>
+      <p class="text-sm text-slate-500">Administración de accesos y roles del sistema</p>
+    </div>
+
+    <app-button label="Nueva Carrera" type="primary"></app-button>
+  </div>
+
+    <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Administradores</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">42</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Secretarias</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">20</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Docentes</p>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">3</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Estudiantes</p>
+      <h3 class="text-2xl font-bold text-red-600 mt-1">1</h3>
+    </div>
+
+  </div>
+
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 grid md:grid-cols-5 gap-4">
+
+    <input placeholder="Buscar por nombre o email..." class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
+
+    <select class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
+      <option>Todos los roles</option>
+      <option>Administrador</option>
+      <option>Secretaria</option>
+      <option>Docente</option>
+      <option>Estudiante</option>
+    </select>
+
+    <select class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
+      <option>Todos los estados</option>
+      <option>Activo</option>
+      <option>Inactivo</option>
+      <option>Bloqueado</option>
+    </select>
+
+    <select class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
+      <option>Ordenar por</option>
+      <option>Nombre</option>
+      <option>Fecha registro</option>
+      <option>Rol</option>
+    </select>
+
+    <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+  </div>
+
+  <!-- TABLA DE USUARIOS -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de Usuarios</span>
+      <span class="text-xs text-slate-400">1,338 usuarios registrados</span>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-4 text-left">Usuario</th>
+          <th class="p-4 text-center">Documento</th>
+          <th class="p-4 text-center">Rol</th>
+          <th class="p-4 text-center">Área</th>
+          <th class="p-4 text-center">Estado</th>
+          <th class="p-4 text-center">Registro</th>
+          <th class="p-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100">
+
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4">
+            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
+            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
+          </td>
+          <td class="p-4 text-center">12345678</td>
+          <td class="p-4 text-center">
+            <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold">Administrador</span>
+          </td>
+          <td class="p-4 text-center">Dirección</td>
+          <td class="p-4 text-center">
+            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
+          </td>
+          <td class="p-4 text-center text-slate-500">05/01/2026</td>
+          <td class="p-4 text-center space-x-2">
+            <button class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg hover:bg-amber-200 transition">Editar</button>
+            <button class="bg-sky-100 text-sky-700 px-3 py-1 rounded-lg hover:bg-sky-200 transition">Ver</button>
+            <button class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg hover:bg-rose-200 transition">Bloquear</button>
+          </td>
+        </tr>
+
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4">
+            <div class="font-semibold text-slate-700">María López</div>
+            <div class="text-xs text-slate-400">maria.lxinstituto.edu</div>
+          </td>
+          <td class="p-4 text-center">87654321</td>
+          <td class="p-4 text-center">
+            <span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-xs font-semibold">Secretaria</span>
+          </td>
+          <td class="p-4 text-center">Administración</td>
+          <td class="p-4 text-center">
+            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
+          </td>
+          <td class="p-4 text-center text-slate-500">11/02/2026</td>
+          <td class="p-4 text-center space-x-2">
+            <button class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg hover:bg-amber-200 transition">Editar</button>
+            <button class="bg-sky-100 text-sky-700 px-3 py-1 rounded-lg hover:bg-sky-200 transition">Ver</button>
+            <button class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg hover:bg-rose-200 transition">Bloquear</button>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ACCIONES RÁPIDAS -->
+  <div class="grid md:grid-cols-2 gap-8">
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+      <h3 class="font-semibold text-slate-700 mb-2">Historial de Accesos</h3>
+      <p class="text-sm text-slate-500 mb-4">Registro de ingresos al sistema</p>
+      <button class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 w-full py-2 rounded-lg font-medium transition">
+        Ver Historial
+      </button>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+      <h3 class="font-semibold text-slate-700 mb-2">Usuarios Inactivos</h3>
+      <p class="text-sm text-slate-500 mb-4">Cuentas sin actividad reciente</p>
+      <button class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 w-full py-2 rounded-lg font-medium transition">
+        Revisar Usuarios
+      </button>
+    </div>
+
+  </div>
+
+</div>

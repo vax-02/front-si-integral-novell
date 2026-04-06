@@ -1,0 +1,332 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Carreras</h1>
+      <p class="text-sm text-slate-500">Administración académica de programas y especialidades</p>
+    </div>
+
+    <app-button label="Nueva Carrera" type="primary"></app-button>
+  </div>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Total Carreras</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">42</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Total Materias</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">20</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Carreras activas</p>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">3</h3>
+    </div>
+
+
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
+    <input placeholder="Buscar docente..." class="input">
+    
+    <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+  </div>
+
+   <!-- TABLA  -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de Carreras</span>
+      <span class="text-xs text-slate-400">1,338 materias registrados</span>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-4 text-left">Carrera</th>
+          <th class="p-4 text-center">Coordinador</th>
+          <th class="p-4 text-center">Duracion</th>
+          <th class="p-4 text-center">Materias</th>
+          <th class="p-4 text-center">Estudiantes</th>
+
+          <th class="p-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100">
+
+          <tr class="hover:bg-slate-50 transition">
+
+          <td class="px-6 py-4 font-semibold text-slate-800">
+            Sistemas Informáticos
+          </td>
+
+          <td class="px-6 py-4 text-center text-slate-600">
+            Ing. Carlos Rojas
+          </td>
+
+          <td class="px-6 py-4 text-center">
+            <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+              3 años
+            </span>
+          </td>
+
+          <td class="px-6 py-4 text-center font-semibold text-blue-600">
+            36
+          </td>
+
+          <td class="px-6 py-4 text-center font-semibold text-emerald-600">
+            420
+          </td>
+
+          <td class="px-6 py-4">
+            <div class="flex justify-center gap-2">
+              <app-button (click)="openViewProgram()" icon="fa-solid fa-eye"
+                class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition" title="Ver">
+              </app-button>
+
+              <app-button icon="fa-solid fa-pen" [variant]="'secondary'"
+                class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition" title="Ver">
+              </app-button>
+
+
+
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!--MODALS-->
+  <app-base-modal [isOpen]="modalViewProgram" title="Detalle de carrera" subtitle="Información general" size="xl"
+    confirmText="Guardar" cancelText="Cerrar" (confirm)="modalViewProgram = false" (cancel)="modalViewProgram = false">
+
+    <div class="space-y-6">
+      <!-- TABS -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <!-- NAV TABS FULL WIDTH -->
+        <div class="w-full bg-slate-100 p-2 rounded-2xl">
+
+          <div class="flex w-full gap-2">
+
+            <button (click)="tab='materias'"
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='materias' 
+        ? 'bg-blue-600 text-white shadow-md' 
+        : 'text-slate-500 hover:bg-white hover:text-blue-600'">
+
+              <i class="fa-solid fa-book-open"></i>
+              <span class="hidden sm:inline">Materias</span>
+            </button>
+
+            <button (click)="tab='director'"
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='director' 
+        ? 'bg-blue-600 text-white shadow-md' 
+        : 'text-slate-500 hover:bg-white hover:text-blue-600'">
+
+              <i class="fa-solid fa-user-tie"></i>
+              <span class="hidden sm:inline">Director</span>
+            </button>
+
+            <button (click)="tab='estudiantes'"
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='estudiantes' 
+        ? 'bg-blue-600 text-white shadow-md' 
+        : 'text-slate-500 hover:bg-white hover:text-blue-600'">
+
+              <i class="fa-solid fa-users"></i>
+              <span class="hidden sm:inline">Estudiantes</span>
+            </button>
+
+
+
+          </div>
+
+        </div>
+        <!-- CONTENIDO -->
+        <div class="p-5 space-y-5">
+
+
+          <!-- ===================== -->
+          <!-- PLAN DE ESTUDIO -->
+          <!-- ===================== -->
+          <div *ngIf="tab==='materias'" class="space-y-6">
+
+            <!-- HEADER -->
+            <div class="flex justify-between items-center">
+              <h3 class="font-semibold text-slate-700">Plan de Estudio</h3>
+
+              <button class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
+                + Nueva Materia
+              </button>
+            </div>
+
+            <!-- ===================== -->
+            <!-- 1ER AÑO -->
+            <!-- ===================== -->
+            <div class="bg-white border border-blue-100 rounded-xl shadow-sm">
+
+              <div class="bg-blue-50 px-4 py-3 font-semibold text-blue-700 rounded-t-xl">
+                1er Año
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+
+                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th class="px-4 py-3 text-left">Materia</th>
+                      <th class="px-4 py-3 text-center">Docente</th>
+                      <th class="px-4 py-3 text-center">Requisito</th>
+                    </tr>
+                  </thead>
+
+                  <tbody class="divide-y">
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-4 py-3 font-medium">Programación I</td>
+                      <td class="px-4 py-3 text-center">Juan Pérez</td>
+                      <td class="px-4 py-3 text-center text-slate-400">—</td>
+                    </tr>
+
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
+
+            <!-- ===================== -->
+            <!-- 2DO AÑO -->
+            <!-- ===================== -->
+            <div class="bg-white border border-blue-100 rounded-xl shadow-sm">
+
+              <div class="bg-emerald-50 px-4 py-3 font-semibold text-emerald-700 rounded-t-xl">
+                2do Año
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+
+                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th class="px-4 py-3 text-left">Materia</th>
+                      <th class="px-4 py-3 text-center">Docente</th>
+                      <th class="px-4 py-3 text-center">Requisito</th>
+                    </tr>
+                  </thead>
+
+                  <tbody class="divide-y">
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-4 py-3 font-medium">Programación II</td>
+                      <td class="px-4 py-3 text-center">Carlos Ruiz</td>
+                      <td class="px-4 py-3 text-center text-blue-600">Programación I</td>
+                    </tr>
+
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-4 py-3 font-medium">Base de Datos I</td>
+                      <td class="px-4 py-3 text-center">Ana Flores</td>
+                      <td class="px-4 py-3 text-center text-blue-600">Programación I</td>
+                    </tr>
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
+
+            <!-- ===================== -->
+            <!-- 3ER AÑO -->
+            <!-- ===================== -->
+            <div class="bg-white border border-blue-100 rounded-xl shadow-sm">
+
+              <div class="bg-yellow-50 px-4 py-3 font-semibold text-yellow-700 rounded-t-xl">
+                3er Año
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+
+                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th class="px-4 py-3 text-left">Materia</th>
+                      <th class="px-4 py-3 text-center">Docente</th>
+                      <th class="px-4 py-3 text-center">Requisito</th>
+                    </tr>
+                  </thead>
+
+                  <tbody class="divide-y">
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-4 py-3 font-medium">Desarrollo Web</td>
+                      <td class="px-4 py-3 text-center">Luis Vargas</td>
+                      <td class="px-4 py-3 text-center text-blue-600">Programación II</td>
+                    </tr>
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ===================== -->
+          <!-- DIRECTOR -->
+          <!-- ===================== -->
+          <div *ngIf="tab==='director'" class="text-center space-y-4">
+
+            <div
+              class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center text-xl font-bold text-blue-600 shadow">
+              CR
+            </div>
+
+            <div>
+              <p class="font-semibold text-slate-800">Ing. Carlos Rojas</p>
+              <p class="text-sm text-slate-500">Director de carrera</p>
+            </div>
+
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
+              Cambiar Director
+            </button>
+
+          </div>
+
+          <!-- ===================== -->
+          <!-- ESTUDIANTES -->
+          <!-- ===================== -->
+          <div *ngIf="tab==='estudiantes'">
+
+            <div class="grid md:grid-cols-3 gap-4">
+
+              <div class="bg-white border border-blue-100 p-4 rounded-xl text-center shadow-sm">
+                <p class="text-sm text-slate-500">1er Año</p>
+                <h3 class="text-xl font-bold text-blue-600">150</h3>
+              </div>
+
+              <div class="bg-white border border-blue-100 p-4 rounded-xl text-center shadow-sm">
+                <p class="text-sm text-slate-500">2do Año</p>
+                <h3 class="text-xl font-bold text-blue-600">140</h3>
+              </div>
+
+              <div class="bg-white border border-blue-100 p-4 rounded-xl text-center shadow-sm">
+                <p class="text-sm text-slate-500">3er Año</p>
+                <h3 class="text-xl font-bold text-blue-600">130</h3>
+              </div>
+
+            </div>
+
+          </div>
+
+       
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </app-base-modal>
+
+
+</div>

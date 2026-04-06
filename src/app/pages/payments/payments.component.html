@@ -1,0 +1,267 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Pagos</h1>
+      <p class="text-sm text-slate-500">Administra pensiones, mensualidades y el historial financiero de estudiantes.
+      </p>
+    </div>
+
+    <app-button label="Registrar pago" variant="primary" (click)="openRegisterModal()"></app-button>
+  </div>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Ingresos del Mes</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">Bs. 48,500</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Pagos Pendientes</p>
+      <h3 class="text-2xl font-bold text-amber-500 mt-1">126</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Pagos Completados</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">1,024</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Estudiantes Morosos</p>
+      <h3 class="text-2xl font-bold text-rose-600 mt-1">38</h3>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+    <div class="grid md:grid-cols-4 gap-4">
+
+      <input type="text" placeholder="Buscar por estudiante o CI..."
+        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+        <option>Carrera</option>
+        <option>Sistemas</option>
+      </select>
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+        <option>Estado</option>
+        <option>Pagado</option>
+        <option>Pendiente</option>
+      </select>
+
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+
+    </div>
+  </div>
+
+
+  <!-- TABLA DE USUARIOS -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Lista de Estudiantes</span>
+      <span class="text-xs text-slate-400">1,338 usuarios registrados</span>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-4 text-left">Estudiante</th>
+          <th class="p-4 text-center">C.I.</th>
+          <th class="p-4 text-center">Carrera</th>
+          <th class="p-4 text-center">Estado</th>
+
+          <th class="p-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100">
+
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4">
+            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
+            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
+          </td>
+          <td class="p-4 text-center">12345678</td>
+          <td class="p-4 text-center">Diseño Grafico</td>
+
+          <td class="p-4 text-center">
+            <span
+              class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">Sin deudas</span>
+          </td>
+          
+          <td class="p-4 text-center space-x-2">
+            <app-button label="Ver" variant="primary" (click)="openDetailModal()"></app-button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!--MODALS -->
+  <app-base-modal [isOpen]="registerModalOpen" title="Registrar pago" subtitle="Registro de mensualidad" size="lg"
+    confirmText="Registrar" cancelText="Cancelar" (confirm)="savePayment()" (cancel)="registerModalOpen = false">
+    <!-- CONTENIDO DINÁMICO -->
+    <div class="flex flex-col items-center gap-6 p-6">
+
+      <!-- Estudiante -->
+      <div class="w-full max-w-md">
+        <label class="block text-sm text-slate-600 mb-2">Estudiante (C.I.)</label>
+        <div class="grid grid-cols-[1fr_auto] gap-3 items-center">
+          <input type="number"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          <app-button label="Buscar"></app-button>
+        </div>
+      </div>
+
+      <!-- Pagos -->
+      <div class="w-full max-w-lg">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm text-slate-600 mb-2">Monto</label>
+            <input type="number"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 mb-2">Descuento</label>
+            <input type="number"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 mb-2">Multa o pago extra</label>
+            <input type="number"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 p-6">
+
+      <h3 class="text-center text-lg font-bold text-slate-800">Información del Pago</h3>
+
+      <!-- Datos principales -->
+      <div class="grid grid-cols-2 gap-4">
+        <p class="font-semibold text-slate-600">Nombre completo:</p>
+        <p class="text-slate-700">Juan Carlos Núñez</p>
+
+        <p class="font-semibold text-slate-600">Carrera:</p>
+        <p class="text-slate-700">Ingeniería en Sistemas</p>
+
+        <p class="font-semibold text-slate-600">CI:</p>
+        <p class="text-slate-700">78965412</p>
+      </div>
+
+      <!-- Datos de pagos -->
+      <h4 class="text-md font-semibold text-slate-800 border-b border-slate-200 pb-2 mt-4">Detalles de Pago</h4>
+
+      <div class="grid grid-cols-2 gap-4 mt-2">
+        <p class="font-semibold text-slate-600">Monto a pagar:</p>
+        <p class="text-slate-700">Bs. 350</p>
+
+        <p class="font-semibold text-slate-600">Descuento:</p>
+        <p class="text-slate-700">Bs. 50</p>
+
+        <p class="font-semibold text-slate-600">Pagos extra:</p>
+        <p class="text-slate-700">Bs. 20</p>
+      </div>
+
+      <!-- Totales -->
+      <div class="grid grid-cols-2 gap-4 mt-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <p class="font-semibold text-slate-800">Total a pagar:</p>
+        <p class="font-bold text-blue-700">Bs. 320</p>
+      </div>
+
+    </div>
+  </app-base-modal>
+
+
+  <app-base-modal [isOpen]="detailModalOpen" title="Historial de pago" subtitle="Historial de mensualidades" size="lg"
+    confirmText="Aceptar"  (confirm)="detailModalOpen = false" (cancel)="detailModalOpen = false">
+
+    <div class="flex flex-col gap-6 p-6 w-full max-w-3xl">
+
+      <!-- Cabecera del estudiante -->
+      <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+        <div>
+          <h3 class="text-lg font-bold text-slate-800">Juan Carlos Núñez</h3>
+          <p class="text-sm text-slate-500">C.I.: 78965412</p>
+          <p class="text-sm text-slate-500">Carrera: Ingeniería en Sistemas</p>
+        </div>
+
+        <div class="flex gap-4 mt-2 md:mt-0">
+          <p class="font-semibold text-slate-700">Total Pagado: <span class="text-emerald-600">Bs. 1,200</span></p>
+          <p class="font-semibold text-slate-700">Total Pendiente: <span class="text-rose-600">Bs. 320</span></p>
+        </div>
+      </div>
+
+      <!-- Tabla de historial -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border border-slate-200 rounded-lg">
+          <thead class="bg-blue-50 text-slate-600 uppercase text-xs tracking-wider">
+            <tr>
+              <th class="p-3 text-left">Fecha</th>
+              <th class="p-3 text-left">Concepto</th>
+              <th class="p-3 text-left">Monto</th>
+              <th class="p-3 text-left">Estado</th>
+              <th class="p-3 text-left">Recibo</th>
+
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-blue-50 transition">
+              <td class="p-3">05/03/2026</td>
+              <td class="p-3">Pensión Marzo 2026</td>
+              <td class="p-3 font-semibold">Bs. 350</td>
+              <td class="p-3">
+                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
+                  Pagado
+                </span>
+              </td>
+              
+              <td class="p-3">
+                <i class="fa-solid fa-print"></i>
+
+              </td>
+            </tr>
+            <tr class="hover:bg-blue-50 transition">
+              <td class="p-3">05/02/2026</td>
+              <td class="p-3">Pensión Febrero 2026</td>
+              <td class="p-3 font-semibold">Bs. 350</td>
+              <td class="p-3">
+                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-semibold">
+                  Pendiente
+                </span>
+              </td>
+            </tr>
+            <tr class="hover:bg-blue-50 transition">
+              <td class="p-3">05/01/2026</td>
+              <td class="p-3">Pensión Enero 2026</td>
+              <td class="p-3 font-semibold">Bs. 350</td>
+              <td class="p-3">
+                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
+                  Pagado
+                </span>
+              </td>
+              <td class="p-3">
+                <i class="fa-solid fa-print"></i>
+
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total de deudas -->
+      <div class="mt-4 flex justify-end">
+        <p class="font-semibold text-slate-800">Total Pendiente: <span class="text-rose-600">Bs. 320</span></p>
+      </div>
+    </div>
+  </app-base-modal>
+</div>

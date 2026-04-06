@@ -1,0 +1,251 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Calificaciones</h1>
+      <p class="text-sm text-slate-500">Consulta, edita y supervisa el rendimiento académico de los estudiantes.</p>
+    </div>
+
+  </div>
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Promedio General</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">78 / 100</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Estudiantes Aprobados</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">1,240</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Estudiantes Reprobados</p>
+      <h3 class="text-2xl font-bold text-rose-600 mt-1">132</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Materias Activas</p>
+      <h3 class="text-2xl font-bold text-indigo-600 mt-1">48</h3>
+    </div>
+  </div>
+
+
+
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+    <div class="grid md:grid-cols-4 gap-4">
+
+      <input type="text" placeholder="Buscar..."
+        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+        <option>Carrera</option>
+        <option>Sistemas</option>
+        <option>Contaduría</option>
+        <option>Marketing</option>
+      </select>
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+        <option>Materia</option>
+        <option>Programación I</option>
+        <option>Base de Datos</option>
+        <option>Redes</option>
+      </select>
+
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+
+    </div>
+  </div>
+
+  <!-- TABLA  -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de Materias</span>
+      <span class="text-xs text-slate-400">1,338 materias registrados</span>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+        <tr>
+          <th class="p-4 text-left">Materia</th>
+          <th class="p-4 text-center">Carrera</th>
+          <th class="p-4 text-center">Estudiantes</th>
+          <th class="p-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100">
+
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4">
+            <div class="font-semibold text-slate-700">Base de datos II</div>
+          </td>
+          <td class="p-4 text-center">Sistemas Informaticos</td>
+          <td class="p-4 text-center">20</td>
+
+          <td class="p-4 text-center space-x-2">
+            <app-button icon="fa-solid fa-ellipsis" [variant]="'primary'" (click)="openNotas()"
+              title="Agregar calificaciones"></app-button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+
+
+
+  <app-base-modal [isOpen]="modalNotas" title="Gestión de Calificaciones"
+    subtitle="Configuración avanzada por estudiante" size="xl" confirmText="Guardar" cancelText="Cancelar"
+     (cancel)="modalNotas = false">
+
+    <div class="space-y-6">
+
+      <!-- ===================== -->
+      <!-- CONFIGURACIÓN -->
+      <!-- ===================== -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
+
+        <h3 class="font-semibold text-slate-700 flex items-center gap-2 mb-4">
+          <i class="fa-solid fa-sliders text-blue-600"></i>
+          Configuración de Evaluaciones
+        </h3>
+
+        <!-- INPUT NUEVO -->
+        <div class="flex flex-wrap gap-3 items-center">
+
+          <input [(ngModel)]="nuevoCampo.nombre" placeholder="Ej: Parcial 1"
+            class="px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm">
+
+          <input [(ngModel)]="nuevoCampo.peso" type="number" placeholder="%"
+            class="w-24 px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm">
+
+          <button (click)="addCampo()"
+            class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+
+        </div>
+
+        <!-- CHIPS -->
+        <div class="flex flex-wrap gap-3 mt-4">
+
+          <div *ngFor="let c of campos; let i = index"
+            class="group bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm hover:shadow-md transition">
+
+            <div>
+              <p class="text-sm font-semibold text-slate-700">{{ c.nombre }}</p>
+              <p class="text-xs text-blue-600">{{ c.peso }}%</p>
+            </div>
+
+            <!-- editar peso -->
+            <input type="number" [(ngModel)]="c.peso"
+              class="w-16 text-xs px-2 py-1 border rounded-lg text-center focus:ring-1 focus:ring-blue-500">
+
+            <button (click)="removeCampo(i)" class="opacity-0 group-hover:opacity-100 text-red-500 transition">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- TOTAL -->
+        <div class="mt-3">
+          <span class="text-sm font-medium">Total:</span>
+          <span class="ml-2 font-bold" [ngClass]="totalPeso() === 100 ? 'text-green-600' : 'text-red-500'">
+            {{ totalPeso() }}%
+          </span>
+        </div>
+
+      </div>
+
+      <!-- ===================== -->
+      <!-- TABLA MODERNA -->
+      <!-- ===================== -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+        <div class="overflow-x-auto">
+
+          <table class="w-full text-sm">
+
+            <!-- HEAD -->
+            <thead class="bg-slate-100 text-xs uppercase text-slate-500">
+              <tr>
+                <th class="px-4 py-3 text-left">Estudiante</th>
+
+                <th *ngFor="let c of campos" class="px-4 py-3 text-center">
+                  <div class="flex flex-col items-center">
+                    <span>{{ c.nombre }}</span>
+                    <span class="text-[10px] text-blue-600">({{ c.peso }}%)</span>
+                  </div>
+                </th>
+
+                <th class="px-4 py-3 text-center">Promedio</th>
+              </tr>
+            </thead>
+
+            <!-- BODY -->
+            <tbody class="divide-y">
+
+              <tr *ngFor="let est of estudiantes" class="hover:bg-slate-50 transition">
+
+                <!-- NOMBRE -->
+                <td class="px-4 py-3 font-medium flex items-center gap-3">
+                  <div
+                    class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                    {{ est.nombre.charAt(0) }}
+                  </div>
+                  {{ est.nombre }}
+                </td>
+
+                <!-- NOTAS -->
+                <td *ngFor="let c of campos; let i = index" class="px-3 py-3">
+
+                  <div class="flex flex-col items-center gap-1">
+
+                    <!-- NOTA -->
+                    <input type="number" [(ngModel)]="est.notas[i]"
+                      class="w-20 px-2 py-1 rounded-lg border border-slate-300 text-center focus:ring-2 focus:ring-blue-500">
+
+                    <!-- PESO INDIVIDUAL -->
+                    <input type="number" [(ngModel)]="est.pesos[i]" placeholder="%"
+                      class="w-16 text-xs px-2 py-1 border rounded-lg text-center text-slate-500 focus:ring-1 focus:ring-blue-400">
+
+                  </div>
+
+                </td>
+
+                <!-- PROMEDIO -->
+                <td class="px-4 py-3 text-center">
+
+                  <span class="px-3 py-1 rounded-full text-sm font-bold" [ngClass]="calcularPromedio(est) >= 51 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-100 text-red-600'">
+
+                    {{ calcularPromedio(est) | number:'1.1-2' }}
+
+                  </span>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+      </div>
+
+    </div>
+
+  </app-base-modal>
+</div>
