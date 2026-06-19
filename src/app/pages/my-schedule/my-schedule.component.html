@@ -1,0 +1,116 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800">Mi Horario</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Consulta tus clases programadas de lunes a viernes
+      </p>
+    </div>
+
+    <app-button label="Descargar horario"></app-button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-3 gap-4">
+    <select class="input" [(ngModel)]="carreraSeleccionadaId" (ngModelChange)="actualizar()">
+      <option [ngValue]="null" disabled>Selecciona una carrera</option>
+      @for (carrera of carreras(); track carrera.id) {
+      <option [ngValue]="carrera.id">{{ carrera.nombre }}</option>
+      }
+    </select>
+
+    <select class="input" [(ngModel)]="anioSeleccionado" (ngModelChange)="actualizar()">
+      <option [ngValue]="null" disabled>Selecciona el año</option>
+      <option [ngValue]="1">Primer Año</option>
+      <option [ngValue]="2">Segundo Año</option>
+      <option [ngValue]="3">Tercer Año</option>
+    </select>
+
+    <app-button label="Ver horario" variant="secondary" [fullWidth]="true"></app-button>
+  </div>
+
+  @if (horarioActual(); as horario) {
+
+  <!-- RESUMEN -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Materias en el horario</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ totalMaterias(horario) }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Horas semanales</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ totalHorasSemana(horario) }} hrs</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Día con más carga</p>
+      <h3 class="text-lg font-bold text-yellow-600 mt-1">{{ diaConMasCarga(horario) }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Turno</p>
+      <h3 class="text-lg font-bold text-indigo-600 mt-1">{{ horario.turno }}</h3>
+    </div>
+  </div>
+
+  <!-- TABLA DE HORARIO -->
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+    <div class="card-header flex justify-between items-center">
+      <span>Horario Semanal</span>
+      <span class="text-xs text-slate-400">{{ horario.turno }}</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border-collapse">
+        <thead class="bg-blue-50 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-3 text-left w-32">Hora</th>
+            @for (dia of dias; track dia) {
+            <th class="p-3 text-center">{{ dia }}</th>
+            }
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (franja of horario.franjas; track franja.hora) {
+          <tr class="border-t border-slate-100">
+            <td class="p-3 text-xs font-semibold text-slate-500 whitespace-nowrap">
+              {{ franja.hora }}
+            </td>
+
+            @for (dia of dias; track dia) {
+            @if (claseEn(franja, dia); as clase) {
+            <td class="p-2 align-top">
+              <div [class]="celdaClaseClass(clase.area)">
+                <p class="font-semibold leading-tight">{{ clase.materia }}</p>
+                <p class="opacity-80 mt-0.5">{{ clase.docente }}</p>
+                <p class="opacity-70">{{ clase.aula }}</p>
+              </div>
+            </td>
+            } @else {
+            <td class="p-2 align-top">
+              <div class="h-full min-h-[64px] rounded-lg border border-dashed border-slate-100"></div>
+            </td>
+            }
+            }
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  } @else {
+
+  <!-- ESTADO VACÍO -->
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-12 text-center">
+    <i class="fa-solid fa-calendar-days text-4xl text-blue-200"></i>
+    <p class="text-slate-500 mt-4">Selecciona una carrera y un año para ver el horario</p>
+  </div>
+
+  }
+
+</div>

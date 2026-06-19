@@ -1,0 +1,103 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800">Pensum Académico</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Malla curricular por carrera a nivel técnico superior
+      </p>
+    </div>
+
+    <app-button label="Descargar pensum"></app-button>
+  </div>
+
+  <!-- SELECTOR DE CARRERA -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
+    <select class="input md:col-span-3" [(ngModel)]="carreraSeleccionadaId"
+      (ngModelChange)="seleccionarCarrera($event)">
+      <option [ngValue]="null" disabled>Selecciona una carrera</option>
+      @for (carrera of carreras(); track carrera.id) {
+      <option [ngValue]="carrera.id">{{ carrera.nombre }}</option>
+      }
+    </select>
+
+    <app-button label="Ver malla" variant="secondary" [fullWidth]="true"></app-button>
+  </div>
+
+  @if (carreraActual(); as carrera) {
+
+  <!-- RESUMEN DE LA CARRERA -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Duración</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">3 años</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Total de materias</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ totalMaterias(carrera) }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Carga horaria total</p>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">{{ totalHoras(carrera) }} hrs</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Título a obtener</p>
+      <h3 class="text-lg font-bold text-indigo-600 mt-1">{{ carrera.titulo }}</h3>
+    </div>
+  </div>
+
+  <!-- MALLA POR AÑO -->
+  <div class="space-y-6">
+    @for (anio of carrera.anios; track anio.numero) {
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden p-4">
+
+      <div class="card-header flex justify-between items-center">
+        <span>{{ anio.etiqueta }}</span>
+        <span class="badge-indigo">{{ anio.materias.length }} materias</span>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 p-6">
+        @for (materia of anio.materias; track materia.sigla) {
+        <div class="border border-blue-100 rounded-lg p-4 space-y-2 hover:border-blue-300 transition-colors">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-semibold text-slate-400">{{ materia.sigla }}</span>
+            <span [class]="badgeAreaClass(materia.area)">{{ materia.area }}</span>
+          </div>
+
+          <h4 class="font-semibold text-slate-700 text-sm leading-snug">
+            {{ materia.nombre }}
+          </h4>
+
+          <div class="flex justify-between text-xs text-slate-500 pt-1">
+            <span>{{ materia.cargaHoraria }} hrs/sem</span>
+            <span>{{ materia.creditos }} créditos</span>
+          </div>
+
+          @if (materia.prerequisito) {
+          <p class="text-xs text-slate-400 pt-1 border-t border-slate-100 mt-2">
+            Prerrequisito: {{ materia.prerequisito }}
+          </p>
+          }
+        </div>
+        }
+      </div>
+
+    </div>
+    }
+  </div>
+
+  } @else {
+
+  <!-- ESTADO VACÍO -->
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-12 text-center">
+    <i class="fa-solid fa-graduation-cap text-4xl text-blue-200"></i>
+    <p class="text-slate-500 mt-4">Selecciona una carrera para ver su malla curricular</p>
+  </div>
+
+  }
+
+</div>

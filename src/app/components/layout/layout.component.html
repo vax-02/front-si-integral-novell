@@ -8,13 +8,12 @@
 
       <!-- LOGO -->
       <div *ngIf="!collapsed" class="flex items-center gap-3 overflow-hidden">
-        <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white">
-          N
+
+        <div class="flex items-center gap-4 group select-none">
+          <img src="images/logo.jpg" alt="Logo" class="h-16 w-auto">
         </div>
 
-        <span class="text-xl font-bold whitespace-nowrap">
-          Novell
-        </span>
+
       </div>
 
       <!-- BOTÓN -->
@@ -29,6 +28,48 @@
     <!-- NAV -->
     <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
 
+      @if(role === 'student') {
+      <!-- SECCION DEL ESTUDIANTE-->
+      <div>
+
+        <div (click)="toggleAcademico()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed ? 'justify-center' : 'justify-between'">
+
+          <div class="flex items-center" [ngClass]="collapsed ? '' : 'gap-4'">
+            <i class="fa-solid fa-graduation-cap text-slate-500 group-hover:text-blue-600"></i>
+            <span *ngIf="!collapsed" class="text-xs font-bold uppercase text-slate-400">
+              Académico
+            </span>
+          </div>
+
+          <i *ngIf="!collapsed" class="fa-solid fa-chevron-down transition-transform"
+            [class.rotate-180]="openAcademico">
+          </i>
+
+        </div>
+
+        <!-- SUBMENU -->
+        <div *ngIf="!collapsed && openAcademico" class="ml-6 space-y-1">
+          <a routerLink="/home/my-pensul" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
+            Plan de estudio
+          </a>
+
+          <a routerLink="/home/my-subjects" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
+            Mis materias
+          </a>
+
+          <a routerLink="/home/my-schedule" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
+            Horario
+          </a>
+        </div>
+
+      </div>
+      }
+
+      @if (role == 'admin') {
       <!-- DASHBOARD -->
       <a routerLink="/home/dashboard" routerLinkActive="bg-blue-50 text-blue-700"
         class="flex items-center p-3 rounded-xl hover:bg-slate-50 group transition"
@@ -70,10 +111,17 @@
           <a routerLink="/home/califications" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600">Calificaciones</a>
 
-          <a routerLink="/home/programs" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
             Carreras
           </a>
-          <a routerLink="/home/programs" class="block py-2 text-sm hover:text-blue-600">
+
+          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
+            Materias
+          </a>
+          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
             Capacitaciones
           </a>
         </div>
@@ -143,7 +191,7 @@
         </div>
 
       </div>
-
+      }
       <!-- CONFIG -->
       <div>
 
@@ -170,8 +218,9 @@
           <a routerLink="/home/password" class="block py-2 text-sm hover:text-blue-600">
             Contraseña
           </a>
+          @if (role == 'admin') {
           <a class="block py-2 text-sm hover:text-blue-600">Institución</a>
-
+          }
         </div>
 
       </div>

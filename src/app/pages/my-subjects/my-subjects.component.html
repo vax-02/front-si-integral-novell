@@ -1,0 +1,185 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800">Mis Materias</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Consulta tus asignaturas inscritas, docentes a cargo y calificaciones
+      </p>
+    </div>
+
+    <button label="Inscribir materia" variant="primary"></button>
+  </div>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Materias inscritas</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ materias().length }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Promedio general</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ promedioGeneral() }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Materias aprobadas</p>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">{{ aprobadas() }}</h3>
+    </div>
+
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
+    <select class="input">
+      <option>Gestión</option>
+      <option>2026</option>
+      <option>2025</option>
+    </select>
+
+    <select class="input">
+      <option>Periodo</option>
+      <option>1er Semestre</option>
+      <option>2do Semestre</option>
+    </select>
+
+    <select class="input">
+      <option>Estado</option>
+      <option>Cursando</option>
+      <option>Aprobada</option>
+      <option>Reprobada</option>
+    </select>
+
+    <button label="Filtrar" variant="secondary"></button>
+  </div>
+
+  <!-- GRID DE MATERIAS -->
+  <div class="grid lg:grid-cols-3 gap-6">
+
+    @for (materia of materias(); track materia.id) {
+    <div class="card p-6 space-y-5 rounded-xl shadow-sm border border-blue-100 bg-white">
+
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="font-semibold text-slate-700">{{ materia.nombre }}</h3>
+          <p class="text-xs text-slate-400 mt-0.5">{{ materia.sigla }}</p>
+        </div>
+        <span [class]="badgeEstadoClass(materia.estado)">{{ materia.estado }}</span>
+      </div>
+
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Docente</span>
+          <span class="font-semibold text-slate-700">{{ materia.docente }}</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="text-slate-500">Carga horaria</span>
+          <span class="font-semibold text-slate-700">{{ materia.cargaHoraria }} hrs/sem</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="text-slate-500">Nota actual</span>
+          <span [class]="notaClass(materia.notaActual)">{{ materia.notaActual ?? '—' }} / 100</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="text-slate-500">Asistencia</span>
+          <span class="font-semibold text-indigo-600">{{ materia.asistencia }}%</span>
+        </div>
+      </div>
+
+      <button class="btn-report-indigo" (click)="abrirModal(materia)">
+        Ver notas y detalle
+      </button>
+    </div>
+    }
+
+  </div>
+
+  <!-- MODAL DETALLE DE MATERIA -->
+  @if (materiaSeleccionada()) {
+  <div class="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50" (click)="cerrarModal()">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()">
+      <!-- Header del modal -->
+      <div class="card-header flex justify-between items-center px-6 py-4 border-b border-blue-100">
+        <div>
+          <h3 class="font-semibold text-slate-800 text-lg">{{ materiaSeleccionada()!.nombre }}</h3>
+          <p class="text-xs text-slate-400">{{ materiaSeleccionada()!.sigla }}</p>
+        </div>
+        <button class="text-slate-400 hover:text-slate-600 transition-colors" (click)="cerrarModal()"
+          aria-label="Cerrar">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+
+        <!-- INFO GENERAL -->
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Docente</p>
+            <p class="font-semibold text-slate-700 mt-1">{{ materiaSeleccionada()!.docente }}</p>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Carga horaria</p>
+            <p class="font-semibold text-slate-700 mt-1">{{ materiaSeleccionada()!.cargaHoraria }} hrs/semana</p>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Carrera</p>
+            <p class="font-semibold text-slate-700 mt-1">{{ materiaSeleccionada()!.carrera }}</p>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Estado</p>
+            <span [class]="badgeEstadoClass(materiaSeleccionada()!.estado)">
+              {{ materiaSeleccionada()!.estado }}
+            </span>
+          </div>
+        </div>
+
+        <!-- TABLA DE NOTAS -->
+        <div class="rounded-xl border border-blue-100 overflow-hidden">
+          <div class="card-header px-4 py-3">
+            <span>Detalle de Calificaciones</span>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="bg-blue-50 text-slate-600 uppercase text-xs">
+              <tr>
+                <th class="p-3 text-left">Evaluación</th>
+                <th class="p-3">Fecha</th>
+                <th class="p-3">Ponderación</th>
+                <th class="p-3">Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (nota of materiaSeleccionada()!.notas; track nota.evaluacion) {
+              <tr class="hover:bg-slate-50">
+                <td class="td-left font-semibold">{{ nota.evaluacion }}</td>
+                <td class="td">{{ nota.fecha }}</td>
+                <td class="td">{{ nota.ponderacion }}%</td>
+                <td class="td">
+                  <span [class]="notaClass(nota.valor)">{{ nota.valor }} / 100</span>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TOTAL -->
+        <div class="flex justify-between items-center bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+          <span class="text-sm font-semibold text-slate-600">Nota final acumulada</span>
+          <span class="text-xl font-bold text-emerald-600">
+            {{ materiaSeleccionada()!.notaActual ?? '—' }} / 100
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  }
+
+</div>

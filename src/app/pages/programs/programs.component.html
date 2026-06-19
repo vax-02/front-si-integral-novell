@@ -49,7 +49,6 @@
       <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
         <tr>
           <th class="p-4 text-left">Carrera</th>
-          <th class="p-4 text-center">Coordinador</th>
           <th class="p-4 text-center">Duracion</th>
           <th class="p-4 text-center">Materias</th>
           <th class="p-4 text-center">Estudiantes</th>
@@ -64,10 +63,6 @@
 
           <td class="px-6 py-4 font-semibold text-slate-800">
             Sistemas Informáticos
-          </td>
-
-          <td class="px-6 py-4 text-center text-slate-600">
-            Ing. Carlos Rojas
           </td>
 
           <td class="px-6 py-4 text-center">
@@ -125,14 +120,6 @@
               <span class="hidden sm:inline">Materias</span>
             </button>
 
-            <button (click)="tab='director'"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='director' 
-        ? 'bg-blue-600 text-white shadow-md' 
-        : 'text-slate-500 hover:bg-white hover:text-blue-600'">
-
-              <i class="fa-solid fa-user-tie"></i>
-              <span class="hidden sm:inline">Director</span>
-            </button>
 
             <button (click)="tab='estudiantes'"
               class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='estudiantes' 
@@ -162,7 +149,7 @@
               <h3 class="font-semibold text-slate-700">Plan de Estudio</h3>
 
               <button class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
-                + Nueva Materia
+                + Importar plan de estudio
               </button>
             </div>
 
@@ -271,26 +258,6 @@
 
           </div>
 
-          <!-- ===================== -->
-          <!-- DIRECTOR -->
-          <!-- ===================== -->
-          <div *ngIf="tab==='director'" class="text-center space-y-4">
-
-            <div
-              class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center text-xl font-bold text-blue-600 shadow">
-              CR
-            </div>
-
-            <div>
-              <p class="font-semibold text-slate-800">Ing. Carlos Rojas</p>
-              <p class="text-sm text-slate-500">Director de carrera</p>
-            </div>
-
-            <button class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
-              Cambiar Director
-            </button>
-
-          </div>
 
           <!-- ===================== -->
           <!-- ESTUDIANTES -->

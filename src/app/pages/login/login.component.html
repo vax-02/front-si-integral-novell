@@ -1,17 +1,19 @@
 <div class="min-h-screen flex bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800">
 
   <!-- IZQUIERDA - LOGIN -->
-  <div class="w-full md:w-[40%] flex items-center justify-center px-6 py-12">
+  <div class="w-full md:w-[35%] flex items-center justify-center px-6 py-12">
 
     <div class="w-[80%] max-w-md">
-
-      <!-- Logo / Marca -->
       <div class="mb-10 text-center">
         <h1 class="text-4xl font-serif font-bold text-white tracking-tight">
           Bienvenido
         </h1>
         <p class="text-blue-200 text-sm mt-2">
-          Instituto Técnico Superior Novell
+          Instituto Técnico Superior
+          <small class="text-red-400 text-sm font-bold">
+            Novell
+          </small>
+
         </p>
         <div class="w-16 h-1 bg-blue-400 mx-auto mt-4 rounded-full"></div>
       </div>
@@ -23,17 +25,35 @@
           Iniciar Sesión
         </h2>
 
-        <form class="space-y-5">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
 
           <!-- Email -->
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               Correo electrónico
             </label>
-            <input type="email" placeholder="ejemplo@email.com"
-              class="w-full px-4 py-3 border border-slate-200 rounded-lg
+            <input type="email" placeholder="ejemplo@email.com" formControlName="email" autocomplete="username"
+              placeholder="usuario@ejemplo.com" [class.invalid]="email.invalid && email.touched" class="w-full px-4 py-3 border border-slate-200 rounded-lg
                      focus:ring-2 focus:ring-blue-600 focus:border-blue-600
                      transition-all outline-none bg-slate-50 focus:bg-white" />
+
+
+            @if (email.invalid && email.touched) {
+            <div class="field-error text-red-500">
+              @if (email.errors?.['required']) {
+              <span>El correo es obligatorio.</span>
+              }
+              @if (email.errors?.['email']) {
+              <span>Ingresa un correo válido.</span>
+              }
+              @if (email.errors?.['maxlength']) {
+              <span>El correo es demasiado largo.</span>
+              }
+              @if (email.errors?.['dangerousChars']) {
+              <span>El correo contiene caracteres no permitidos.</span>
+              }
+            </div>
+            }
           </div>
 
           <!-- Password -->
@@ -41,26 +61,51 @@
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               Contraseña
             </label>
-            <input type="password" placeholder="••••••••"
-              class="w-full px-4 py-3 border border-slate-200 rounded-lg
-                     focus:ring-2 focus:ring-blue-600 focus:border-blue-600
-                     transition-all outline-none bg-slate-50 focus:bg-white" />
+
+            <div class="relative">
+              <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+                autocomplete="current-password" placeholder="••••••••"
+                [class.invalid]="password.invalid && password.touched" class="w-full px-4 py-3 pr-11 border border-slate-200 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-blue-600
+             transition-all outline-none bg-slate-50 focus:bg-white" />
+
+              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2
+           text-slate-400 hover:text-slate-600
+           transition-colors outline-none" (click)="togglePassword()"
+                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <i [class]="showPassword() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+              </button>
+            </div>
           </div>
 
+
+          @if (password.invalid && password.touched) {
+          <div class="field-error text-red-500">
+            @if (password.errors?.['required']) {
+            <span>La contraseña es obligatoria.</span>
+            }
+            @if (password.errors?.['minlength']) {
+            <span>Debe tener al menos 8 caracteres.</span>
+            }
+            @if (password.errors?.['maxlength']) {
+            <span>La contraseña es demasiado larga.</span>
+            }
+            @if (password.errors?.['dangerousChars']) {
+            <span>La contraseña contiene caracteres no permitidos.</span>
+            }
+          </div>
+          }
           <!-- Botón -->
-          <button type="submit"
-            class="w-full bg-blue-800 text-white py-3 rounded-lg font-bold
+          <button type="submit" [disabled]="loading()" class="w-full bg-blue-800 text-white py-3 rounded-lg font-bold
                    hover:bg-blue-700 active:scale-95 transition-all duration-300
                    shadow-lg shadow-blue-900/30">
-            Entrar al Sistema
+            @if (loading()) {
+            <span>Ingresando...</span>
+            } @else {
+            <span>Ingresar</span>
+            }
           </button>
 
-          <!-- Links -->
-          <div class="flex justify-between text-xs pt-2">
-            <a class="text-slate-500 hover:text-blue-700 cursor-pointer transition-colors">
-              ¿Olvidaste tu contraseña?
-            </a>
-          </div>
 
         </form>
       </div>
@@ -74,19 +119,17 @@
   </div>
 
   <!-- DERECHA - IMAGEN -->
-  <div class="hidden md:block md:w-[60%] relative overflow-hidden">
+  <div class="hidden md:block md:w-[65%] relative overflow-hidden">
 
-    <img src="https://images.unsplash.com/photo-1523240715181-310f9d7a5738?q=80&w=2070"
-      class="absolute inset-0 w-full h-full object-cover">
-
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-blue-800/70 to-indigo-900/80"></div>
+    <img src="images/fondo.webp" alt="Fondo de pantalla"
+      class="absolute inset-0 w-full h-full object-cover object-right">
 
     <!-- Decoración -->
     <div class="absolute bottom-10 left-10 text-white max-w-sm">
       <h3 class="text-3xl font-serif font-bold mb-4 leading-tight">
         Formación que impulsa tu futuro profesional
       </h3>
-      <div class="w-12 h-1 bg-blue-400"></div>
+      <div class="w-auto h-1 bg-blue-600"></div>
     </div>
 
   </div>

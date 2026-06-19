@@ -1,18 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-presentation',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './presentation.component.html',
-  styleUrl: './presentation.component.css'
+  styleUrl: './presentation.component.css',
 })
 export class PresentationComponent {
-  constructor(private router: Router) { }
-
-  goToLogin() {
-    this.router.navigate(['/login']);
-  }
+  constructor(private router: Router) {}
 }
