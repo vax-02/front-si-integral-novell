@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
+import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 
 @Component({
   selector: 'app-payments',
   standalone: true,
-  imports: [ButtonComponent, BaseModalComponent],
+  imports: [ButtonComponent, BaseModalComponent, BaseInputComponent],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.css',
 })

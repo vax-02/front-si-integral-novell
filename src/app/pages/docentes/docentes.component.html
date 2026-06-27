@@ -112,84 +112,37 @@
   <!--MODALS-->
   <app-base-modal [isOpen]="modalAddDocente" title="Agregar información de Docente" subtitle="Información general"
     size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalAddDocente = false">
-    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8">
-
-      <!-- ===================== -->
-      <!-- DATOS PERSONALES -->
-      <!-- ===================== -->
+    <div class="space-y-6">
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Datos Personales
         </h3>
 
         <div class="grid md:grid-cols-3 gap-4">
-
-          <input placeholder="Nombres"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="Apellido Paterno"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="Apellido Materno"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="C.I."
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+          <app-base-input text="Nombre"/>
+          <app-base-input text="Apellido paterno"/>
+          <app-base-input text="Apellido materno"/>
+          <app-base-input text="C.I." type_i="number"/>
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- CONTACTO -->
-      <!-- ===================== -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Contacto
         </h3>
 
         <div class="grid md:grid-cols-2 gap-4">
-
-          <input placeholder="Correo electrónico"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="Celular"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
+          <app-base-input text="Correo electrónico"/>
+          <app-base-input text="Celular" type_i="number"/>
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- INFORMACIÓN PROFESIONAL -->
-      <!-- ===================== -->
       <div>
         <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Información Profesional
         </h3>
 
-        <div class="grid md:grid-cols-3 gap-4">
-
-          <!-- ESPECIALIDADES DINÁMICAS -->
-          <div class="md:col-span-3">
-            <label class="text-sm text-slate-500 mb-1 block">Especialidades</label>
-
-            <div
-              class="flex flex-wrap gap-2 p-3 border border-slate-300 rounded-xl focus-within:ring-2 focus-within:ring-blue-500">
-
-              <!-- TAGS -->
-              <span *ngFor="let esp of especialidades; let i = index"
-                class="flex items-center gap-2 bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                {{ esp }}
-                <button type="button" (click)="removeEspecialidad(i)" class="text-blue-500 hover:text-red-500">
-                  ✕
-                </button>
-              </span>
-
-              <!-- INPUT -->
-              <input [(ngModel)]="especialidadInput" (keydown.enter)="addEspecialidad()"
-                placeholder="Escribe y presiona Enter..."
-                class="flex-1 min-w-[150px] outline-none border-none text-sm bg-transparent">
-            </div>
-          </div>
-          <!-- GRADO -->
+        <div class="grid md:grid-cols-1 gap-4">
           <select name="" id=""
             class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition md:col-span-2">
             <option>Grado académico</option>
@@ -198,49 +151,11 @@
             <option>Maestría</option>
             <option>Doctorado</option>
           </select>
-          <!-- TIPO -->
-          <select
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-            <option>Tipo de Docente</option>
-            <option>Tiempo Completo</option>
-            <option>Medio Tiempo</option>
-            <option>Por Horas</option>
-          </select>
-
-        </div>
-      </div>
-      <!-- ===================== -->
-      <!-- INFORMACIÓN LABORAL -->
-      <!-- ===================== -->
-      <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Información Laboral
-        </h3>
-
-        <div class="grid md:grid-cols-3 gap-4">
-
-          <input type="date"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition"
-            placeholder="Fecha de ingreso">
-
-          <input placeholder="Salario (Bs.)" type="number"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <select
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-            <option>Estado</option>
-            <option>Activo</option>
-            <option>Inactivo</option>
-          </select>
-
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- DOCUMENTOS -->
-      <!-- ===================== -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Documentos
         </h3>
 
@@ -301,11 +216,8 @@
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- DATOS PERSONALES -->
-      <!-- ===================== -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Datos Personales
         </h3>
 

@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
+import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 @Component({
   selector: 'app-students',
-  imports: [CommonModule, ButtonComponent, BaseModalComponent],
+  imports: [CommonModule, ButtonComponent, BaseModalComponent, BaseInputComponent],
   templateUrl: './students.component.html',
   styleUrl: './students.component.css',
 })

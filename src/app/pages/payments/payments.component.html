@@ -105,38 +105,21 @@
   <app-base-modal [isOpen]="registerModalOpen" title="Registrar pago" subtitle="Registro de mensualidad" size="lg"
     confirmText="Registrar" cancelText="Cancelar" (confirm)="savePayment()" (cancel)="registerModalOpen = false">
     <!-- CONTENIDO DINÁMICO -->
-    <div class="flex flex-col items-center gap-6 p-6">
+    <div class="flex flex-col items-center gap-6 p-3">
 
       <!-- Estudiante -->
       <div class="w-full max-w-md">
-        <label class="block text-sm text-slate-600 mb-2">Estudiante (C.I.)</label>
         <div class="grid grid-cols-[1fr_auto] gap-3 items-center">
-          <input type="number"
-            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          <app-base-input text="C.I. del Estudiate"/>
           <app-button label="Buscar"></app-button>
         </div>
       </div>
 
       <!-- Pagos -->
       <div class="w-full max-w-lg">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm text-slate-600 mb-2">Monto</label>
-            <input type="number"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-          </div>
-
-          <div>
-            <label class="block text-sm text-slate-600 mb-2">Descuento</label>
-            <input type="number"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-          </div>
-
-          <div>
-            <label class="block text-sm text-slate-600 mb-2">Multa o pago extra</label>
-            <input type="number"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-base-input text="Monto" type_i="number"/>
+          <app-base-input text="Descuento" type_i="number"/>
         </div>
       </div>
 
@@ -186,7 +169,6 @@
     confirmText="Aceptar"  (confirm)="detailModalOpen = false" (cancel)="detailModalOpen = false">
 
     <div class="flex flex-col gap-6 p-6 w-full max-w-3xl">
-
       <!-- Cabecera del estudiante -->
       <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
         <div>

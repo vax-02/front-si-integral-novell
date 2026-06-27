@@ -147,7 +147,8 @@
         </div>
 
         <div *ngIf="!collapsed && openFinanzas" class="ml-6">
-          <a routerLink="/home/payments" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/payments" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
             Pagos
           </a>
         </div>
@@ -174,17 +175,16 @@
 
         <div *ngIf="!collapsed && openAdmin" class="ml-6 space-y-1">
 
-          <a routerLink="/home/attendance" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/attendance" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
             Asistencia
           </a>
 
-
-
-          <a routerLink="/home/users" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/users" routerLinkActive="text-blue-600" class="block py-2 text-sm hover:text-blue-600">
             Usuarios
           </a>
 
-          <a routerLink="/home/reports" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/reports" routerLinkActive="text-blue-600" class="block py-2 text-sm hover:text-blue-600">
             Reportes
           </a>
 
@@ -211,44 +211,37 @@
         </div>
 
         <div *ngIf="!collapsed && openConfig" class="ml-6 space-y-1">
-          <a routerLink="/home/profile" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/profile" routerLinkActive="text-blue-600" class="block py-2 text-sm hover:text-blue-600">
             Perfil
           </a>
 
-          <a routerLink="/home/password" class="block py-2 text-sm hover:text-blue-600">
+          <a routerLink="/home/password" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600">
             Contraseña
           </a>
           @if (role == 'admin') {
           <a class="block py-2 text-sm hover:text-blue-600">Institución</a>
           }
         </div>
-
       </div>
-
     </nav>
 
-
-    <!-- PROFILE -->
-    <!-- PROFILE -->
     <div class="border-t p-3">
 
       <div class="flex items-center w-full" [ngClass]="collapsed ? 'flex-col gap-2 justify-center' : 'justify-between'">
 
         <!-- USUARIO -->
-        <div class="flex items-center" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
-
-          <img src="https://i.pravatar.cc/100" class="w-10 h-10 rounded-full" />
-
-          <div *ngIf="!collapsed">
-            <p class="text-sm font-bold">Javier C.</p>
-            <p class="text-xs text-slate-500">Administrador</p>
+        <a routerLink="/home/profile" routerLinkActive="text-blue-600" class="block py-2 text-sm hover:text-blue-600">
+          <div class="flex items-center" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
+            <img src="https://i.pravatar.cc/100" class="w-10 h-10 rounded-full" />
+            <div *ngIf="!collapsed">
+              <p class="text-sm font-bold">Javier C.</p>
+              <p class="text-xs text-slate-500">Administrador</p>
+            </div>
           </div>
-
-        </div>
-
+        </a>
         <!-- LOGOUT -->
         <button (click)="logout()" class="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition">
-
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
 

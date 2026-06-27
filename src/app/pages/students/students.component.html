@@ -8,7 +8,7 @@
     </div>
 
 
-    <app-button label="Agregar" variant="primary" (click)="openModalStudent()"></app-button>
+    <app-button label="Inscribir" variant="primary" (click)="openModalStudent()"></app-button>
   </div>
 
   <!-- TARJETAS RESUMEN -->
@@ -105,102 +105,62 @@
     </table>
   </div>
   <!--MODALS-->
-  <app-base-modal [isOpen]="registerModalStudent" title="Inscribir estudiante" subtitle="asd" size="lg"
-    confirmText="Registrar" cancelText="Cancelar" (confirm)="saveStudent()" (cancel)="registerModalStudent = false">
-
-
-    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8">
-
-      <!-- ===================== -->
-      <!-- DATOS PERSONALES -->
-      <!-- ===================== -->
+  <app-base-modal [isOpen]="registerModalStudent" title="Inscribir estudiante" size="lg" confirmText="Registrar"
+    cancelText="Cancelar" (confirm)="saveStudent()" (cancel)="registerModalStudent = false">
+    <div class="space-y-6">
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Datos Personales
         </h3>
 
         <div class="grid md:grid-cols-3 gap-4">
-
-          <input placeholder="Nombres"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="Apellido Paterno"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="Apellido Materno"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="C.I."
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input type="date"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition text-slate-500">
-
-
+          <app-base-input text="Nombre"/>
+          <app-base-input text="Apellido paterno"/>
+          <app-base-input text="Apellido Materno"/>
+          <app-base-input text="C.I." />
         </div>
       </div>
-
-      <!-- ===================== -->
-      <!-- CONTACTO -->
-      <!-- ===================== -->
+      
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Contacto
         </h3>
 
         <div class="grid md:grid-cols-2 gap-4">
-
-          <input placeholder="Correo electrónico"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input placeholder="Celular"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+          <app-base-input text="Correo electrónico"/>
+          <app-base-input text="Celular" />
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- DATOS ACADÉMICOS -->
-      <!-- ===================== -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Datos Académicos
         </h3>
 
-        <div class="grid md:grid-cols-3 gap-4">
+        <div class="grid md:grid-cols-2 gap-4">
 
           <select
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+            class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition">
             <option>Carrera</option>
             <option>Sistemas Informáticos</option>
           </select>
 
           <select
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
+            class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition">
             <option>Turno</option>
             <option>Mañana</option>
             <option>Tarde</option>
             <option>Noche</option>
           </select>
-
-          <select
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-            <option>Gestión</option>
-            <option>2026</option>
-          </select>
-
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- DOCUMENTOS -->
-      <!-- ===================== -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Documentos Recibidos
         </h3>
 
-        <div class="grid md:grid-cols-2 gap-4">
-
+        <div class="grid md:grid-cols-3 gap-2">
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
             <input type="checkbox" class="w-4 h-4 accent-blue-500">
@@ -216,45 +176,25 @@
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
             <input type="checkbox" class="w-4 h-4 accent-blue-500">
-            Fotografía 3x3
-          </label>
-
-          <label
-            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
             Copia de C.I.
           </label>
 
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- PAGOS -->
-      <!-- ===================== -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Información de Pago
         </h3>
 
-        <div class="grid md:grid-cols-3 gap-4">
-
-          <input type="number" placeholder="Monto inscripción"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition font-semibold text-blue-600">
-
-          <input type="number" placeholder="Descuento"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
-          <input type="number" placeholder="Pago adicional"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition">
-
+        <div class="grid md:grid-cols-2 gap-4">
+          <app-base-input text="Matricula"/>
+          <app-base-input text="Mensualidad"/>
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- RESUMEN -->
-      <!-- ===================== -->
-      <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-5 rounded-xl shadow-sm">
-        <h3 class="text-lg font-semibold text-slate-700 mb-3 text-center">
+      <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-3 rounded-xl shadow-sm">
+        <h3 class="text-md font-semibold text-slate-700 mb-3 text-center">
           Resumen
         </h3>
 

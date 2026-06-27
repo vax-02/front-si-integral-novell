@@ -1,0 +1,19 @@
+<div class="relative">
+  <input id="{{ text }}" type="{{ type_i }}" placeholder=" " class="peer w-full px-3 pt-2 pb-2 rounded-xl border border-slate-300
+           focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+
+  <label for="{{ text }}" class="absolute left-3 bg-white px-1 text-slate-500 transition-all duration-200
+           top-1/2 -translate-y-1/2
+
+           peer-focus:top-0
+           peer-focus:-translate-y-1/2
+           peer-focus:text-xs
+           peer-focus:text-blue-600
+
+           peer-[:not(:placeholder-shown)]:top-0
+           peer-[:not(:placeholder-shown)]:-translate-y-1/2
+           peer-[:not(:placeholder-shown)]:text-xs
+           peer-[:not(:placeholder-shown)]:text-blue-600">
+    {{ text }}
+  </label>
+</div>
