@@ -20,7 +20,7 @@ export class BaseModalComponent {
   @Input() showFooter = true;
   @Input() showCancel = true;
   @Input() showConfirm = true;
-
+  @Input() loading = false;
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 

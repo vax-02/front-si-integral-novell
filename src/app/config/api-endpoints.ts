@@ -4,4 +4,5 @@ export const API_ENDPOINTS = {
   auth: {
     login: `${API_BASE_URL}/login`,
   },
+  users: `${API_BASE_URL}/users`,
 } as const;

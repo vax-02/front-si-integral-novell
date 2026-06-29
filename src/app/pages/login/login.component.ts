@@ -92,11 +92,10 @@ export class LoginComponent {
     this.userService.login(credentials.email, credentials.password).subscribe({
       next: (response) => {
         console.log('Login correcto:', response);
-        const data = {
-          token: response.token,
-          user: response.user,
-        };
+        
         localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', JSON.stringify(response.token));
+
 
         if (response.user.role_id == 1) {
           this.router.navigate(['/home/dashboard']);

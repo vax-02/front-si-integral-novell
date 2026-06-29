@@ -1,5 +1,5 @@
 import { Router, RouterModule, Routes } from '@angular/router';
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 export class LayoutComponent {
   private readonly router = inject(Router);
 
-  role = localStorage.getItem('userRole');
+  role = 'admin';
   user = JSON.parse(localStorage.getItem('user') || '{}');
   collapsed = false;
   openAcademico = true;
@@ -20,11 +20,38 @@ export class LayoutComponent {
   openFinanzas = false;
   openAdmin = false;
   openConfig = false;
+
+  isMobile = false;
+
+  constructor() {}
+
   ngOnInit() {
-    console.log(this.role);
+    this.checkScreenSize();
+  }
+
+  ngOnDestroy() {}
+
+  @HostListener('window:resize')
+  checkScreenSize() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth < 768;
+
+    // Si cambia de móvil a desktop, restaurar estado
+    if (wasMobile && !this.isMobile) {
+      this.collapsed = false;
+    }
+
+    // Si es móvil, siempre colapsado
+    if (this.isMobile) {
+      this.collapsed = true;
+    }
   }
   toggleSidebar() {
-    this.collapsed = !this.collapsed;
+    if (this.isMobile) {
+      this.collapsed = !this.collapsed;
+    } else {
+      this.collapsed = !this.collapsed;
+    }
   }
   toggleAcademico() {
     this.openAcademico = !this.openAcademico;
