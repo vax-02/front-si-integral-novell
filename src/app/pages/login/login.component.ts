@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BaseInputComponent } from '../../shared/base-input/base-input.component';
+
 import {
   AbstractControl,
   FormBuilder,
@@ -8,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-
+import { UserService } from '../../service/user.service';
 function noDangerousCharsValidator(
   control: AbstractControl,
 ): ValidationErrors | null {
@@ -24,17 +26,19 @@ function noDangerousCharsValidator(
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BaseInputComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly userService = inject(UserService);
   // Señales para estado de UI (carga, error general, mostrar/ocultar password)
   readonly loading = signal(false);
   readonly serverError = signal<string | null>(null);
   readonly showPassword = signal(false);
+  msg_error: string = '';
 
   readonly loginForm = this.fb.nonNullable.group({
     email: [
@@ -78,24 +82,36 @@ export class LoginComponent {
     }
 
     this.loading.set(true);
+    console.log(this.loading());
 
     const credentials = {
       email: this.loginForm.getRawValue().email.trim(),
       password: this.loginForm.getRawValue().password,
     };
 
-    if (credentials.email == 'est@gmail.com') {
-      localStorage.setItem('userRole', 'student');
-      this.router.navigate(['/home/my-subjects']);
-    } else if (credentials.email == 'prof@gmail.com') {
-      localStorage.setItem('userRole', 'my-subjects');
-      this.router.navigate(['/home/professor']);
-    } else if (credentials.email == 'admin@gmail.com') {
-      localStorage.setItem('userRole', 'admin');
-      this.router.navigate(['/home/dashboard']);
-    }
+    this.userService.login(credentials.email, credentials.password).subscribe({
+      next: (response) => {
+        console.log('Login correcto:', response);
+        const data = {
+          token: response.token,
+          user: response.user,
+        };
+        localStorage.setItem('user', JSON.stringify(response.user));
 
-    
-
+        if (response.user.role_id == 1) {
+          this.router.navigate(['/home/dashboard']);
+        } /*else if (response.user.role_id == 2) {
+          localStorage.setItem('userRole', 'my-subjects');
+          this.router.navigate(['/home/professor']);
+        } else if (response.user.role_id == 3) {
+          localStorage.setItem('userRole', 'admin');
+          this.router.navigate(['/home/dashboard']);
+        }*/
+      },
+      error: (error) => {
+        this.msg_error = error.error.message;
+      },
+    });
+    this.loading.set(false);
   }
 }

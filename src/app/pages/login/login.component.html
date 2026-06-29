@@ -1,117 +1,97 @@
-<div class="min-h-screen flex bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800">
+<div class="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800">
 
   <!-- IZQUIERDA - LOGIN -->
-  <div class="w-full md:w-[35%] flex items-center justify-center px-6 py-12">
+  <div class="w-full  md:w-[50%] lg:w-[30%] min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-12 py-10 overflow-y-auto">
 
-    <div class="w-[80%] max-w-md">
-      <div class="mb-10 text-center">
-        <h1 class="text-4xl font-serif font-bold text-white tracking-tight">
+    <div class="w-full max-w-md">
+
+      <!-- HEADER -->
+      <div class="mb-8 sm:mb-10 text-center">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-white tracking-tight">
           Bienvenido
         </h1>
-        <p class="text-blue-200 text-sm mt-2">
-          Instituto Técnico Superior
-          <small class="text-red-400 text-sm font-bold">
-            Novell
-          </small>
 
+        <p class="text-blue-200 text-xs sm:text-sm mt-2">
+          Instituto Técnico Superior
+          <small class="text-red-400 font-bold">Novell</small>
         </p>
-        <div class="w-16 h-1 bg-blue-400 mx-auto mt-4 rounded-full"></div>
+
+        <div class="w-14 sm:w-16 h-1 bg-blue-100 mx-auto mt-4 rounded-full"></div>
       </div>
 
-      <!-- Card -->
-      <div class="bg-white rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+      <!-- CARD -->
+      <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 space-y-6 border border-white/20">
 
-        <h2 class="text-xl font-bold text-slate-800 text-center">
+        <h2 class="text-lg sm:text-xl font-bold text-slate-800 text-center pb-2">
           Iniciar Sesión
         </h2>
 
+        <div class="text-red-500 text-sm text-center pb-2">
+          {{ msg_error }}
+        </div>
+
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
 
-          <!-- Email -->
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              Correo electrónico
-            </label>
-            <input type="email" placeholder="ejemplo@email.com" formControlName="email" autocomplete="username"
-              placeholder="usuario@ejemplo.com" [class.invalid]="email.invalid && email.touched" class="w-full px-4 py-3 border border-slate-200 rounded-lg
-                     focus:ring-2 focus:ring-blue-600 focus:border-blue-600
-                     transition-all outline-none bg-slate-50 focus:bg-white" />
+          <!-- EMAIL -->
+          <div class="pb-4">
 
+            <app-base-input
+              class="block w-full"
+              text="Correo electrónico"
+              type_i="email"
+              formControlName="email">
+            </app-base-input>
 
             @if (email.invalid && email.touched) {
-            <div class="field-error text-red-500">
-              @if (email.errors?.['required']) {
-              <span>El correo es obligatorio.</span>
-              }
-              @if (email.errors?.['email']) {
-              <span>Ingresa un correo válido.</span>
-              }
-              @if (email.errors?.['maxlength']) {
-              <span>El correo es demasiado largo.</span>
-              }
-              @if (email.errors?.['dangerousChars']) {
-              <span>El correo contiene caracteres no permitidos.</span>
-              }
-            </div>
+              <div class="text-red-500 text-xs sm:text-sm">
+                @if (email.errors?.['required']) { <span>El correo es obligatorio.</span> }
+                @if (email.errors?.['email']) { <span>Ingresa un correo válido.</span> }
+                @if (email.errors?.['maxlength']) { <span>El correo es demasiado largo.</span> }
+                @if (email.errors?.['dangerousChars']) { <span>Caracteres no permitidos.</span> }
+              </div>
             }
+
           </div>
 
-          <!-- Password -->
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              Contraseña
-            </label>
+          <!-- PASSWORD -->
+          <div class="pb-4">
 
-            <div class="relative">
-              <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
-                autocomplete="current-password" placeholder="••••••••"
-                [class.invalid]="password.invalid && password.touched" class="w-full px-4 py-3 pr-11 border border-slate-200 rounded-lg
-             focus:ring-2 focus:ring-blue-600 focus:border-blue-600
-             transition-all outline-none bg-slate-50 focus:bg-white" />
+            <app-base-input
+              class="block w-full"
+              text="Contraseña"
+              type_i="password"
+              formControlName="password">
+            </app-base-input>
 
-              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2
-           text-slate-400 hover:text-slate-600
-           transition-colors outline-none" (click)="togglePassword()"
-                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
-                <i [class]="showPassword() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-              </button>
-            </div>
+            @if (password.invalid && password.touched) {
+              <div class="text-red-500 text-xs sm:text-sm">
+                @if (password.errors?.['required']) { <span>La contraseña es obligatoria.</span> }
+                @if (password.errors?.['minlength']) { <span>Mínimo 8 caracteres.</span> }
+                @if (password.errors?.['maxlength']) { <span>Demasiado larga.</span> }
+                @if (password.errors?.['dangerousChars']) { <span>Caracteres no permitidos.</span> }
+              </div>
+            }
+
           </div>
 
-
-          @if (password.invalid && password.touched) {
-          <div class="field-error text-red-500">
-            @if (password.errors?.['required']) {
-            <span>La contraseña es obligatoria.</span>
-            }
-            @if (password.errors?.['minlength']) {
-            <span>Debe tener al menos 8 caracteres.</span>
-            }
-            @if (password.errors?.['maxlength']) {
-            <span>La contraseña es demasiado larga.</span>
-            }
-            @if (password.errors?.['dangerousChars']) {
-            <span>La contraseña contiene caracteres no permitidos.</span>
-            }
-          </div>
-          }
-          <!-- Botón -->
-          <button type="submit" [disabled]="loading()" class="w-full bg-blue-800 text-white py-3 rounded-lg font-bold
-                   hover:bg-blue-700 active:scale-95 transition-all duration-300
-                   shadow-lg shadow-blue-900/30">
+          <!-- BUTTON -->
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="w-full bg-blue-800 text-white px-2 md:px-6 py-2  text-md rounded-2xl  transition"
+          >
             @if (loading()) {
-            <span>Ingresando...</span>
+              <span>Ingresando...</span>
             } @else {
-            <span>Ingresar</span>
+              <span>Ingresar</span>
             }
           </button>
-
 
         </form>
       </div>
 
-      <!-- Footer pequeño -->
-      <p class="text-center text-blue-200 text-xs mt-8">
+      <!-- FOOTER -->
+      <p class="text-center text-blue-200 text-[11px] sm:text-xs mt-8">
         © 2026 Instituto Técnico Superior Novell
       </p>
 
@@ -119,17 +99,22 @@
   </div>
 
   <!-- DERECHA - IMAGEN -->
-  <div class="hidden md:block md:w-[65%] relative overflow-hidden">
+  <div class="hidden md:block md:w-[70%] relative overflow-hidden min-h-screen">
 
-    <img src="images/fondo.webp" alt="Fondo de pantalla"
-      class="absolute inset-0 w-full h-full object-cover object-right">
+    <img
+      src="images/fondo.webp"
+      alt="Fondo de pantalla"
+      class="absolute inset-0 w-full h-full object-cover object-center lg:object-right"
+    />
 
-    <!-- Decoración -->
-    <div class="absolute bottom-10 left-10 text-white max-w-sm">
-      <h3 class="text-3xl font-serif font-bold mb-4 leading-tight">
-        Formación que impulsa tu futuro profesional
+    <!-- OVERLAY DECORATIVO -->
+    <div class="absolute bottom-8 lg:bottom-12 left-6 lg:left-12 text-white max-w-lg">
+      <h3 class="text-lg lg:text-3xl font-serif font-bold leading-tight mb-4">
+        Impulsa tu futuro profesional
       </h3>
-      <div class="w-auto h-1 bg-blue-600"></div>
+
+      <div class="w-20 lg:w-32 h-1 bg-blue-500 rounded-full"></div>
+
     </div>
 
   </div>

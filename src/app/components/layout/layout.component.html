@@ -1,5 +1,4 @@
 <div class="flex h-screen bg-slate-50 font-sans text-slate-900">
-
   <!-- SIDEBAR -->
   <aside [class.w-60]="!collapsed" [class.w-20]="collapsed"
     class="bg-white border-r border-slate-200 transition-all duration-300 flex flex-col shadow-xl">
@@ -227,16 +226,18 @@
     </nav>
 
     <div class="border-t p-3">
-
       <div class="flex items-center w-full" [ngClass]="collapsed ? 'flex-col gap-2 justify-center' : 'justify-between'">
 
         <!-- USUARIO -->
         <a routerLink="/home/profile" routerLinkActive="text-blue-600" class="block py-2 text-sm hover:text-blue-600">
           <div class="flex items-center" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
-            <img src="https://i.pravatar.cc/100" class="w-10 h-10 rounded-full" />
+            <div class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold"
+              [ngClass]="getColor(user?.name)">
+              {{ getInitials(user?.name) }}
+            </div>
             <div *ngIf="!collapsed">
-              <p class="text-sm font-bold">Javier C.</p>
-              <p class="text-xs text-slate-500">Administrador</p>
+              <p class="text-sm font-bold">{{ user?.name }} {{ user?.first_lastname }} {{ user?.second_lastname }}</p>
+              <p class="text-xs text-slate-500">{{ user?.role }}</p>
             </div>
           </div>
         </a>

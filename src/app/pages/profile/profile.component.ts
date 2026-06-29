@@ -7,6 +7,8 @@ import { Component } from '@angular/core';
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent {
+    user = JSON.parse(localStorage.getItem('user') || '{}');
+
 getIniciales(nombre: string): string {
   return nombre
     .split(' ')
