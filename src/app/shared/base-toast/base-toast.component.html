@@ -1,0 +1,52 @@
+<div *ngIf="show" class="fixed top-5 right-5 z-[9999]">
+
+  <div class="bg-white shadow-xl border rounded-xl overflow-hidden min-w-[320px] animate-toast">
+
+    <div class="flex items-center gap-2 p-2">
+
+      <i class="text-2xl" [ngClass]="{
+          'fas fa-solid fa-circle-check text-green-600': type === 'success',
+          'fas fa-solid fa-circle-xmark text-red-600': type === 'error',
+          'fas fa-solid fa-triangle-exclamation text-yellow-500': type === 'warning',
+          'fas fa-solid fa-circle-info text-blue-600': type === 'info'
+        }">
+      </i>
+
+      <div class="flex-1">
+        <p class="font-semibold capitalize">
+          @if(type=='success'){
+          Hecho
+          }
+          @else if(type=='error'){
+          Error
+          }
+          @else if(type=='warning'){
+          Advertencia
+          }
+          @else if(type=='info'){
+          Información
+          }
+          @else {
+          Notificación
+          }
+
+        </p>
+        <p class="text-sm text-slate-500">{{ message }}</p>
+      </div>
+
+      <button (click)="show = false" class="text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+    <div class="h-1" [ngClass]="{
+        'bg-green-500': type === 'success',
+        'bg-red-500': type === 'error',
+        'bg-yellow-500': type === 'warning',
+        'bg-blue-500': type === 'info'
+      }">
+    </div>
+
+  </div>
+</div>

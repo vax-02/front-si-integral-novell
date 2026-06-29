@@ -9,6 +9,7 @@ import { BaseModalComponent } from '../../shared/base-modal/base-modal.component
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 import { UserService } from '../../service/user.service';
 import { CommonModule } from '@angular/common';
+import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-profile',
   imports: [
@@ -28,6 +29,7 @@ export class ProfileComponent {
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
+    private toast: ToastService
   ) {}
   ngOnInit(): void {
     this.initForm();
@@ -36,7 +38,7 @@ export class ProfileComponent {
   initForm(): void {
     this.profileForm = this.fb.group({
       phone: [
-        this.user.phone || '',
+        this.user.cellphone || '',
         [
           Validators.required,
           Validators.minLength(8),
@@ -59,7 +61,7 @@ export class ProfileComponent {
   openEditModal(): void {
     this.editModalStudent = true;
     this.profileForm.patchValue({
-      phone: this.user.phone || '',
+      phone: this.user.cellphone || '',
     });
   }
   updateProfile(): void {
@@ -76,6 +78,7 @@ export class ProfileComponent {
 
           this.loading = false;
           this.editModalStudent = false;
+          this.toast.success('Perfil actualizado')
         },
         error: (error) => {},
       });
