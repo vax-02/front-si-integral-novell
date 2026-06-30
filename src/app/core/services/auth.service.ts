@@ -34,7 +34,7 @@ export class AuthService {
   }
   saveSession(token: string, user: any): void {
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('user', user);
   }
 
   logout(): void {
