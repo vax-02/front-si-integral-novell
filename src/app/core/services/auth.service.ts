@@ -25,6 +25,11 @@ export class AuthService {
     const data = localStorage.getItem('user');
     return data ? JSON.parse(data) : null;
   }
+  get userId(): number | null {
+    const data = localStorage.getItem('user');
+    return data ? JSON.parse(data).id : null;
+  }
+ 
   get isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }

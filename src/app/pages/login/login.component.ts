@@ -93,7 +93,7 @@ export class LoginComponent {
     this.userService.login(credentials.email, credentials.password).subscribe({
       next: (response) => {
         this.auth.saveSession(
-          JSON.stringify(response.token),
+          response.token,
           JSON.stringify(response.user),
         );
 
@@ -110,7 +110,16 @@ export class LoginComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.msg_error = error.error.message;
+        switch (error.error.code) {
+          case 'CREDENCIALES':
+            this.msg_error = 'Correo o contraseña incorrectos';
+            break;
+          case 'INACTIVO':
+            this.msg_error = 'Tu cuenta está inactiva';
+            break;
+        default:
+          this.msg_error = 'Error inesperado';
+        }
         this.loading.set(false);
       },
     });

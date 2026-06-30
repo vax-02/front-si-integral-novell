@@ -10,6 +10,7 @@ import { BaseInputComponent } from '../../shared/base-input/base-input.component
 import { UserService } from '../../service/user.service';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../shared/services/toast.service';
+import { AuthService, User } from '../../core/services/auth.service';
 @Component({
   selector: 'app-profile',
   imports: [
@@ -25,12 +26,15 @@ export class ProfileComponent {
   editModalStudent = false;
   loading = false;
   profileForm!: FormGroup;
-  user = JSON.parse(localStorage.getItem('user') || '{}');
+  user !: User 
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
-    private toast: ToastService
-  ) {}
+    private toast: ToastService,
+    private auth: AuthService
+  ) {
+    this.user = this.auth.user!
+  }
   ngOnInit(): void {
     this.initForm();
   }
@@ -38,7 +42,7 @@ export class ProfileComponent {
   initForm(): void {
     this.profileForm = this.fb.group({
       phone: [
-        this.user.cellphone || '',
+        this.user?.cellphone || '',
         [
           Validators.required,
           Validators.minLength(8),
@@ -49,7 +53,7 @@ export class ProfileComponent {
     });
   }
 
-  getIniciales(nombre: string): string {
+  getIniciales(nombre: string = ''): string {
     return nombre
       .split(' ')
       .map((n) => n[0])
@@ -61,10 +65,11 @@ export class ProfileComponent {
   openEditModal(): void {
     this.editModalStudent = true;
     this.profileForm.patchValue({
-      phone: this.user.cellphone || '',
+      phone: this.user?.cellphone || '',
     });
   }
   updateProfile(): void {
+    if(!this.user) return;
     this.loading = true;
     if (this.profileForm.valid) {
       const phoneValue = this.profileForm.get('phone')?.value;
@@ -73,14 +78,17 @@ export class ProfileComponent {
       };
       this.userService.updateProfile(this.user.id, data).subscribe({
         next: (response) => {
-          this.user.cellphone = phoneValue;
+          this.user!.cellphone = phoneValue;
           localStorage.setItem('user', JSON.stringify(this.user));
 
           this.loading = false;
           this.editModalStudent = false;
           this.toast.success('Perfil actualizado')
         },
-        error: (error) => {},
+        error: (error) => {
+          this.loading = false;
+          this.toast.error('Erro al actualizar')
+        },
       });
     } else {
       // Marcar todos los campos como tocados para mostrar errores
