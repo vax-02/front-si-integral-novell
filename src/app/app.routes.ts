@@ -18,12 +18,13 @@ import { ChangePasswordComponent } from './pages/change-password/change-password
 import { MySubjectsComponent } from './pages/my-subjects/my-subjects.component';
 import { MyPensulComponent } from './pages/my-pensul/my-pensul.component';
 import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // Ruta para el Home
   { path: '', component: PresentationComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'home', component:  LayoutComponent, children: [
+  { path: 'home', canActivate: [authGuard], component:  LayoutComponent, children: [
     //estudiantes
     { path: 'my-subjects', component: MySubjectsComponent },
     { path: 'my-schedule', component:  MyScheduleComponent },

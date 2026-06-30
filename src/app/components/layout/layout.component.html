@@ -1,33 +1,26 @@
 <div class="flex h-screen bg-slate-50 font-sans text-slate-900 relative">
-  
+
   <!-- BOTÓN HAMBURGUESA - SOLO MÓVIL -->
-  <button 
-    *ngIf="isMobile" 
-    (click)="toggleSidebar()" 
+  <button *ngIf="isMobile" (click)="toggleSidebar()"
     class="fixed top-4 right-4 z-50 p-2.5 bg-white rounded-lg shadow-lg hover:bg-slate-50 transition-all duration-200 md:hidden"
     [class.hidden]="!collapsed">
     <i class="fa-solid fa-bars text-xl text-slate-700"></i>
   </button>
 
   <!-- OVERLAY OSCURO - SOLO MÓVIL -->
-  <div 
-    *ngIf="isMobile && !collapsed" 
-    (click)="collapsed = true"
+  <div *ngIf="isMobile && !collapsed" (click)="collapsed = true"
     class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden">
   </div>
 
   <!-- SIDEBAR -->
-  <aside 
-    [class.w-64]="!collapsed" 
-    [class.w-20]="collapsed && !isMobile"
-    [class.-translate-x-full]="isMobile && collapsed"
-    [class.translate-x-0]="!isMobile || !collapsed"
+  <aside [class.w-64]="!collapsed" [class.w-20]="collapsed && !isMobile"
+    [class.-translate-x-full]="isMobile && collapsed" [class.translate-x-0]="!isMobile || !collapsed"
     class="bg-white border-r border-slate-200 transition-all duration-300 flex flex-col shadow-2xl fixed md:relative z-50 h-full"
     [ngClass]="isMobile ? 'w-72' : 'relative'">
 
     <!-- HEADER DEL SIDEBAR -->
-    <div class="flex items-center p-5 h-20 border-b border-slate-100" 
-         [ngClass]="collapsed && !isMobile ? 'justify-center' : 'justify-between'">
+    <div class="flex items-center p-5 h-20 border-b border-slate-100"
+      [ngClass]="collapsed && !isMobile ? 'justify-center' : 'justify-between'">
 
       <!-- LOGO -->
       <div *ngIf="!collapsed || isMobile" class="flex items-center gap-3 overflow-hidden">
@@ -37,18 +30,13 @@
       </div>
 
       <!-- BOTÓN CERRAR - MÓVIL -->
-      <button 
-        *ngIf="isMobile && !collapsed" 
-        (click)="collapsed = true" 
+      <button *ngIf="isMobile && !collapsed" (click)="collapsed = true"
         class="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
         <i class="fa-solid fa-xmark text-xl"></i>
       </button>
 
       <!-- BOTÓN COLLAPSE - DESKTOP -->
-      <button 
-        *ngIf="!isMobile" 
-        (click)="toggleSidebar()" 
-        class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+      <button *ngIf="!isMobile" (click)="toggleSidebar()" class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
         <i class="fa-solid" [ngClass]="collapsed ? 'fa-arrow-right' : 'fa-arrow-left'"></i>
       </button>
 
@@ -72,16 +60,19 @@
 
         <!-- SUBMENU -->
         <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
-          <a routerLink="/home/my-pensul" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/my-pensul" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Plan de estudio
           </a>
-          <a routerLink="/home/my-subjects" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/my-subjects" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Mis materias
           </a>
-          <a routerLink="/home/my-schedule" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/my-schedule" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Horario
           </a>
         </div>
@@ -92,8 +83,7 @@
       <!-- DASHBOARD -->
       <a routerLink="/home/dashboard" routerLinkActive="bg-blue-50 text-blue-700"
         class="flex items-center p-3 rounded-xl hover:bg-slate-50 group transition"
-        [ngClass]="collapsed && !isMobile ? 'justify-center' : 'gap-4'" 
-        (click)="isMobile ? collapsed = true : null">
+        [ngClass]="collapsed && !isMobile ? 'justify-center' : 'gap-4'" (click)="isMobile ? collapsed = true : null">
         <i class="fa-solid fa-chart-line text-slate-500 group-hover:text-blue-600 text-lg"></i>
         <span *ngIf="!collapsed || isMobile">Dashboard</span>
       </a>
@@ -112,28 +102,34 @@
 
         <!-- SUBMENU -->
         <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
-          <a routerLink="/home/students" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/students" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Estudiantes
           </a>
-          <a routerLink="/home/docentes" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/docentes" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Docentes
           </a>
-          <a routerLink="/home/califications" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/califications" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Calificaciones
           </a>
-          <a routerLink="/home/programs" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Carreras
           </a>
-          <a routerLink="/home/programs" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Materias
           </a>
-          <a routerLink="/home/programs" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Capacitaciones
           </a>
         </div>
@@ -151,8 +147,9 @@
         </div>
 
         <div *ngIf="(!collapsed || isMobile) && openFinanzas" class="ml-6">
-          <a routerLink="/home/payments" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/payments" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Pagos
           </a>
         </div>
@@ -164,22 +161,26 @@
           [ngClass]="collapsed && !isMobile ? 'justify-center' : 'justify-between'">
           <div class="flex items-center" [ngClass]="collapsed && !isMobile ? '' : 'gap-4'">
             <i class="fa-solid fa-screwdriver-wrench text-slate-500 group-hover:text-blue-600 text-lg"></i>
-            <span *ngIf="!collapsed || isMobile" class="text-xs font-bold uppercase text-slate-400">Administración</span>
+            <span *ngIf="!collapsed || isMobile"
+              class="text-xs font-bold uppercase text-slate-400">Administración</span>
           </div>
           <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down" [class.rotate-180]="openAdmin"></i>
         </div>
 
         <div *ngIf="(!collapsed || isMobile) && openAdmin" class="ml-6 space-y-1">
-          <a routerLink="/home/attendance" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/attendance" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Asistencia
           </a>
-          <a routerLink="/home/users" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/users" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Usuarios
           </a>
-          <a routerLink="/home/reports" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/reports" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Reportes
           </a>
         </div>
@@ -198,16 +199,19 @@
         </div>
 
         <div *ngIf="(!collapsed || isMobile) && openConfig" class="ml-6 space-y-1">
-          <a routerLink="/home/profile" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/profile" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Perfil
           </a>
-          <a routerLink="/home/password" routerLinkActive="text-blue-600" 
-             class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a routerLink="/home/password" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Contraseña
           </a>
           @if (role == 'admin') {
-          <a class="block py-2 text-sm hover:text-blue-600 transition-colors" (click)="isMobile ? collapsed = true : null">
+          <a class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
             Institución
           </a>
           }
@@ -217,29 +221,30 @@
 
     <!-- FOOTER DEL SIDEBAR - USUARIO Y LOGOUT -->
     <div class="border-t p-3">
-      <div class="flex items-center w-full" 
-           [ngClass]="collapsed && !isMobile ? 'flex-col gap-2 justify-center' : 'justify-between'">
+      <div class="flex items-center w-full"
+        [ngClass]="collapsed && !isMobile ? 'flex-col gap-2 justify-center' : 'justify-between'">
 
         <!-- USUARIO -->
-        <a routerLink="/home/profile" routerLinkActive="text-blue-600" 
-           class="block py-2 text-sm hover:text-blue-600 transition-colors w-full" 
-           (click)="isMobile ? collapsed = true : null">
+        <a routerLink="/home/profile" routerLinkActive="text-blue-600"
+          class="block py-2 text-sm hover:text-blue-600 transition-colors w-full"
+          (click)="isMobile ? collapsed = true : null">
           <div class="flex items-center" [ngClass]="collapsed && !isMobile ? 'justify-center' : 'gap-3'">
             <div class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold"
               [ngClass]="getColor(user?.name)">
-              {{ getInitials(user?.name) }}
+              {{ getInitials(user?.name ) }}
             </div>
             <div *ngIf="!collapsed || isMobile" class="flex-1 min-w-0">
-              <p class="text-sm font-bold truncate">{{ user?.name }} {{ user?.first_lastname }} {{ user?.second_lastname }}</p>
+              <p class="text-sm font-bold truncate">{{ user?.name }} {{ user?.first_lastname }}
+                {{ user?.second_lastname }}</p>
               <p class="text-xs text-slate-500 capitalize">{{ user?.role }}</p>
             </div>
           </div>
         </a>
 
         <!-- LOGOUT -->
-        <button (click)="logout()" 
-                class="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors"
-                [ngClass]="collapsed && !isMobile ? '' : 'ml-2'">
+        <button (click)="logout()"
+          class="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors"
+          [ngClass]="collapsed && !isMobile ? '' : 'ml-2'">
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
 
@@ -248,8 +253,7 @@
   </aside>
 
   <!-- MAIN CONTENT -->
-  <main class="flex-1 p-4 md:p-8 overflow-y-auto transition-all duration-300"
-        [ngClass]="isMobile ? 'w-full' : ''">
+  <main class="flex-1 p-4 md:p-8 overflow-y-auto transition-all duration-300" [ngClass]="isMobile ? 'w-full' : ''">
     <router-outlet></router-outlet>
   </main>
 </div>

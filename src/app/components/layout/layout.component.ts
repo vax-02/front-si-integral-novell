@@ -1,6 +1,7 @@
 import { Router, RouterModule, Routes } from '@angular/router';
 import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService, User } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -11,9 +12,8 @@ import { CommonModule } from '@angular/common';
 })
 export class LayoutComponent {
   private readonly router = inject(Router);
-
+  user : User | null ;
   role = 'admin';
-  user = JSON.parse(localStorage.getItem('user') || '{}');
   collapsed = false;
   openAcademico = true;
   openControl = false;
@@ -23,7 +23,10 @@ export class LayoutComponent {
 
   isMobile = false;
 
-  constructor() {}
+  constructor(private auth: AuthService) {
+    this.user = this.auth.user;
+
+  }
 
   ngOnInit() {
     this.checkScreenSize();
@@ -73,7 +76,7 @@ export class LayoutComponent {
     localStorage.clear();
     this.router.navigate(['/login']);
   }
-  getInitials(nombre: string): string {
+  getInitials(nombre: string = ''): string {
     if (!nombre) return '';
 
     return nombre
@@ -82,7 +85,7 @@ export class LayoutComponent {
       .join('')
       .toUpperCase();
   }
-  getColor(nombre: string): string {
+  getColor(nombre : string = ''): string {
     const colors = [
       'bg-blue-600',
       'bg-red-500',

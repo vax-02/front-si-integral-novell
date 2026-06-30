@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../service/user.service';
+import { AuthService } from '../../core/services/auth.service';
 function noDangerousCharsValidator(
   control: AbstractControl,
 ): ValidationErrors | null {
@@ -35,7 +36,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly userService = inject(UserService);
   // Señales para estado de UI (carga, error general, mostrar/ocultar password)
-  readonly loading = signal(false);
+  loading = signal(false);
   readonly serverError = signal<string | null>(null);
   readonly showPassword = signal(false);
   msg_error: string = '';
@@ -61,6 +62,7 @@ export class LoginComponent {
     ],
   });
 
+  constructor(private auth: AuthService) {}
   get email() {
     return this.loginForm.controls.email;
   }
@@ -82,7 +84,6 @@ export class LoginComponent {
     }
 
     this.loading.set(true);
-    console.log(this.loading());
 
     const credentials = {
       email: this.loginForm.getRawValue().email.trim(),
@@ -91,26 +92,27 @@ export class LoginComponent {
 
     this.userService.login(credentials.email, credentials.password).subscribe({
       next: (response) => {
-        console.log('Login correcto:', response);
-        
-        localStorage.setItem('user', JSON.stringify(response.user));
-        localStorage.setItem('token', JSON.stringify(response.token));
-
+        this.auth.saveSession(
+          JSON.stringify(response.token),
+          JSON.stringify(response.user),
+        );
 
         if (response.user.role_id == 1) {
           this.router.navigate(['/home/dashboard']);
-        } /*else if (response.user.role_id == 2) {
+        }
+        /*else if (response.user.role_id == 2) {
           localStorage.setItem('userRole', 'my-subjects');
           this.router.navigate(['/home/professor']);
         } else if (response.user.role_id == 3) {
           localStorage.setItem('userRole', 'admin');
           this.router.navigate(['/home/dashboard']);
         }*/
+        this.loading.set(false);
       },
       error: (error) => {
         this.msg_error = error.error.message;
+        this.loading.set(false);
       },
     });
-    this.loading.set(false);
   }
 }
