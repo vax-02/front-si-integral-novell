@@ -24,6 +24,15 @@ export class UserService {
     });
   }
 
+  getUsers(page: number, perPage: number, search: string) {
+    return this.http.get<any>(
+      `${this.apiUrl.users}?page=${page}&per_page=${perPage}&search=${search}`,
+      { headers: this.headers },
+    );
+  }
+  createUser(data: any) {
+    return this.http.post(`${this.apiUrl.users}`, data, { headers: this.headers });
+  }
   updateProfile(userId: number, updatedData: any): Observable<any> {
     return this.http.put(
       `${this.apiUrl.users}/${userId}/profile`,
@@ -31,15 +40,13 @@ export class UserService {
       { headers: this.headers },
     );
   }
-  changePassword( data: any): Observable<any> {
+  changePassword(data: any): Observable<any> {
     const updatedData = {
-      current : data.password,
-      new : data.new,
-    }
-    return this.http.put(
-      `${this.apiUrl.users}/change-password`,
-      updatedData,
-      { headers: this.headers },
-    );
+      current: data.password,
+      new: data.new,
+    };
+    return this.http.put(`${this.apiUrl.users}/change-password`, updatedData, {
+      headers: this.headers,
+    });
   }
 }

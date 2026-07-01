@@ -1,159 +1,268 @@
 <div class="space-y-8">
 
   <!-- HEADER -->
-
-  <div class="flex justify-between items-center">
+  <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+    <!-- TEXTO -->
     <div>
-      <h1 class="text-2xl font-bold text-slate-800">Gestión de Usuarios</h1>
-      <p class="text-sm text-slate-500">Administración de accesos y roles del sistema</p>
+      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">
+        Gestión de Usuarios
+      </h1>
+      <p class="text-sm sm:text-base text-slate-500">
+        Administración de accesos y roles del sistema
+      </p>
     </div>
-
-    <app-button label="Nuevo usuario" type="primary"></app-button>
+    <!-- BOTÓN -->
+    <div class="w-full sm:w-auto">
+      <app-button class="w-full sm:w-auto" label="Nuevo usuario" type="primary" (click)="userModalCreate = true">
+      </app-button>
+    </div>
   </div>
 
-    <!-- TARJETAS RESUMEN -->
-  <div class="grid md:grid-cols-4 gap-6">
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Administradores</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">42</h3>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+
+    <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-xs sm:text-sm text-slate-500">Administradores</p>
+
+      <div class="mt-1">
+        <ng-container *ngIf="!loading; else loadingAdmin">
+          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+            {{ cards.tAdmins }}
+          </h3>
+        </ng-container>
+
+        <ng-template #loadingAdmin>
+          <div class="flex items-center gap-2 text-blue-700">
+            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+            <span class="text-sm">Cargando...</span>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Secretarias</p>
-      <h3 class="text-2xl font-bold text-emerald-600 mt-1">20</h3>
+    <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-xs sm:text-sm text-slate-500">Secretarias</p>
+
+      <div class="mt-1">
+        <ng-container *ngIf="!loading; else loadingAdmin">
+          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+            {{ cards.tSecres }}
+          </h3>
+        </ng-container>
+
+        <ng-template #loadingAdmin>
+          <div class="flex items-center gap-2 text-blue-700">
+            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+            <span class="text-sm">Cargando...</span>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Docentes</p>
-      <h3 class="text-2xl font-bold text-yellow-600 mt-1">3</h3>
+    <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-xs sm:text-sm text-slate-500">Docentes</p>
+
+      <div class="mt-1">
+        <ng-container *ngIf="!loading; else loadingAdmin">
+          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+            {{ cards.tDoc }}
+          </h3>
+        </ng-container>
+
+        <ng-template #loadingAdmin>
+          <div class="flex items-center gap-2 text-blue-700">
+            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+            <span class="text-sm">Cargando...</span>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Estudiantes</p>
-      <h3 class="text-2xl font-bold text-red-600 mt-1">1</h3>
-    </div>
+    <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-xs sm:text-sm text-slate-500">Estudiantes</p>
 
+      <div class="mt-1">
+        <ng-container *ngIf="!loading; else loadingAdmin">
+          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+            {{ cards.tEst }}
+          </h3>
+        </ng-container>
+
+        <ng-template #loadingAdmin>
+          <div class="flex items-center gap-2 text-blue-700">
+            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+            <span class="text-sm">Cargando...</span>
+          </div>
+        </ng-template>
+      </div>
+    </div>
   </div>
-
 
   <!-- FILTROS -->
-  <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 grid md:grid-cols-5 gap-4">
+  <div class="bg-white p-2 sm:p-6 rounded-2xl shadow-sm border border-slate-200 
+            grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4">
 
-    <input placeholder="Buscar por nombre o email..." class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
+    <input [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Buscar por nombre o email..." class="border border-slate-200 rounded-lg px-3 py-2 sm:px-4 sm:py-2 
+           focus:ring-2 focus:ring-indigo-400 outline-none lg:col-span-1">
 
-    <select class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
-      <option>Todos los roles</option>
-      <option>Administrador</option>
-      <option>Secretaria</option>
-      <option>Docente</option>
-      <option>Estudiante</option>
-    </select>
+    <div class="lg:col-span-1">
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadUsers()">
+      </app-button>
+    </div>
 
-    <select class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
-      <option>Todos los estados</option>
-      <option>Activo</option>
-      <option>Inactivo</option>
-      <option>Bloqueado</option>
-    </select>
-
-    <select class="border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 outline-none">
-      <option>Ordenar por</option>
-      <option>Nombre</option>
-      <option>Fecha registro</option>
-      <option>Rol</option>
-    </select>
-
-    <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
   </div>
 
   <!-- TABLA DE USUARIOS -->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
-    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+    <!-- HEADER -->
+    <div
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 sm:p-6 border-b border-slate-200">
       <span class="font-semibold text-slate-700">Listado de Usuarios</span>
-      <span class="text-xs text-slate-400">1,338 usuarios registrados</span>
+      <span class="text-xs text-slate-400">{{ totalUsers }} usuarios registrados</span>
     </div>
 
-    <table class="w-full text-sm">
-      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-        <tr>
-          <th class="p-4 text-left">Usuario</th>
-          <th class="p-4 text-center">Documento</th>
-          <th class="p-4 text-center">Rol</th>
-          <th class="p-4 text-center">Área</th>
-          <th class="p-4 text-center">Estado</th>
-          <th class="p-4 text-center">Registro</th>
-          <th class="p-4 text-center">Acciones</th>
-        </tr>
-      </thead>
+    <!-- TABLE WRAPPER RESPONSIVE -->
+    <div class="overflow-x-auto">
 
-      <tbody class="divide-y divide-slate-100">
+      <table class="w-full min-w-[900px] text-sm">
 
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4">
-            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
-            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
-          </td>
-          <td class="p-4 text-center">12345678</td>
-          <td class="p-4 text-center">
-            <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold">Administrador</span>
-          </td>
-          <td class="p-4 text-center">Dirección</td>
-          <td class="p-4 text-center">
-            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
-          </td>
-          <td class="p-4 text-center text-slate-500">05/01/2026</td>
-          <td class="p-4 text-center space-x-2">
-            <button class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg hover:bg-amber-200 transition">Editar</button>
-            <button class="bg-sky-100 text-sky-700 px-3 py-1 rounded-lg hover:bg-sky-200 transition">Ver</button>
-            <button class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg hover:bg-rose-200 transition">Bloquear</button>
-          </td>
-        </tr>
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-3 sm:p-4 text-left">Nombre Completo</th>
+            <th class="p-3 sm:p-4 text-center">Celular</th>
+            <th class="p-3 sm:p-4 text-center">Rol</th>
+            <th class="p-3 sm:p-4 text-center">Estado</th>
+            <th class="p-3 sm:p-4 text-center">Acciones</th>
+          </tr>
+        </thead>
 
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4">
-            <div class="font-semibold text-slate-700">María López</div>
-            <div class="text-xs text-slate-400">maria.lxinstituto.edu</div>
-          </td>
-          <td class="p-4 text-center">87654321</td>
-          <td class="p-4 text-center">
-            <span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-xs font-semibold">Secretaria</span>
-          </td>
-          <td class="p-4 text-center">Administración</td>
-          <td class="p-4 text-center">
-            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
-          </td>
-          <td class="p-4 text-center text-slate-500">11/02/2026</td>
-          <td class="p-4 text-center space-x-2">
-            <button class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg hover:bg-amber-200 transition">Editar</button>
-            <button class="bg-sky-100 text-sky-700 px-3 py-1 rounded-lg hover:bg-sky-200 transition">Ver</button>
-            <button class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg hover:bg-rose-200 transition">Bloquear</button>
-          </td>
-        </tr>
+        <tbody class="divide-y divide-slate-100">
 
-      </tbody>
-    </table>
+          <tr *ngFor="let user of users" class="hover:bg-slate-50 transition">
+
+            <td class="p-3 sm:p-4">
+              <div class="font-semibold text-slate-700">{{ user.name }}</div>
+              <div class="text-xs text-slate-400">{{ user.email }}</div>
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">{{ user.cellphone ? user.cellphone : 'No definido' }}</td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <span
+                class="bg-indigo-100 text-indigo-600 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold uppercase">
+                {{user.role.name }}
+              </span>
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <span class="bg-emerald-100 text-emerald-600 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold">
+                {{ user.status ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <!-- ACCIONES RESPONSIVE -->
+            <td class="p-3 sm:p-4 text-center">
+              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+
+                <button
+                  class="bg-amber-100 text-amber-700 px-2 py-1 rounded-lg text-xs hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
+                  <i class="fas fa-edit"></i>
+                  Editar
+                </button>
+
+                <button
+                  class="bg-rose-100 text-rose-700 px-2 py-1 rounded-lg text-xs hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition">
+                  <i class="fas fa-ban"></i>
+                  Bloquear
+                </button>
+
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="loading" class="hover:bg-slate-50 transition">
+            <td colspan="5" class="p-4 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-indigo-600 text-xl"></i>
+                <span>Cargando usuarios...</span>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+
+    <!-- PAGINACIÓN -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
+
+      <p class="text-xs text-slate-500">
+        Mostrando {{ from }} - {{ to }} de {{ totalUsers }} usuarios
+      </p>
+
+      <div class="flex gap-2">
+
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Anterior
+        </button>
+
+        <span class="px-3 py-1 bg-indigo-600 text-white rounded">
+          {{ currentPage }}
+        </span>
+
+        <button (click)="nextPage()" [disabled]="currentPage === lastPage"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Siguiente
+        </button>
+
+      </div>
+    </div>
+
+
   </div>
 
-  <!-- ACCIONES RÁPIDAS -->
-  <div class="grid md:grid-cols-2 gap-8">
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-      <h3 class="font-semibold text-slate-700 mb-2">Historial de Accesos</h3>
-      <p class="text-sm text-slate-500 mb-4">Registro de ingresos al sistema</p>
-      <button class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 w-full py-2 rounded-lg font-medium transition">
-        Ver Historial
-      </button>
-    </div>
+  <app-base-modal [isOpen]="userModalCreate" [loading]="loadingModal" title="Crear usuario" size="md" confirmText="Crear"
+    cancelText="Cancelar" (confirm)="save()" (cancel)="cancel()">
+    <form [formGroup]="form">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+            Datos Personales
+          </h3>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-      <h3 class="font-semibold text-slate-700 mb-2">Usuarios Inactivos</h3>
-      <p class="text-sm text-slate-500 mb-4">Cuentas sin actividad reciente</p>
-      <button class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 w-full py-2 rounded-lg font-medium transition">
-        Revisar Usuarios
-      </button>
-    </div>
+          <div class="grid md:grid-cols-3 gap-4">
+            <app-base-input text="Nombre" formControlName="nombre" />
+            <app-base-input text="Apellido paterno" formControlName="apellido_paterno" />
+            <app-base-input text="Apellido Materno" formControlName="apellido_materno" />
+            <app-base-input text="C.I." formControlName="ci" />
 
-  </div>
+            <select formControlName="role_id" class="w-full px-3 py-2 rounded-xl border border-slate-300">
+
+              <option [ngValue]="null">Seleccione un rol</option>
+
+              <option *ngFor="let role of roles" [value]="role.id">
+                {{ role.name }}
+              </option>
+
+            </select>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+            Contacto
+          </h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <app-base-input text="Correo electrónico" formControlName="email" />
+            <app-base-input text="Celular" formControlName="celular" />
+          </div>
+        </div>
+      </div>
+    </form>
+  </app-base-modal>
 
 </div>
