@@ -5,4 +5,8 @@ export const API_ENDPOINTS = {
     login: `${API_BASE_URL}/login`,
   },
   users: `${API_BASE_URL}/users`,
+  degrees: `${API_BASE_URL}/degrees`,
+  docentes: `${API_BASE_URL}/docentes`
+
+
 } as const;

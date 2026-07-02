@@ -12,7 +12,7 @@
   </div>
 
   <!-- TARJETAS RESUMEN -->
-  <div class="grid md:grid-cols-4 gap-6">
+  <div class="grid md:grid-cols-3 gap-6">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Total Docentes</p>
       <h3 class="text-2xl font-bold text-blue-700 mt-1">86</h3>
@@ -24,21 +24,16 @@
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Licencia</p>
-      <h3 class="text-2xl font-bold text-amber-500 mt-1">8</h3>
-    </div>
-
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Tiempo Completo</p>
+      <p class="text-sm text-slate-500">Inactivos</p>
       <h3 class="text-2xl font-bold text-indigo-600 mt-1">54</h3>
     </div>
   </div>
 
   <!-- FILTROS -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-    <div class="grid md:grid-cols-4 gap-4">
+    <div class="grid md:grid-cols-3 gap-4">
 
-      <input type="text" placeholder="Buscar por nombre o CI..."
+      <input type="text" placeholder="Buscar por nombre o CI..." [(ngModel)]="search" (ngModelChange)="onSearchChange()"
         class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
 
       <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
@@ -48,14 +43,7 @@
         <option>Contaduría</option>
       </select>
 
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Estado</option>
-        <option>Activo</option>
-        <option>Licencia</option>
-        <option>Retirado</option>
-      </select>
-
-      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadDocentes()"></app-button>
     </div>
   </div>
 
@@ -63,49 +51,99 @@
   <!-- TABLA  -->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
-    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-6 border-b border-slate-200 gap-2">
       <span class="font-semibold text-slate-700">Listado de docentes</span>
-      <span class="text-xs text-slate-400">1,338 docentes registrados</span>
+      <span class="text-xs text-slate-400">{{ totalDocentes }} docentes registrados</span>
     </div>
 
-    <table class="w-full text-sm">
-      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-        <tr>
-          <th class="p-4 text-left">Docente</th>
-          <th class="p-4 text-center">C.I.</th>
-          <th class="p-4 text-center">Grado Academico</th>
-          <th class="p-4 text-center">Estado</th>
-          <th class="p-4 text-center">Acciones</th>
-        </tr>
-      </thead>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[800px]">
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-4 text-left">Docente</th>
+            <th class="p-4 text-center">C.I.</th>
+            <th class="p-4 text-center">Celular</th>
+            <th class="p-4 text-center">Estado</th>
+            <th class="p-4 text-center">Acciones</th>
+          </tr>
+        </thead>
 
-      <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let docente of docentes" class="hover:bg-slate-50 transition">
+            <td class="p-4">
+              <div class="font-semibold text-slate-700">{{ docente.user.name }} {{ docente.user.first_lastname }}
+                {{ docente.user.second_lastname }}</div>
+              <div class="text-xs text-slate-400">{{ docente.user.email }}</div>
+            </td>
+            <td class="p-4 text-center">{{ docente.user.ci }}</td>
+            <td class="p-4 text-center">{{ docente.user.cellphone || 'No definido' }}</td>
+            <td class="p-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="docente.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
+                {{ docente.status ? 'Activo' : 'Bloqueado' }}
+              </span>
+            </td>
+            <td class="p-3 sm:p-4 text-center">
+              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+                <button (click)="openViewDocente(docente)"
+                  class="bg-blue-500 text-white px-2 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition">
+                  <i class="text-lg fas fa-eye"></i>
+                </button>
 
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4">
-            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
-            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
-          </td>
-          <td class="p-4 text-center">12345678</td>
-          <td class="p-4 text-center">
-            <span
-              class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold">Administrador</span>
-          </td>
-          <td class="p-4 text-center">
-            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
-          </td>
-          <td class="p-4 text-center space-x-2">
-            <app-button icon="fa-solid fa-eye" [variant]="'primary'" title="Ver" (click)="openViewDocente()">
-            </app-button>
-            <app-button icon="fa-solid fa-pen" [variant]="'secondary'" title="Editar">
-            </app-button>
-            <app-button icon="fa-solid fa-ellipsis" [variant]="'tertiary'" title="bajas/readmision"
-              (click)="openOptionDocente()"></app-button>
-          </td>
+                <button [ngClass]="docente.status 
+      ? 'bg-rose-500 text-white hover:bg-rose-600'
+      : 'bg-green-500 text-white hover:bg-green-600'" class="px-2 rounded-lg transition"
+                  title="{{ docente.status ? 'Bloquear' : 'Desbloquear' }}">
+                  <i class="text-lg fas" [ngClass]="docente.status ? 'fa-unlock' : 'fa-lock'"></i>
+                </button>
 
-        </tr>
-      </tbody>
-    </table>
+                <button (click)="openOptionDocente(docente.id)"
+                  class="bg-amber-500 text-white px-2 rounded-lg hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
+                  <i class="text-lg fas fa-edit"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="loading" class="hover:bg-slate-50 transition">
+            <td colspan="5" class="p-4 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <span>Cargando docentes...</span>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && docentes.length === 0" class="hover:bg-slate-50 transition">
+            <td colspan="5" class="p-4 text-center text-slate-500">
+              No se encontraron docentes.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
+      <p class="text-xs text-slate-500">
+        Mostrando {{ from }} - {{ to }} de {{ totalDocentes }} docentes
+      </p>
+
+      <div class="flex gap-2">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Anterior
+        </button>
+
+        <span class="px-3 py-1 bg-indigo-600 text-white rounded">
+          {{ currentPage }}
+        </span>
+
+        <button (click)="nextPage()" [disabled]="currentPage === lastPage"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Siguiente
+        </button>
+      </div>
+    </div>
   </div>
 
 
@@ -119,10 +157,10 @@
         </h3>
 
         <div class="grid md:grid-cols-3 gap-4">
-          <app-base-input text="Nombre"/>
-          <app-base-input text="Apellido paterno"/>
-          <app-base-input text="Apellido materno"/>
-          <app-base-input text="C.I." type_i="number"/>
+          <app-base-input text="Nombre" [(ngModel)]="nombre" />
+          <app-base-input text="Apellido paterno" [(ngModel)]="apellidoPaterno" />
+          <app-base-input text="Apellido materno" [(ngModel)]="apellidoMaterno" />
+          <app-base-input text="C.I." type_i="number" [(ngModel)]="ci" />
         </div>
       </div>
 
@@ -132,8 +170,8 @@
         </h3>
 
         <div class="grid md:grid-cols-2 gap-4">
-          <app-base-input text="Correo electrónico"/>
-          <app-base-input text="Celular" type_i="number"/>
+          <app-base-input text="Correo electrónico" [(ngModel)]="correo" />
+          <app-base-input text="Celular" type_i="number" [(ngModel)]="celular" />
         </div>
       </div>
 
@@ -143,13 +181,13 @@
         </h3>
 
         <div class="grid md:grid-cols-1 gap-4">
-          <select name="" id=""
+          <select [(ngModel)]="gradoAcademico"
             class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition md:col-span-2">
-            <option>Grado académico</option>
-            <option>Licenciatura</option>
-            <option>Ingeniería</option>
-            <option>Maestría</option>
-            <option>Doctorado</option>
+            <option value="">Grado académico</option>
+            <option value="Licenciatura">Licenciatura</option>
+            <option value="Ingeniería">Ingeniería</option>
+            <option value="Maestría">Maestría</option>
+            <option value="Doctorado">Doctorado</option>
           </select>
         </div>
       </div>
@@ -163,25 +201,25 @@
 
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" [(ngModel)]="documentos.hojaVida" class="w-4 h-4 accent-blue-500">
             Hoja de Vida (CV)
           </label>
 
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" [(ngModel)]="documentos.tituloProfesional" class="w-4 h-4 accent-blue-500">
             Título Profesional
           </label>
 
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" [(ngModel)]="documentos.ciCopia" class="w-4 h-4 accent-blue-500">
             C.I. (Copia)
           </label>
 
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" [(ngModel)]="documentos.certificados" class="w-4 h-4 accent-blue-500">
             Certificados
           </label>
 
@@ -192,73 +230,30 @@
 
 
   <app-base-modal [isOpen]="modalViewDocente" title="Ver información de Docente" subtitle="Información general"
-    size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalViewDocente = false">
-    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8">
+    size="lg" confirmText="Aceptar" cancelText="Cancelar" (confirm)="modalViewDocente = false"
+    (cancel)="modalViewDocente = false">
+    <div class="bg-white p-2  space-y-8">
 
-      <!-- ===================== -->
-      <!-- PERFIL -->
-      <!-- ===================== -->
       <div class="flex items-center gap-4">
         <div
           class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
-          JP
+          {{ docenteSeleccionado?.user?.name?.charAt(0) }}{{ docenteSeleccionado?.user?.first_lastname?.charAt(0) }}
         </div>
 
         <div>
-          <h2 class="text-xl font-bold text-slate-800">Juan Pérez</h2>
-          <p class="text-sm text-slate-500">Docente</p>
+          <h2 class="text-xl font-bold text-slate-800">{{ docenteSeleccionado?.user?.name }}
+            {{ docenteSeleccionado?.user?.first_lastname }} {{ docenteSeleccionado?.user?.second_lastname }}</h2>
+          <p class="text-sm text-slate-500">C.I.:{{ docenteSeleccionado?.user?.ci }}</p>
         </div>
 
         <div class="ml-auto">
-          <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-600">
-            Activo
+          <span class="px-3 py-1 rounded-full text-sm font-semibold"
+            [ngClass]="docenteSeleccionado?.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
+            {{ docenteSeleccionado?.status ? 'Activo' : 'Bloqueado' }}
           </span>
         </div>
       </div>
 
-      <div>
-        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Datos Personales
-        </h3>
-
-        <div class="grid md:grid-cols-3 gap-4 text-sm">
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Nombres</p>
-            <p class="font-semibold text-slate-800">Juan</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Apellido Paterno</p>
-            <p class="font-semibold text-slate-800">Pérez</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Apellido Materno</p>
-            <p class="font-semibold text-slate-800">García</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">C.I.</p>
-            <p class="font-semibold text-slate-800">12345678</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Fecha de Nacimiento</p>
-            <p class="font-semibold text-slate-800">01/01/1990</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Género</p>
-            <p class="font-semibold text-slate-800">Masculino</p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ===================== -->
-      <!-- CONTACTO -->
-      <!-- ===================== -->
       <div>
         <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Contacto
@@ -268,92 +263,32 @@
 
           <div class="bg-slate-50 p-3 rounded-xl">
             <p class="text-slate-500">Correo</p>
-            <p class="font-semibold text-slate-800">docente&#64;email.com</p>
+            <p class="font-semibold text-slate-800">{{ docenteSeleccionado?.user?.email }}</p>
           </div>
 
           <div class="bg-slate-50 p-3 rounded-xl">
             <p class="text-slate-500">Teléfono</p>
-            <p class="font-semibold text-slate-800">78945612</p>
+            <p class="font-semibold text-slate-800">{{ docenteSeleccionado?.user?.cellphone || 'No definido' }}</p>
           </div>
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- INFORMACIÓN PROFESIONAL -->
-      <!-- ===================== -->
+
       <div>
         <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Información Profesional
         </h3>
-
         <div class="space-y-4 text-sm">
-
-          <!-- ESPECIALIDADES -->
-          <div>
-            <p class="text-slate-500 mb-2">Especialidades</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                Programación
-              </span>
-              <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                Base de Datos
-              </span>
-              <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                Redes
-              </span>
-            </div>
-          </div>
-
           <!-- OTROS DATOS -->
           <div class="grid md:grid-cols-3 gap-4">
-
-
             <div class="bg-slate-50 p-3 rounded-xl md:col-span-2">
               <p class="text-slate-500">Grado Académico</p>
-              <p class="font-semibold text-slate-800">Ingeniero en Sistemas</p>
+              <p class="font-semibold text-slate-800">{{ docenteSeleccionado?.degree?.name }}</p>
             </div>
-
-            <div class="bg-slate-50 p-3 rounded-xl">
-              <p class="text-slate-500">Tipo</p>
-              <p class="font-semibold text-slate-800">Tiempo Completo</p>
-            </div>
-
           </div>
-
         </div>
       </div>
 
-      <!-- ===================== -->
-      <!-- INFORMACIÓN LABORAL -->
-      <!-- ===================== -->
-      <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Información Laboral
-        </h3>
-
-        <div class="grid md:grid-cols-3 gap-4 text-sm">
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Fecha de Ingreso</p>
-            <p class="font-semibold text-slate-800">01/02/2024</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Salario</p>
-            <p class="font-semibold text-green-600">Bs. 3500</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Estado</p>
-            <p class="font-semibold text-green-600">Activo</p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ===================== -->
-      <!-- DOCUMENTOS -->
-      <!-- ===================== -->
       <div>
         <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Documentos
@@ -363,22 +298,35 @@
 
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
             <span>Hoja de Vida</span>
-            <span class="text-green-600 font-semibold">✔</span>
+            <span class="text-green-600 font-semibold">
+              <i class="fa-solid "
+                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.cv, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.cv}"></i>
+            </span>
           </div>
 
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
             <span>Título Profesional</span>
-            <span class="text-green-600 font-semibold">✔</span>
+            <span class="text-green-600 font-semibold">
+              <i class="fa-solid "
+                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.professional_title, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.professional_title}"></i>
+            </span>
           </div>
 
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-            <span>C.I.</span>
-            <span class="text-green-600 font-semibold">✔</span>
+            <span>Fotocopia de C.I.</span>
+            <span class="text-green-600 font-semibold">
+              <i class="fa-solid "
+                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.carnet, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.carnet}"></i>
+
+            </span>
           </div>
 
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
             <span>Certificados</span>
-            <span class="text-red-500 font-semibold">✖</span>
+            <span class=" font-semibold">
+              <i class="fa-solid "
+                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.certificate, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.certificate}"></i>
+            </span>
           </div>
 
         </div>
@@ -424,20 +372,6 @@
             <i class="fa-solid fa-minus"></i> Quitar
           </button>
 
-          <button (click)="tabDoc='estado'"
-            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='estado' 
-            ? 'bg-yellow-500 text-white shadow' 
-            : 'text-slate-500 hover:bg-white hover:text-yellow-600'">
-            <i class="fa-solid fa-toggle-on"></i> Estado
-          </button>
-
-          <button (click)="tabDoc='baja'"
-            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='baja' 
-            ? 'bg-red-700 text-white shadow' 
-            : 'text-slate-500 hover:bg-white hover:text-red-700'">
-            <i class="fa-solid fa-user-xmark"></i> Baja
-          </button>
-
         </div>
       </div>
 
@@ -448,23 +382,43 @@
 
         <h3 class="font-semibold text-slate-700">Asignar materia</h3>
 
-        <select class="w-full input">
-          <option>Seleccionar materia</option>
-          <option>Programación I</option>
-        </select>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <select class="input">
-            <option>Año</option>
-            <option>1er Año</option>
-          </select>
+          <!-- Select 1 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Carrera</label>
+            <select
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Seleccionar carrera</option>
+              <option> Ingeniería en Sistemas</option>
+              <option> Licenciatura en Matemática</option>
+            </select>
+          </div>
 
-          <select class="input">
-            <option>Turno</option>
-            <option>Mañana</option>
-          </select>
+          <!-- Select 2 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Materia</label>
+            <select
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Seleccionar materia</option>
+              <option>Programación I</option>
+              <option>Matemática Discreta</option>
+            </select>
+          </div>
+
+          <!-- Select 3 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Turno</label>
+            <select
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Seleccionar turno</option>
+              <option>Mañana</option>
+              <option>Tarde</option>
+            </select>
+          </div>
+          
+
         </div>
-
       </div>
 
       <!-- ===================== -->
@@ -480,51 +434,6 @@
         </select>
 
         <textarea class="input" placeholder="Motivo (opcional)"></textarea>
-
-      </div>
-
-      <!-- ===================== -->
-      <!-- ESTADO -->
-      <!-- ===================== -->
-      <div *ngIf="tabDoc==='estado'" class="space-y-4">
-
-        <h3 class="font-semibold text-slate-700">Cambiar estado</h3>
-
-        <div class="grid grid-cols-2 gap-4">
-
-          <button (click)="estado='activo'" [ngClass]="estado==='activo' 
-            ? 'bg-green-600 text-white' 
-            : 'bg-white hover:bg-green-50'" class="p-4 rounded-xl border flex flex-col items-center gap-2 transition">
-            <i class="fa-solid fa-check"></i>
-            Activo
-          </button>
-
-          <button (click)="estado='inactivo'" [ngClass]="estado==='inactivo' 
-            ? 'bg-red-600 text-white' 
-            : 'bg-white hover:bg-red-50'" class="p-4 rounded-xl border flex flex-col items-center gap-2 transition">
-            <i class="fa-solid fa-xmark"></i>
-            Inactivo
-          </button>
-
-        </div>
-
-      </div>
-
-      <!-- ===================== -->
-      <!-- BAJA DOCENTE -->
-      <!-- ===================== -->
-      <div *ngIf="tabDoc==='baja'" class="space-y-4">
-
-        <h3 class="font-semibold text-red-600">Dar de baja docente</h3>
-
-        <input type="date" class="input">
-
-        <textarea class="input" placeholder="Motivo de la baja"></textarea>
-
-        <div class="bg-red-50 border border-red-200 p-3 rounded-xl text-sm text-red-600 flex gap-2">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          Esta acción eliminará al docente de futuras asignaciones.
-        </div>
 
       </div>
 
