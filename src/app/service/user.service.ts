@@ -8,15 +8,10 @@ import { AuthService } from '../core/services/auth.service';
 })
 export class UserService {
   private apiUrl = API_ENDPOINTS;
-  private headers: HttpHeaders;
   constructor(
     private http: HttpClient,
     private auth: AuthService,
-  ) {
-    this.headers = new HttpHeaders({
-      Authorization: `Bearer ${this.auth.token}`, // Assuming you have a token for authentication
-    });
-  }
+  ) {}
   login(email: string, password: string): Observable<any> {
     return this.http.post(this.apiUrl.auth.login, {
       email,
@@ -27,17 +22,26 @@ export class UserService {
   getUsers(page: number, perPage: number, search: string) {
     return this.http.get<any>(
       `${this.apiUrl.users}?page=${page}&per_page=${perPage}&search=${search}`,
-      { headers: this.headers },
+      { headers: this.getHeaders() },
     );
   }
   createUser(data: any) {
-    return this.http.post(`${this.apiUrl.users}`, data, { headers: this.headers });
+    return this.http.post(`${this.apiUrl.users}`, data, {
+      headers: this.getHeaders(),
+    });
   }
+
+  updateUser(userId: number, updatedData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl.users}/${userId}`, updatedData, {
+      headers: this.getHeaders(),
+    });
+  }
+
   updateProfile(userId: number, updatedData: any): Observable<any> {
     return this.http.put(
       `${this.apiUrl.users}/${userId}/profile`,
       updatedData,
-      { headers: this.headers },
+      { headers: this.getHeaders() },
     );
   }
   changePassword(data: any): Observable<any> {
@@ -46,7 +50,18 @@ export class UserService {
       new: data.new,
     };
     return this.http.put(`${this.apiUrl.users}/change-password`, updatedData, {
-      headers: this.headers,
+      headers: this.getHeaders(),
+    });
+  }
+  changeStatus(userId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl.users}/${userId}/change-status`,{}, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  private getHeaders() {
+    return new HttpHeaders({
+      Authorization: `Bearer ${this.auth.token}`,
     });
   }
 }

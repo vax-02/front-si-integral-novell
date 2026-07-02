@@ -31,7 +31,7 @@ export class UsersComponent {
     { id: 3, name: 'Docente' },
     { id: 4, name: 'Estudiante' },
   ];
-  
+
   cards = {
     tAdmins: 0,
     tSecres: 0,
@@ -45,6 +45,7 @@ export class UsersComponent {
   lastPage = 1;
   totalUsers = 0;
   userModalCreate = false;
+  editingUserId: number | null = null;
   loading = false;
   loadingModal = false;
   constructor(
@@ -61,11 +62,23 @@ export class UsersComponent {
       nombre: ['', Validators.required],
       apellido_paterno: ['', Validators.required],
       apellido_materno: [''],
-      ci: ['', Validators.required, Validators.pattern(/^\d{5,12}$/), Validators.minLength(5), Validators.maxLength(12)],
+      ci: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^\d{5,12}$/),
+          Validators.minLength(5),
+          Validators.maxLength(12),
+        ],
+      ],
       role_id: [null, Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      celular: ['', Validators.pattern(/^\d{8}$/)],
+      celular: ['', [Validators.pattern(/^\d{8}$/), Validators.minLength(8), Validators.maxLength(8)]],
     });
+  }
+
+  get f() {
+    return this.form.controls;
   }
   loadUsers() {
     this.loading = true;
@@ -74,7 +87,6 @@ export class UsersComponent {
       .subscribe({
         next: (response) => {
           this.loading = false;
-          console.log('Usuarios cargados:', response);
           this.totalUsers = response.total_users;
 
           this.cards.tAdmins = response.total_admins;
@@ -84,57 +96,126 @@ export class UsersComponent {
 
           this.currentPage = response.users.current_page;
           this.lastPage = response.users.last_page;
-          //this.totalUsers = response.total;
           this.users = response.users.data;
-          console.log('Usuarios cargados:', this.users);
         },
         error: (error) => {
           this.loading = false;
           this.toast.error('Error al cargar los usuarios');
-          console.log('Error al cargar los usuarios:', error);
         },
       });
   }
 
   save() {
+    
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.loadingModal = true;
-    const data = {
-        'role_id' : this.form.value.role_id,
-        'ci' : this.form.value.ci,
-        'name' : this.form.value.nombre,
-        'first_lastname' : this.form.value.apellido_paterno,
-        'second_lastname' : this.form.value.apellido_materno,
-        'email' : this.form.value.email,
-        'password' : this.form.value.password,
-        'cellphone' : this.form.value.celular,
-        'status' : this.form.value.status,
+    const payload: any = {
+      role_id: this.form.value.role_id,
+      ci: this.form.value.ci,
+      name: this.form.value.nombre,
+      first_lastname: this.form.value.apellido_paterno,
+      second_lastname: this.form.value.apellido_materno,
+      email: this.form.value.email,
+      cellphone: this.form.value.celular,
+      status: 1,
     };
 
-    this.userService.createUser(data).subscribe({
+    const request$ = this.editingUserId
+      ? this.userService.updateUser(this.editingUserId, payload)
+      : this.userService.createUser(payload);
+
+    const isEdit = !!this.editingUserId;
+
+    request$.subscribe({
       next: () => {
         this.loadingModal = false;
         this.userModalCreate = false;
+        this.editingUserId = null;
+        this.form.reset({ status: 1 });
 
-        this.form.reset();
-
-        this.loadUsers(); 
-        this.toast.success('Usuario creado exitosamente');
+        this.loadUsers();
+        this.toast.success(
+          isEdit
+            ? 'Usuario actualizado exitosamente'
+            : 'Usuario creado exitosamente',
+        );
       },
-      error: () => {
+      error: (error) => {
         this.loadingModal = false;
-        this.toast.error('Error al crear el usuario');
+        this.toast.error(
+          isEdit
+            ? 'Error al actualizar el usuario'
+            : 'Error al crear el usuario',
+        );
+        if (error.error && error.error.errors) {
+          if(error.error.errors.ci) {
+            this.toast.error("Ese C.I. ya fue registrado");
+          }
+          if(error.error.errors.email) {
+            this.toast.error("Ese correo electrónico ya fue registrado");
+          }
+        } 
       },
     });
   }
   cancel() {
     this.userModalCreate = false;
-    this.form.reset();
+    this.editingUserId = null;
+    this.form.reset({ status: 1 });
   }
+
+  openCreateModal() {
+    this.editingUserId = null;
+    this.form.reset({ status: 1 });
+    this.userModalCreate = true;
+  }
+
+  openEditModal(user: any) {
+    this.editingUserId = user.id;
+    this.form.patchValue({
+      nombre: user.name || '',
+      apellido_paterno: user.first_lastname || '',
+      apellido_materno: user.second_lastname || '',
+      ci: user.ci || '',
+      role_id: user.role?.id ?? null,
+      email: user.email || '',
+      celular: user.cellphone || '',
+      password: '',
+      status: user.status ?? 1,
+    });
+    this.userModalCreate = true;
+  }
+
+  get modalTitle(): string {
+    return this.editingUserId ? 'Editar usuario' : 'Crear usuario';
+  }
+
+  get confirmText(): string {
+    return this.editingUserId ? 'Actualizar' : 'Crear';
+  }
+
+
+  toggleUserStatus(id: number) {
+    this.userService.changeStatus(id).subscribe({
+      next: () => {
+        const user = this.users.find((u) => u.id === id);
+
+        if (user) {
+          user.status = user.status ? 0 : 1;
+        }
+
+        this.toast.success('Estado del usuario actualizado exitosamente');
+      },
+      error: (error) => {
+        this.toast.error('Error al actualizar el estado del usuario');
+      },
+    });
+  }
+
   nextPage() {
     if (this.currentPage < this.lastPage) {
       this.currentPage++;

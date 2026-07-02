@@ -13,7 +13,7 @@
     </div>
     <!-- BOTÓN -->
     <div class="w-full sm:w-auto">
-      <app-button class="w-full sm:w-auto" label="Nuevo usuario" type="primary" (click)="userModalCreate = true">
+      <app-button class="w-full sm:w-auto" label="Nuevo usuario" type="primary" (click)="openCreateModal()">
       </app-button>
     </div>
   </div>
@@ -155,10 +155,12 @@
                 {{user.role.name }}
               </span>
             </td>
-
             <td class="p-3 sm:p-4 text-center">
-              <span class="bg-emerald-100 text-emerald-600 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold">
-                {{ user.status ? 'Activo' : 'Inactivo' }}
+              <span class="px-2 sm:px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="{
+      'bg-emerald-100 text-emerald-600': user.status,
+      'bg-rose-100 text-rose-600': !user.status
+    }">
+                {{ user.status ? 'Activo' : 'Bloqueado' }}
               </span>
             </td>
 
@@ -166,16 +168,16 @@
             <td class="p-3 sm:p-4 text-center">
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
 
-                <button
-                  class="bg-amber-100 text-amber-700 px-2 py-1 rounded-lg text-xs hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
-                  <i class="fas fa-edit"></i>
-                  Editar
+                <button (click)="openEditModal(user)"
+                  class="bg-amber-500 text-white px-2 rounded-lg hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
+                  <i class="text-lg fas fa-edit"></i>
                 </button>
 
-                <button
-                  class="bg-rose-100 text-rose-700 px-2 py-1 rounded-lg text-xs hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition">
-                  <i class="fas fa-ban"></i>
-                  Bloquear
+                <button (click)="toggleUserStatus(user.id)" [ngClass]="user.status 
+    ? 'bg-rose-500 text-white hover:bg-rose-600'
+    : 'bg-green-500 text-white hover:bg-green-600'" class="px-2 rounded-lg  transition"
+                  title="{{ user.status ? 'Bloquear' : 'Desbloquear' }}">
+                  <i class="text-lg fas" [ngClass]="user.status ? 'fa-unlock' : 'fa-lock'"></i>
                 </button>
 
               </div>
@@ -226,8 +228,8 @@
   </div>
 
 
-  <app-base-modal [isOpen]="userModalCreate" [loading]="loadingModal" title="Crear usuario" size="md" confirmText="Crear"
-    cancelText="Cancelar" (confirm)="save()" (cancel)="cancel()">
+  <app-base-modal [isOpen]="userModalCreate" [loading]="loadingModal" [title]="modalTitle" size="md"
+    [confirmText]="confirmText" cancelText="Cancelar" (confirm)="save()" (cancel)="cancel()">
     <form [formGroup]="form">
       <div class="space-y-6">
         <div>
@@ -236,20 +238,37 @@
           </h3>
 
           <div class="grid md:grid-cols-3 gap-4">
-            <app-base-input text="Nombre" formControlName="nombre" />
-            <app-base-input text="Apellido paterno" formControlName="apellido_paterno" />
+            <div class="space-y-1">
+              <app-base-input text="Nombre" formControlName="nombre" />
+              <p class="text-rose-600 text-xs" *ngIf="f['nombre'].invalid && f['nombre'].touched">
+                <span *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</span>
+              </p>
+            </div>
+            <div class="space-y-1">
+              <app-base-input text="Apellido paterno" formControlName="apellido_paterno" />
+              <p class="text-rose-600 text-xs" *ngIf="f['apellido_paterno'].invalid && f['apellido_paterno'].touched">
+                <span *ngIf="f['apellido_paterno'].errors?.['required']">El apellido paterno es obligatorio.</span>
+              </p>
+            </div>
             <app-base-input text="Apellido Materno" formControlName="apellido_materno" />
-            <app-base-input text="C.I." formControlName="ci" />
-
-            <select formControlName="role_id" class="w-full px-3 py-2 rounded-xl border border-slate-300">
-
-              <option [ngValue]="null">Seleccione un rol</option>
-
-              <option *ngFor="let role of roles" [value]="role.id">
-                {{ role.name }}
-              </option>
-
-            </select>
+            <div class="space-y-1">
+              <app-base-input text="C.I." formControlName="ci" />
+              <p class="text-rose-600 text-xs" *ngIf="f['ci'].invalid && f['ci'].touched">
+                <span *ngIf="f['ci'].errors?.['required']">El CI es obligatorio.</span>
+                <span *ngIf="f['ci'].errors?.['pattern'] || f['ci'].errors?.['minlength'] || f['ci'].errors?.['maxlength']">
+                  El CI debe ser numérico y tener entre 5 y 12 dígitos.
+                </span>
+              </p>
+            </div>
+            <div class="space-y-1">
+              <select formControlName="role_id" class="w-full px-3 py-2 rounded-xl border border-slate-300">
+                <option [ngValue]="null">Seleccione un rol</option>
+                <option *ngFor="let role of roles | slice:0:2" [value]="role.id">{{ role.name }}</option>
+              </select>
+              <p class="text-rose-600 text-xs" *ngIf="f['role_id'].invalid && f['role_id'].touched">
+                <span *ngIf="f['role_id'].errors?.['required']">El rol es obligatorio.</span>
+              </p>
+            </div>
           </div>
         </div>
         <div>
@@ -257,10 +276,24 @@
             Contacto
           </h3>
           <div class="grid md:grid-cols-2 gap-4">
-            <app-base-input text="Correo electrónico" formControlName="email" />
-            <app-base-input text="Celular" formControlName="celular" />
+            <div class="space-y-1">
+              <app-base-input text="Correo electrónico" formControlName="email" />
+              <p class="text-rose-600 text-xs" *ngIf="f['email'].invalid && f['email'].touched">
+                <span *ngIf="f['email'].errors?.['required']">El correo es obligatorio.</span>
+                <span *ngIf="f['email'].errors?.['email']">El correo no tiene un formato válido.</span>
+              </p>
+            </div>
+            <div class="space-y-1">
+              <app-base-input text="Celular" formControlName="celular" />
+              <p class="text-rose-600 text-xs" *ngIf="f['celular'].invalid && f['celular'].touched">
+                <span *ngIf="f['celular'].errors?.['pattern'] || f['celular'].errors?.['minlength'] || f['celular'].errors?.['maxlength']">
+                  El celular debe ser numérico y tener 8 dígitos.
+                </span>
+              </p>
+            </div>
           </div>
         </div>
+
       </div>
     </form>
   </app-base-modal>
