@@ -6,7 +6,12 @@ export const API_ENDPOINTS = {
   },
   users: `${API_BASE_URL}/users`,
   degrees: `${API_BASE_URL}/degrees`,
-  docentes: `${API_BASE_URL}/docentes`
+  docentes: `${API_BASE_URL}/docentes`,
+  carrers: {
+    index: `${API_BASE_URL}/careers`,
+    downloadTemplate: `${API_BASE_URL}/careers/download-template`
+  } 
+
 
 
 } as const;

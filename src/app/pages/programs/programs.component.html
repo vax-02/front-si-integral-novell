@@ -4,45 +4,35 @@
   <div class="flex justify-between items-center">
     <div>
       <h1 class="text-2xl font-bold text-slate-800">Gestión de Carreras</h1>
-      <p class="text-sm text-slate-500">Administración académica de programas y especialidades</p>
+      <p class="text-sm text-slate-500">Administración académica de carreras</p>
     </div>
 
-    <app-button label="Nueva Carrera" type="primary"></app-button>
+    <app-button label="Nueva Carrera" type="primary" (click)="abrirModal()"></app-button>
   </div>
 
   <!-- TARJETAS RESUMEN -->
   <div class="grid md:grid-cols-3 gap-6">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Total Carreras</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">42</h3>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ data.total ||  0 }} </h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Total Materias</p>
-      <h3 class="text-2xl font-bold text-emerald-600 mt-1">20</h3>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ data.totalSubjects || 0 }} </h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Carreras activas</p>
-      <h3 class="text-2xl font-bold text-yellow-600 mt-1">3</h3>
+      <h3 class="text-2xl font-bold text-yellow-600 mt-1">{{ data.careersActivas || 0 }} </h3>
     </div>
-
-
   </div>
-
-  <!-- FILTROS -->
-  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
-    <input placeholder="Buscar docente..." class="input">
-    
-    <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
-  </div>
-
-   <!-- TABLA  -->
+  <!-- TABLA  -->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
     <div class="flex justify-between items-center p-6 border-b border-slate-200">
       <span class="font-semibold text-slate-700">Listado de Carreras</span>
-      <span class="text-xs text-slate-400">1,338 materias registrados</span>
+      <span class="text-xs text-slate-400">{{ data.total }} Carreras registrados</span>
     </div>
 
     <table class="w-full text-sm">
@@ -50,6 +40,7 @@
         <tr>
           <th class="p-4 text-left">Carrera</th>
           <th class="p-4 text-center">Duracion</th>
+          <th class="p-4 text-center">Tipo</th>
           <th class="p-4 text-center">Materias</th>
           <th class="p-4 text-center">Estudiantes</th>
 
@@ -58,242 +49,351 @@
       </thead>
 
       <tbody class="divide-y divide-slate-100">
+        <tr *ngIf="loading" class="hover:bg-slate-50 transition">
+          <td colspan="5" class="p-6 text-center">
+            <div class="flex items-center justify-center gap-2 text-slate-600">
+              <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+              <span>Cargando carreras...</span>
+            </div>
+          </td>
+        </tr>
 
-          <tr class="hover:bg-slate-50 transition">
+        <tr *ngIf="!loading && data.Careers.length === 0" class="hover:bg-slate-50 transition">
+          <td colspan="5" class="p-6 text-center text-slate-500">
+            No se encontraron carreras.
+          </td>
+        </tr>
+
+        <tr *ngFor="let career of data.Careers" class="hover:bg-slate-50 transition">
 
           <td class="px-6 py-4 font-semibold text-slate-800">
-            Sistemas Informáticos
+            {{ career.name }}
           </td>
 
           <td class="px-6 py-4 text-center">
             <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
-              3 años
+              {{ career.duration }}
             </span>
           </td>
-
+          <td class="px-6 py-4 text-center">
+            {{ career.type }}
+          </td>
           <td class="px-6 py-4 text-center font-semibold text-blue-600">
-            36
+            {{ career.subjects_count }}
           </td>
 
           <td class="px-6 py-4 text-center font-semibold text-emerald-600">
-            420
+            {{ career.students_count }}
           </td>
 
-          <td class="px-6 py-4">
-            <div class="flex justify-center gap-2">
-              <app-button (click)="openViewProgram()" icon="fa-solid fa-eye"
-                class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition" title="Ver">
-              </app-button>
 
-              <app-button icon="fa-solid fa-pen" [variant]="'secondary'"
-                class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition" title="Ver">
-              </app-button>
+          <td class="p-3 sm:p-4 text-center">
+            <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+              <button (click)="openViewProgram(career.id)"
+                class="bg-blue-500 text-white px-2 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition">
+                <i class="text-lg fas fa-eye"></i>
+              </button>
 
-
+              <button class="bg-rose-500 text-white hover:bg-rose-600 px-2 rounded-lg transition">
+                <i class="text-lg fas fa-trash"></i>
+              </button>
 
             </div>
           </td>
-
         </tr>
       </tbody>
     </table>
   </div>
 
   <!--MODALS-->
-  <app-base-modal [isOpen]="modalViewProgram" title="Detalle de carrera" subtitle="Información general" size="xl"
-    confirmText="Guardar" cancelText="Cerrar" (confirm)="modalViewProgram = false" (cancel)="modalViewProgram = false">
+  <app-base-modal [isOpen]="modalViewProgram" title="Detalle de carrera" subtitle="Plan de estudios" size="xl"
+    confirmText="Aceptar" cancelText="Cerrar" (confirm)="closeViewProgram()" (cancel)="closeViewProgram()"
+    [loading]="loadingModalDetails">
+    <div class="relative">
+
+
+      <div class="space-y-6">
+
+        <!-- HEADER -->
+        <div class="flex flex-col items-center gap-2 text-center">
+
+          <!-- NOMBRE CARRERA -->
+          <h3 class="text-2xl md:text-3xl font-bold text-slate-800">
+            {{ careerSelected?.name }}
+          </h3>
+
+          <!-- INFO SECUNDARIA -->
+          <div class="flex flex-wrap items-center justify-center gap-3 text-sm text-slate-500">
+
+            <span class="flex items-center gap-1">
+              <i class="fa-solid fa-clock text-slate-400"></i>
+              Duración: {{ careerSelected?.duration }}
+            </span>
+
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+
+            <span class="flex items-center gap-1">
+              <i class="fa-solid fa-layer-group text-slate-400"></i>
+              Tipo: {{ careerSelected?.type }}
+            </span>
+
+          </div>
+
+          <!-- BADGE ESTADO -->
+          <span class="px-3 py-1 rounded-full text-xs font-semibold mt-2" [ngClass]="careerSelected?.status == 1
+      ? 'bg-green-100 text-green-700'
+      : 'bg-red-100 text-red-700'">
+
+            {{ careerSelected?.status == 1 ? 'Activa' : 'Inactiva' }}
+
+          </span>
+
+
+        </div>
+
+
+        <div *ngFor="let group of careerSelected?.subjects_by_level" class="mb-6">
+
+          <!-- HEADER LEVEL -->
+          <div class="bg-slate-100 px-4 py-2 rounded-t-xl font-semibold text-slate-700">
+            Nivel {{ group.level }}
+          </div>
+
+          <!-- TABLE -->
+          <div class="overflow-x-auto border border-slate-200 rounded-b-xl">
+
+            <table class="w-full text-sm">
+
+              <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                <tr>
+                  <th class="px-4 py-3 text-left">Sigla</th>
+                  <th class="px-4 py-3 text-left">Materia</th>
+                  <th class="px-4 py-3 text-center">Prerrequisito</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y">
+
+                <tr *ngFor="let subject of group.subjects" class="hover:bg-slate-50">
+
+                  <!-- SIGLA -->
+                  <td class="px-4 py-3 font-medium text-slate-700">
+                    {{ subject.sigla }}
+                  </td>
+
+                  <!-- MATERIA -->
+                  <td class="px-4 py-3">
+                    {{ subject.name }}
+                  </td>
+
+                  <!-- PRERREQUISITO -->
+                  <td class="px-4 py-3 text-center">
+
+                    <span *ngIf="subject.subject_id; else none" class="text-blue-600 font-medium">
+
+                      {{ getSubjectName(subject.subject_id) }}
+
+                    </span>
+
+                    <ng-template #none>
+                      <span class="text-slate-400">—</span>
+                    </ng-template>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </app-base-modal>
+
+
+  <app-base-modal [isOpen]="modalCareer" title="Nueva Carrera" subtitle="Registrar una nueva carrera" size="xl"
+    confirmText="Guardar" cancelText="Cancelar" (confirm)="saveCareer()" (cancel)="modalCareer=false">
 
     <div class="space-y-6">
-      <!-- TABS -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="grid md:grid-cols-3 gap-5">
+
+          <app-base-input text="Nombre de la carrera" placeholder="Ingrese el nombre de la carrera" />
+
+
+          <select class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-blue-500">
+
+            <option value="">Seleccione la duración</option>
+            <option value="1">1 Año</option>
+            <option value="2">2 Años</option>
+            <option value="3">3 Años</option>
+
+          </select>
+
+
+          <select class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-blue-500">
+
+            <option value="">Seleccione el tipo</option>
+            <option value="Semestral">Semestral</option>
+            <option value="Anual">Anual</option>
+
+          </select>
+
+
+        </div>
+
+      </div>
+
+      <!-- PLAN DE ESTUDIO -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
-        <!-- NAV TABS FULL WIDTH -->
-        <div class="w-full bg-slate-100 p-2 rounded-2xl">
-
-          <div class="flex w-full gap-2">
-
-            <button (click)="tab='materias'"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='materias' 
-        ? 'bg-blue-600 text-white shadow-md' 
-        : 'text-slate-500 hover:bg-white hover:text-blue-600'">
-
-              <i class="fa-solid fa-book-open"></i>
-              <span class="hidden sm:inline">Materias</span>
-            </button>
 
 
-            <button (click)="tab='estudiantes'"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tab==='estudiantes' 
-        ? 'bg-blue-600 text-white shadow-md' 
-        : 'text-slate-500 hover:bg-white hover:text-blue-600'">
+        <div class="border-2 border-dashed border-blue-300 rounded-2xl p-2 text-center">
 
-              <i class="fa-solid fa-users"></i>
-              <span class="hidden sm:inline">Estudiantes</span>
-            </button>
+          <i class="fa-solid fa-file-arrow-up text-5xl text-blue-500 mb-4"></i>
 
+          <h3 class="font-semibold text-lg">
+            Importar Plan de Estudio
+          </h3>
 
+          <p class="text-slate-500 mt-2">
 
+            Seleccione un archivo Excel (.xlsx)
+
+          </p>
+
+          <div class="mt-6">
+            <input type="file" accept=".xlsx">
+          </div>
+          <div class="mt-5">
+            <a (click)="dowloadTemplate()" class="cursor-pointer text-blue-600 text-sm">
+              Descargar plantilla de ejemplo
+            </a>
           </div>
 
+          <button class="mt-6 px-6 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
+            Subir archivo
+          </button>
         </div>
-        <!-- CONTENIDO -->
-        <div class="p-5 space-y-5">
+      </div>
+    </div>
 
 
-          <!-- ===================== -->
-          <!-- PLAN DE ESTUDIO -->
-          <!-- ===================== -->
-          <div *ngIf="tab==='materias'" class="space-y-6">
-
-            <!-- HEADER -->
-            <div class="flex justify-between items-center">
-              <h3 class="font-semibold text-slate-700">Plan de Estudio</h3>
-
-              <button class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
-                + Importar plan de estudio
-              </button>
-            </div>
-
-            <!-- ===================== -->
-            <!-- 1ER AÑO -->
-            <!-- ===================== -->
-            <div class="bg-white border border-blue-100 rounded-xl shadow-sm">
-
-              <div class="bg-blue-50 px-4 py-3 font-semibold text-blue-700 rounded-t-xl">
-                1er Año
-              </div>
-
-              <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-
-                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-                    <tr>
-                      <th class="px-4 py-3 text-left">Materia</th>
-                      <th class="px-4 py-3 text-center">Docente</th>
-                      <th class="px-4 py-3 text-center">Requisito</th>
-                    </tr>
-                  </thead>
-
-                  <tbody class="divide-y">
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-4 py-3 font-medium">Programación I</td>
-                      <td class="px-4 py-3 text-center">Juan Pérez</td>
-                      <td class="px-4 py-3 text-center text-slate-400">—</td>
-                    </tr>
-
-                  </tbody>
-
-                </table>
-              </div>
-            </div>
-
-            <!-- ===================== -->
-            <!-- 2DO AÑO -->
-            <!-- ===================== -->
-            <div class="bg-white border border-blue-100 rounded-xl shadow-sm">
-
-              <div class="bg-emerald-50 px-4 py-3 font-semibold text-emerald-700 rounded-t-xl">
-                2do Año
-              </div>
-
-              <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-
-                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-                    <tr>
-                      <th class="px-4 py-3 text-left">Materia</th>
-                      <th class="px-4 py-3 text-center">Docente</th>
-                      <th class="px-4 py-3 text-center">Requisito</th>
-                    </tr>
-                  </thead>
-
-                  <tbody class="divide-y">
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-4 py-3 font-medium">Programación II</td>
-                      <td class="px-4 py-3 text-center">Carlos Ruiz</td>
-                      <td class="px-4 py-3 text-center text-blue-600">Programación I</td>
-                    </tr>
-
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-4 py-3 font-medium">Base de Datos I</td>
-                      <td class="px-4 py-3 text-center">Ana Flores</td>
-                      <td class="px-4 py-3 text-center text-blue-600">Programación I</td>
-                    </tr>
-                  </tbody>
-
-                </table>
-              </div>
-            </div>
-
-            <!-- ===================== -->
-            <!-- 3ER AÑO -->
-            <!-- ===================== -->
-            <div class="bg-white border border-blue-100 rounded-xl shadow-sm">
-
-              <div class="bg-yellow-50 px-4 py-3 font-semibold text-yellow-700 rounded-t-xl">
-                3er Año
-              </div>
-
-              <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-
-                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-                    <tr>
-                      <th class="px-4 py-3 text-left">Materia</th>
-                      <th class="px-4 py-3 text-center">Docente</th>
-                      <th class="px-4 py-3 text-center">Requisito</th>
-                    </tr>
-                  </thead>
-
-                  <tbody class="divide-y">
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-4 py-3 font-medium">Desarrollo Web</td>
-                      <td class="px-4 py-3 text-center">Luis Vargas</td>
-                      <td class="px-4 py-3 text-center text-blue-600">Programación II</td>
-                    </tr>
-                  </tbody>
-
-                </table>
-              </div>
-            </div>
-
-          </div>
+  </app-base-modal>
 
 
-          <!-- ===================== -->
-          <!-- ESTUDIANTES -->
-          <!-- ===================== -->
-          <div *ngIf="tab==='estudiantes'">
+  <app-base-modal [isOpen]="modalDetailSubjetcs" title="Vista previa del Plan de Estudio"
+    subtitle="Revise la información importada antes de guardar" size="xl" confirmText="Confirmar Importación"
+    cancelText="Cancelar" (confirm)="saveStudyPlan()" (cancel)="modalDetailSubjetcs=false">
 
-            <div class="grid md:grid-cols-3 gap-4">
+    <div class="space-y-6">
 
-              <div class="bg-white border border-blue-100 p-4 rounded-xl text-center shadow-sm">
-                <p class="text-sm text-slate-500">1er Año</p>
-                <h3 class="text-xl font-bold text-blue-600">150</h3>
-              </div>
+      <!-- Resumen -->
+      <div class="grid md:grid-cols-3 gap-4">
 
-              <div class="bg-white border border-blue-100 p-4 rounded-xl text-center shadow-sm">
-                <p class="text-sm text-slate-500">2do Año</p>
-                <h3 class="text-xl font-bold text-blue-600">140</h3>
-              </div>
-
-              <div class="bg-white border border-blue-100 p-4 rounded-xl text-center shadow-sm">
-                <p class="text-sm text-slate-500">3er Año</p>
-                <h3 class="text-xl font-bold text-blue-600">130</h3>
-              </div>
-
-            </div>
-
-          </div>
-
-       
-
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+          <p class="text-sm text-slate-500">Materias Correctas</p>
+          <p class="text-3xl font-bold text-green-600">
+            {{ validSubjects }}
+          </p>
         </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm text-slate-500">Errores Encontrados</p>
+          <p class="text-3xl font-bold text-red-600">
+            {{ errorSubjects }}
+          </p>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p class="text-sm text-slate-500">Total Registros</p>
+          <p class="text-3xl font-bold text-blue-600">
+            {{ previewSubjects.length }}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Mensaje de errores -->
+      <div *ngIf="errorSubjects>0" class="rounded-xl border border-red-300 bg-red-50 p-4">
+
+        <div class="font-semibold text-red-700">
+          Se encontraron errores en el archivo.
+        </div>
+
+        <ul class="mt-2 text-sm text-red-600 list-disc ml-5">
+          <li *ngFor="let error of importErrors">
+            {{ error }}
+          </li>
+        </ul>
+
+      </div>
+
+      <!-- Tabla -->
+      <div class="overflow-auto rounded-xl border border-slate-200">
+
+        <table class="w-full text-sm">
+
+          <thead class="bg-slate-100">
+
+            <tr>
+
+              <th class="px-4 py-3 text-left">Nivel</th>
+              <th class="px-4 py-3 text-left">Sigla</th>
+              <th class="px-4 py-3 text-left">Materia</th>
+              <th class="px-4 py-3 text-left">Pre requisito</th>
+              <th class="px-4 py-3 text-center">Estado</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let item of previewSubjects" class="border-t">
+
+              <td class="px-4 py-3">
+                {{ item.level }}
+              </td>
+
+              <td class="px-4 py-3 font-medium">
+                {{ item.code }}
+              </td>
+
+              <td class="px-4 py-3">
+                {{ item.name }}
+              </td>
+
+              <td class="px-4 py-3">
+                {{ item.prerequisite || '-' }}
+              </td>
+
+              <td class="px-4 py-3 text-center">
+
+                <span *ngIf="item.valid" class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                  Correcto
+                </span>
+
+                <span *ngIf="!item.valid" class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs">
+                  Error
+                </span>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
 
       </div>
 
     </div>
 
   </app-base-modal>
-
-
 </div>
