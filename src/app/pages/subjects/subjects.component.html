@@ -46,9 +46,7 @@
           <tr>
             <th class="p-4 text-left">Nombre</th>
             <th class="p-4 text-center">Sigla</th>
-            <th class="p-4 text-center">Nivel</th>
             <th class="p-4 text-center">Carrera</th>
-            <th class="p-4 text-center">Prerequisito</th>
             <th class="p-4 text-center">Acciones</th>
           </tr>
         </thead>
@@ -72,15 +70,13 @@
           <tr *ngFor="let subject of subjects" class="hover:bg-slate-50 transition">
             <td class="p-4 font-semibold text-slate-700">{{ subject.name }}</td>
             <td class="p-4 text-center">{{ subject.sigla }}</td>
-            <td class="p-4 text-center">{{ subject.level }}</td>
             <td class="p-4 text-center">{{ subject.career?.name || '-' }}</td>
-            <td class="p-4 text-center">{{ subject.prerequisite?.sigla || '—' }}</td>
             <td class="p-4 text-center">
               <div class="flex justify-center gap-2">
-                <button (click)="openAssignModal(subject)" class="px-2 py-1 rounded-lg bg-blue-600 text-white text-xs hover:bg-blue-700">
+                <button (click)="openAssignModal(subject)" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs hover:bg-blue-700">
                   <i class="fa-solid fa-user-plus"></i>
                 </button>
-                <button (click)="openHistoryModal(subject)" class="px-2 py-1 rounded-lg bg-amber-500 text-white text-xs hover:bg-amber-600">
+                <button (click)="openHistoryModal(subject)" class="px-3 py-2 rounded-lg bg-amber-500 text-white text-xs hover:bg-amber-600">
                   <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
               </div>

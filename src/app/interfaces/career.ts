@@ -16,3 +16,8 @@ export interface CareersResponse {
   totalSubjects: number;
   careersActivas: number;
 }
+
+export interface CareerForSelect {
+  id: number;
+  name: string;
+}

@@ -12,97 +12,134 @@
   </div>
 
   <!-- TARJETAS RESUMEN -->
-  <div class="grid md:grid-cols-4 gap-6">
+  <div class="grid md:grid-cols-3 gap-6">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Total Estudiantes</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">1,284</h3>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ dataCards.total }}</h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Activos</p>
-      <h3 class="text-2xl font-bold text-emerald-600 mt-1">1,102</h3>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ dataCards.actives }}</h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Suspendidos</p>
-      <h3 class="text-2xl font-bold text-amber-500 mt-1">96</h3>
+      <p class="text-sm text-slate-500">Abandonos</p>
+      <h3 class="text-2xl font-bold text-amber-500 mt-1">{{dataCards.inactives}}</h3>
     </div>
 
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Egresados</p>
-      <h3 class="text-2xl font-bold text-indigo-600 mt-1">86</h3>
-    </div>
   </div>
 
   <!-- FILTROS -->
-  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-    <div class="grid md:grid-cols-4 gap-4">
+  <div class="bg-white p-2 sm:p-6 rounded-2xl shadow-sm border border-slate-200
+            grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 
-      <input type="text" placeholder="Buscar por nombre o CI..."
-        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+    <input
+      [(ngModel)]="search"
+      (ngModelChange)="onSearchChange()"
+      type="text"
+      placeholder="Buscar por nombre, CI o email..."
+      class="border border-slate-200 rounded-lg px-3 py-2 sm:px-4 sm:py-2
+             focus:ring-2 focus:ring-blue-400 outline-none lg:col-span-2">
 
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Carrera</option>
-        <option>Sistemas Informáticos</option>
-        <option>Administración</option>
-        <option>Contaduría</option>
-      </select>
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Estado</option>
-        <option>Activo</option>
-        <option>Suspendido</option>
-        <option>Egresado</option>
-      </select>
-
-      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+    <div class="lg:col-span-1">
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadStudents()"></app-button>
     </div>
   </div>
 
-  <!-- TABLA DE USUARIOS -->
+  <!-- TABLA DE ESTUDIANTES -->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
-    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+    <!-- HEADER -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 sm:p-6 border-b border-slate-200">
       <span class="font-semibold text-slate-700">Listado de estudiantes</span>
-      <span class="text-xs text-slate-400">1,338 usuarios registrados</span>
+      <span class="text-xs text-slate-400">{{ totalStudents }} estudiantes registrados</span>
     </div>
 
-    <table class="w-full text-sm">
-      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-        <tr>
-          <th class="p-4 text-left">Estudiante</th>
-          <th class="p-4 text-center">C.I.</th>
-          <th class="p-4 text-center">Carrera</th>
-          <th class="p-4 text-center">Estado</th>
-          <th class="p-4 text-center">Acciones</th>
-        </tr>
-      </thead>
+    <!-- TABLE WRAPPER RESPONSIVE -->
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[800px] text-sm">
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-4 text-left">Estudiante</th>
+            <th class="p-4 text-center">C.I.</th>
+            <th class="p-4 text-center">Carrera</th>
+            <th class="p-4 text-center">Estado</th>
+            <th class="p-4 text-center">Acciones</th>
+          </tr>
+        </thead>
 
-      <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-slate-100">
 
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4">
-            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
-            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
-          </td>
-          <td class="p-4 text-center">12345678</td>
-          <td class="p-4 text-center">
-            <span
-              class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold">Administrador</span>
-          </td>
-          <td class="p-4 text-center">
-            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">Activo</span>
-          </td>
-          <td class="p-4 text-center space-x-2">
-            <app-button icon="fa-solid fa-eye" [variant]="'primary'" title="Ver" (click)="openModalView()"></app-button>
-            <app-button icon="fa-solid fa-pen" [variant]="'secondary'" title="Editar" (click)="openModalEdit()">
-            </app-button>
-            <app-button icon="fa-solid fa-ellipsis" [variant]="'tertiary'" title="bajas/readmision"
-              (click)="openModalOption()"></app-button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <tr *ngFor="let student of students" class="hover:bg-slate-50 transition">
+            <td class="p-4">
+              <div class="font-semibold text-slate-700">{{ student.user.name }} {{ student.user.first_lastname }}
+                {{ student.user.second_lastname }}</div>
+              <div class="text-xs text-slate-400">{{ student.user.email }}</div>
+            </td>
+            <td class="p-4 text-center">{{ student.user.ci }}</td>
+            <td class="p-4 text-center">{{ student.career.name }}</td>
+            <td class="p-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="{
+                'bg-emerald-100 text-emerald-600': student.status,
+                'bg-rose-100 text-rose-600': !student.status
+              }">
+                {{ student.status ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="p-4 text-center">
+              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+                <app-button icon="fa-solid fa-eye" [variant]="'primary'" title="Ver" (click)="openModalView()"></app-button>
+                <app-button icon="fa-solid fa-pen" [variant]="'secondary'" title="Editar" (click)="openModalEdit()"></app-button>
+                <app-button icon="fa-solid fa-ellipsis" [variant]="'tertiary'" title="Bajas/readmisión" (click)="openModalOption()"></app-button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="loading">
+            <td colspan="5" class="p-4 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <span>Cargando estudiantes...</span>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && students.length === 0">
+            <td colspan="5" class="p-6 text-center text-slate-400 text-sm">
+              No se encontraron estudiantes.
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
+
+      <p class="text-xs text-slate-500">
+        Mostrando {{ from }} - {{ to }} de {{ totalStudents }} estudiantes
+      </p>
+
+      <div class="flex gap-2">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Anterior
+        </button>
+
+        <span class="px-3 py-1 bg-blue-600 text-white rounded">
+          {{ currentPage }}
+        </span>
+
+        <button (click)="nextPage()" [disabled]="currentPage === lastPage"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Siguiente
+        </button>
+      </div>
+
+    </div>
+
   </div>
   <!--MODALS-->
   <app-base-modal [isOpen]="registerModalStudent" title="Inscribir estudiante" size="lg" confirmText="Registrar"
@@ -114,20 +151,20 @@
         </h3>
 
         <div class="grid md:grid-cols-3 gap-4">
-          <app-base-input text="Nombre"/>
-          <app-base-input text="Apellido paterno"/>
-          <app-base-input text="Apellido Materno"/>
+          <app-base-input text="Nombre" />
+          <app-base-input text="Apellido paterno" />
+          <app-base-input text="Apellido Materno" />
           <app-base-input text="C.I." />
         </div>
       </div>
-      
+
       <div>
         <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Contacto
         </h3>
 
         <div class="grid md:grid-cols-2 gap-4">
-          <app-base-input text="Correo electrónico"/>
+          <app-base-input text="Correo electrónico" />
           <app-base-input text="Celular" />
         </div>
       </div>
@@ -188,8 +225,8 @@
         </h3>
 
         <div class="grid md:grid-cols-2 gap-4">
-          <app-base-input text="Matricula"/>
-          <app-base-input text="Mensualidad"/>
+          <app-base-input text="Matricula" />
+          <app-base-input text="Mensualidad" />
         </div>
       </div>
 
