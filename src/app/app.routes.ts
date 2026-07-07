@@ -18,6 +18,7 @@ import { ChangePasswordComponent } from './pages/change-password/change-password
 import { MySubjectsComponent } from './pages/my-subjects/my-subjects.component';
 import { MyPensulComponent } from './pages/my-pensul/my-pensul.component';
 import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
+import { SubjectsComponent } from './pages/subjects/subjects.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -40,6 +41,7 @@ export const routes: Routes = [
     { path: 'califications', component: CalificationsComponent },
     { path: 'attendance', component: AttendanceComponent },
     { path: 'programs', component: ProgramsComponent },
+    { path: 'subjects', component: SubjectsComponent },
     { path: 'users', component: UsersComponent },
     { path: 'reports', component: ReportsComponent },
     { path: 'settings', component: SettingsComponent, children: [

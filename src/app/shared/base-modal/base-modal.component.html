@@ -47,7 +47,7 @@
         {{cancelText}}
       </button>
       <button *ngIf="showConfirm" [disabled]="loading" (click)="confirm.emit()"
-        class="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        class="px-4 py-2 text-sm rounded-lg text-white" [ngClass]="confirmButtonClass">
         <span *ngIf="!loading">
           {{confirmText}}
         </span>
