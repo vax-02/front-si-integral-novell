@@ -15,4 +15,9 @@ export const API_ENDPOINTS = {
     simple: `${API_BASE_URL}/careers/simple`,
     downloadTemplate: `${API_BASE_URL}/careers/download-template`,
   },
+
+  courses: {
+    index: `${API_BASE_URL}/courses`,
+  },
+  
 } as const;

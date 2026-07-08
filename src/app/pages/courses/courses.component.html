@@ -1,1 +1,267 @@
-<p>courses works!</p>
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+    <div>
+      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">
+        Gestión de Cursos
+      </h1>
+      <p class="text-sm sm:text-base text-slate-500">
+        Administración académica de cursos y paralelos
+      </p>
+    </div>
+    <div class="w-full sm:w-auto">
+      <app-button label="Nuevo curso" variant="primary" [fullWidth]="true" (click)="openCreateModal()">
+      </app-button>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="bg-white p-3 sm:p-6 rounded-2xl shadow-sm border border-slate-200
+              grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+
+    <input
+      [(ngModel)]="search"
+      (ngModelChange)="onSearchChange()"
+      type="text"
+      placeholder="Buscar por gestión, paralelo, turno o carrera..."
+      class="border border-slate-200 rounded-lg px-3 py-2 sm:px-4 sm:py-2
+             focus:ring-2 focus:ring-indigo-400 outline-none lg:col-span-2">
+
+    <div class="lg:col-span-1">
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadCourses()">
+      </app-button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <!-- HEADER TABLA -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 sm:p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de cursos</span>
+      <span class="text-xs text-slate-400">{{ totalCourses }} cursos registrados</span>
+    </div>
+
+    <!-- TABLA RESPONSIVE -->
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[900px] text-sm">
+
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-3 sm:p-4 text-left">Carrera</th>
+            <th class="p-3 sm:p-4 text-center">Gestión</th>
+            <th class="p-3 sm:p-4 text-center">Paralelo</th>
+            <th class="p-3 sm:p-4 text-center">Turno</th>
+            <th class="p-3 sm:p-4 text-center">Cupo</th>
+            <th class="p-3 sm:p-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+
+          <!-- Filas de datos -->
+          <tr *ngFor="let course of courses" class="hover:bg-slate-50 transition">
+
+            <td class="p-3 sm:p-4">
+              <div class="font-semibold text-slate-700">{{ course.career?.name ?? '—' }}</div>
+            </td>
+
+            <td class="p-3 sm:p-4 text-center text-slate-600">
+              {{ course.gestion }}
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold uppercase">
+                {{ course.paralelo }}
+              </span>
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="{
+                  'bg-amber-100 text-amber-700':  course.turno === 'Mañana',
+                  'bg-blue-100  text-blue-700':   course.turno === 'Tarde',
+                  'bg-slate-200 text-slate-700':  course.turno === 'Noche'
+                }">
+                {{ course.turno }}
+              </span>
+            </td>
+
+            <td class="p-3 sm:p-4 text-center text-slate-600">
+              {{ course.limit }}
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+
+                <button
+                  (click)="openEditModal(course)"
+                  title="Editar"
+                  class="bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-400 transition">
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <button
+                  (click)="openDeleteConfirm(course.id)"
+                  title="Eliminar"
+                  class="bg-rose-500 text-white px-3 py-1 rounded-lg hover:bg-rose-400 transition">
+                  <i class="fas fa-trash"></i>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+
+          <!-- Loading -->
+          <tr *ngIf="loading">
+            <td colspan="6" class="p-6 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-indigo-600 text-xl"></i>
+                <span>Cargando cursos...</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Sin resultados -->
+          <tr *ngIf="!loading && courses.length === 0">
+            <td colspan="6" class="p-6 text-center text-slate-400 text-sm">
+              No se encontraron cursos.
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
+
+      <p class="text-xs text-slate-500">
+        Mostrando {{ from }} - {{ to }} de {{ totalCourses }} cursos
+      </p>
+
+      <div class="flex gap-2">
+        <button
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+          class="px-3 py-1 border rounded disabled:opacity-50 hover:bg-slate-50 transition">
+          Anterior
+        </button>
+
+        <span class="px-3 py-1 bg-indigo-600 text-white rounded">
+          {{ currentPage }}
+        </span>
+
+        <button
+          (click)="nextPage()"
+          [disabled]="currentPage === lastPage"
+          class="px-3 py-1 border rounded disabled:opacity-50 hover:bg-slate-50 transition">
+          Siguiente
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL CREAR / EDITAR -->
+  <app-base-modal
+    [isOpen]="openModalCreate"
+    [title]="modalTitle"
+    subtitle="Defina toda la información necesaria"
+    size="md"
+    [confirmText]="confirmText"
+    cancelText="Cancelar"
+    [loading]="loadingModal"
+    (confirm)="save()"
+    (cancel)="cancel()">
+
+    <form [formGroup]="courseForm">
+      <div class="space-y-6">
+
+        <!-- Carrera + Turno -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+          <div class="space-y-1">
+            <label class="block text-sm font-medium text-slate-700">Carrera</label>
+            <select
+              formControlName="career_id"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              <option [ngValue]="null">Seleccione una carrera</option>
+              <option *ngFor="let c of careersForSelect" [value]="c.id">{{ c.name }}</option>
+            </select>
+            <p class="text-rose-600 text-xs"
+              *ngIf="f['career_id'].invalid && f['career_id'].touched">
+              La carrera es obligatoria.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-sm font-medium text-slate-700">Turno</label>
+            <select
+              formControlName="turno"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
+              <option value="Noche">Noche</option>
+            </select>
+            <p class="text-rose-600 text-xs"
+              *ngIf="f['turno'].invalid && f['turno'].touched">
+              El turno es obligatorio.
+            </p>
+          </div>
+        </div>
+
+        <!-- Gestión + Paralelo + Cupo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          <div class="space-y-1">
+            <app-base-input text="Gestión" formControlName="gestion" />
+            <p class="text-rose-600 text-xs"
+              *ngIf="f['gestion'].invalid && f['gestion'].touched">
+              <span *ngIf="f['gestion'].errors?.['required']">La gestión es obligatoria.</span>
+              <span *ngIf="f['gestion'].errors?.['pattern']">Debe ser un año de 4 dígitos.</span>
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <app-base-input text="Paralelo" formControlName="paralelo" />
+            <p class="text-rose-600 text-xs"
+              *ngIf="f['paralelo'].invalid && f['paralelo'].touched">
+              <span *ngIf="f['paralelo'].errors?.['required']">El paralelo es obligatorio.</span>
+              <span *ngIf="f['paralelo'].errors?.['pattern']">Solo letras (máx. 2).</span>
+              <span *ngIf="f['paralelo'].errors?.['maxlength']">Máximo 2 caracteres.</span>
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <app-base-input text="Cupo" formControlName="limit" />
+            <p class="text-rose-600 text-xs"
+              *ngIf="f['limit'].invalid && f['limit'].touched">
+              <span *ngIf="f['limit'].errors?.['required']">El cupo es obligatorio.</span>
+              <span *ngIf="f['limit'].errors?.['pattern'] || f['limit'].errors?.['min']">Debe ser un número mayor a 0.</span>
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </form>
+
+  </app-base-modal>
+
+
+  <!-- MODAL CONFIRMAR ELIMINACIÓN -->
+  <app-base-modal-confirm
+    [isOpen]="confirmDeleteOpen"
+    title="Eliminar curso"
+    message="¿Estás seguro de que deseas eliminar este curso? Esta acción no se puede deshacer."
+    confirmText="Sí, eliminar"
+    cancelText="Cancelar"
+    [loading]="deletingCourse"
+    (confirm)="deleteCourse()"
+    (cancel)="closeDelete()">
+  </app-base-modal-confirm>
+
+</div>

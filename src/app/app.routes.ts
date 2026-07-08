@@ -20,6 +20,7 @@ import { MyPensulComponent } from './pages/my-pensul/my-pensul.component';
 import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
 import { SubjectsComponent } from './pages/subjects/subjects.component';
 import { authGuard } from './core/guards/auth.guard';
+import { CoursesComponent } from './pages/courses/courses.component';
 
 export const routes: Routes = [
   // Ruta para el Home
@@ -41,6 +42,8 @@ export const routes: Routes = [
     { path: 'califications', component: CalificationsComponent },
     { path: 'attendance', component: AttendanceComponent },
     { path: 'programs', component: ProgramsComponent },
+    { path: 'courses', component: CoursesComponent },
+
     { path: 'subjects', component: SubjectsComponent },
     { path: 'users', component: UsersComponent },
     { path: 'reports', component: ReportsComponent },

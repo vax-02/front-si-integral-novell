@@ -1,63 +1,64 @@
 <div class="space-y-8">
 
   <!-- HEADER -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+  <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
     <div>
-      <h1 class="text-2xl font-bold text-slate-800">Gestión de Docentes</h1>
-      <p class="text-sm text-slate-500">Administra la información académica y laboral del personal docente.</p>
+      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">Gestión de Docentes</h1>
+      <p class="text-sm sm:text-base text-slate-500">Administra la información académica y laboral del personal docente.</p>
     </div>
-
-
-    <app-button label="Agregar" variant="primary" (click)="openAddDocente()"> </app-button>
+    <div class="w-full sm:w-auto">
+      <app-button label="Agregar docente" variant="primary" [fullWidth]="true" (click)="openAddDocente()"></app-button>
+    </div>
   </div>
 
   <!-- TARJETAS RESUMEN -->
-  <div class="grid md:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Total Docentes</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">86</h3>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">
+        <ng-container *ngIf="!loading; else spinner">{{ totalDocentes }}</ng-container>
+      </h3>
     </div>
-
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Activos</p>
-      <h3 class="text-2xl font-bold text-emerald-600 mt-1">72</h3>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">
+        <ng-container *ngIf="!loading; else spinner">{{ activeCount }}</ng-container>
+      </h3>
     </div>
-
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Inactivos</p>
-      <h3 class="text-2xl font-bold text-indigo-600 mt-1">54</h3>
+      <h3 class="text-2xl font-bold text-rose-500 mt-1">
+        <ng-container *ngIf="!loading; else spinner">{{ inactiveCount }}</ng-container>
+      </h3>
     </div>
   </div>
+  <ng-template #spinner>
+    <i class="fas fa-spinner fa-spin text-xl text-blue-400"></i>
+  </ng-template>
 
   <!-- FILTROS -->
-  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-    <div class="grid md:grid-cols-3 gap-4">
-
-      <input type="text" placeholder="Buscar por nombre o CI..." [(ngModel)]="search" (ngModelChange)="onSearchChange()"
-        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Carrera</option>
-        <option>Sistemas Informáticos</option>
-        <option>Administración</option>
-        <option>Contaduría</option>
-      </select>
-
-      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadDocentes()"></app-button>
-    </div>
+  <div class="bg-white p-3 sm:p-6 rounded-2xl shadow-sm border border-slate-200
+              grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+    <input
+      [(ngModel)]="search"
+      (ngModelChange)="onSearchChange()"
+      type="text"
+      placeholder="Buscar por nombre, CI o email..."
+      class="border border-slate-200 rounded-lg px-3 py-2 sm:px-4 sm:py-2
+             focus:ring-2 focus:ring-indigo-400 outline-none">
+    <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadDocentes()"></app-button>
   </div>
 
-
-  <!-- TABLA  -->
+  <!-- TABLA -->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-6 border-b border-slate-200 gap-2">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 sm:p-6 border-b border-slate-200">
       <span class="font-semibold text-slate-700">Listado de docentes</span>
       <span class="text-xs text-slate-400">{{ totalDocentes }} docentes registrados</span>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full text-sm min-w-[800px]">
+      <table class="w-full min-w-[800px] text-sm">
         <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
           <tr>
             <th class="p-4 text-left">Docente</th>
@@ -67,12 +68,13 @@
             <th class="p-4 text-center">Acciones</th>
           </tr>
         </thead>
-
         <tbody class="divide-y divide-slate-100">
+
           <tr *ngFor="let docente of docentes" class="hover:bg-slate-50 transition">
             <td class="p-4">
-              <div class="font-semibold text-slate-700">{{ docente.user.name }} {{ docente.user.first_lastname }}
-                {{ docente.user.second_lastname }}</div>
+              <div class="font-semibold text-slate-700">
+                {{ docente.user.name }} {{ docente.user.first_lastname }} {{ docente.user.second_lastname }}
+              </div>
               <div class="text-xs text-slate-400">{{ docente.user.email }}</div>
             </td>
             <td class="p-4 text-center">{{ docente.user.ci }}</td>
@@ -80,67 +82,78 @@
             <td class="p-4 text-center">
               <span class="px-3 py-1 rounded-full text-xs font-semibold"
                 [ngClass]="docente.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
-                {{ docente.status ? 'Activo' : 'Bloqueado' }}
+                {{ docente.status ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
-            
-            <td class="p-3 sm:p-4 text-center">
+            <td class="p-4 text-center">
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-                <button (click)="openViewDocente(docente)"
-                  class="bg-blue-500 text-white px-2 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition">
-                  <i class="text-lg fas fa-eye"></i>
+
+                <!-- Ver -->
+                <button (click)="openViewDocente(docente)" title="Ver detalle"
+                  class="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-400 transition">
+                  <i class="text-sm fas fa-eye"></i>
                 </button>
 
-                <button [ngClass]="docente.status 
-      ? 'bg-rose-500 text-white hover:bg-rose-600'
-      : 'bg-green-500 text-white hover:bg-green-600'" class="px-2 rounded-lg transition"
-                  title="{{ docente.status ? 'Bloquear' : 'Desbloquear' }}">
-                  <i class="text-lg fas" [ngClass]="docente.status ? 'fa-unlock' : 'fa-lock'"></i>
+                <!-- Editar -->
+                <button (click)="openEditDocente(docente)" title="Editar"
+                  class="bg-amber-500 text-white px-2 py-1 rounded-lg hover:bg-amber-400 transition">
+                  <i class="text-sm fas fa-edit"></i>
                 </button>
 
-                <button (click)="openOptionDocente(docente.id)"
-                  class="bg-amber-500 text-white px-2 rounded-lg hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
-                  <i class="text-lg fas fa-edit"></i>
+                <!-- Asignar/quitar materias -->
+                <button (click)="openOptionDocente(docente)" title="Gestionar materias"
+                  class="bg-indigo-500 text-white px-2 py-1 rounded-lg hover:bg-indigo-400 transition">
+                  <i class="text-sm fas fa-book"></i>
                 </button>
+
+                <!-- Bloquear / Activar -->
+                <button (click)="toggleStatus(docente)"
+                  [ngClass]="docente.status
+                    ? 'bg-rose-500 text-white hover:bg-rose-400'
+                    : 'bg-green-500 text-white hover:bg-green-400'"
+                  class="px-2 py-1 rounded-lg transition"
+                  [title]="docente.status ? 'Bloquear' : 'Activar'">
+                  <i class="text-sm fas" [ngClass]="docente.status ? 'fa-lock' : 'fa-unlock'"></i>
+                </button>
+
               </div>
             </td>
           </tr>
 
-          <tr *ngIf="loading" class="hover:bg-slate-50 transition">
-            <td colspan="5" class="p-4 text-center">
+          <!-- Loading -->
+          <tr *ngIf="loading">
+            <td colspan="5" class="p-6 text-center">
               <div class="flex items-center justify-center gap-2 text-slate-600">
-                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <i class="fas fa-spinner fa-spin text-indigo-600 text-xl"></i>
                 <span>Cargando docentes...</span>
               </div>
             </td>
           </tr>
 
-          <tr *ngIf="!loading && docentes.length === 0" class="hover:bg-slate-50 transition">
-            <td colspan="5" class="p-4 text-center text-slate-500">
+          <!-- Sin resultados -->
+          <tr *ngIf="!loading && docentes.length === 0">
+            <td colspan="5" class="p-6 text-center text-slate-400 text-sm">
               No se encontraron docentes.
             </td>
           </tr>
+
         </tbody>
       </table>
     </div>
 
+    <!-- PAGINACIÓN -->
     <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
       <p class="text-xs text-slate-500">
         Mostrando {{ from }} - {{ to }} de {{ totalDocentes }} docentes
       </p>
-
       <div class="flex gap-2">
         <button (click)="previousPage()" [disabled]="currentPage === 1"
-          class="px-3 py-1 border rounded disabled:opacity-50">
+          class="px-3 py-1 border rounded disabled:opacity-50 hover:bg-slate-50 transition">
           Anterior
         </button>
-
-        <span class="px-3 py-1 bg-indigo-600 text-white rounded">
-          {{ currentPage }}
-        </span>
-
+        <span class="px-3 py-1 bg-indigo-600 text-white rounded">{{ currentPage }}</span>
         <button (click)="nextPage()" [disabled]="currentPage === lastPage"
-          class="px-3 py-1 border rounded disabled:opacity-50">
+          class="px-3 py-1 border rounded disabled:opacity-50 hover:bg-slate-50 transition">
           Siguiente
         </button>
       </div>
@@ -148,297 +161,333 @@
   </div>
 
 
-  <!--MODALS-->
-  <app-base-modal [isOpen]="modalAddDocente" title="Agregar información de Docente" subtitle="Información general"
-    size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalAddDocente = false">
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL CREAR / EDITAR                                                -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <app-base-modal
+    [isOpen]="modalAddDocente"
+    [title]="modalTitle"
+    subtitle="Complete toda la información del docente"
+    size="lg"
+    [confirmText]="confirmSaveText"
+    cancelText="Cancelar"
+    [loading]="loadingModal"
+    (confirm)="saveDocente()"
+    (cancel)="cancelModal()">
+
     <div class="space-y-6">
+
+      <!-- Datos personales -->
       <div>
-        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-indigo-500 pl-3">
           Datos Personales
         </h3>
-
         <div class="grid md:grid-cols-3 gap-4">
-          <app-base-input text="Nombre" [(ngModel)]="nombre" />
-          <app-base-input text="Apellido paterno" [(ngModel)]="apellidoPaterno" />
+
+          <div class="space-y-1">
+            <app-base-input text="Nombre *" [(ngModel)]="nombre" />
+            <p *ngIf="errores['nombre']" class="text-rose-600 text-xs">{{ errores['nombre'] }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <app-base-input text="Apellido paterno *" [(ngModel)]="apellidoPaterno" />
+            <p *ngIf="errores['apellidoPaterno']" class="text-rose-600 text-xs">{{ errores['apellidoPaterno'] }}</p>
+          </div>
+
           <app-base-input text="Apellido materno" [(ngModel)]="apellidoMaterno" />
-          <app-base-input text="C.I." type_i="number" [(ngModel)]="ci" />
+
+          <div class="space-y-1">
+            <app-base-input text="C.I. *" [(ngModel)]="ci" />
+            <p *ngIf="errores['ci']" class="text-rose-600 text-xs">{{ errores['ci'] }}</p>
+          </div>
+
         </div>
       </div>
 
+      <!-- Contacto -->
       <div>
-        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-indigo-500 pl-3">
           Contacto
         </h3>
-
         <div class="grid md:grid-cols-2 gap-4">
-          <app-base-input text="Correo electrónico" [(ngModel)]="correo" />
-          <app-base-input text="Celular" type_i="number" [(ngModel)]="celular" />
+
+          <div class="space-y-1">
+            <app-base-input text="Correo electrónico *" [(ngModel)]="correo" />
+            <p *ngIf="errores['correo']" class="text-rose-600 text-xs">{{ errores['correo'] }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <app-base-input text="Celular" [(ngModel)]="celular" />
+            <p *ngIf="errores['celular']" class="text-rose-600 text-xs">{{ errores['celular'] }}</p>
+          </div>
+
         </div>
       </div>
 
+      <!-- Información profesional -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-indigo-500 pl-3">
           Información Profesional
         </h3>
-
-        <div class="grid md:grid-cols-1 gap-4">
-          <select [(ngModel)]="gradoAcademico"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition md:col-span-2">
-            <option value="">Grado académico</option>
-            <option value="Licenciatura">Licenciatura</option>
-            <option value="Ingeniería">Ingeniería</option>
-            <option value="Maestría">Maestría</option>
-            <option value="Doctorado">Doctorado</option>
+        <div class="space-y-1">
+          <select [(ngModel)]="degreeId"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm">
+            <option [ngValue]="null">Seleccione grado académico *</option>
+            <option *ngFor="let d of degrees" [value]="d.id">{{ d.name }}</option>
           </select>
+          <p *ngIf="errores['gradoAcademico']" class="text-rose-600 text-xs">{{ errores['gradoAcademico'] }}</p>
         </div>
       </div>
 
+      <!-- Documentos -->
       <div>
-        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Documentos
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-indigo-500 pl-3">
+          Documentos recibidos
         </h3>
-
-        <div class="grid md:grid-cols-2 gap-4">
-
-          <label
-            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" [(ngModel)]="documentos.hojaVida" class="w-4 h-4 accent-blue-500">
+        <div class="grid md:grid-cols-2 gap-3">
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.hojaVida" class="w-4 h-4 accent-indigo-500">
             Hoja de Vida (CV)
           </label>
-
-          <label
-            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" [(ngModel)]="documentos.tituloProfesional" class="w-4 h-4 accent-blue-500">
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.tituloProfesional" class="w-4 h-4 accent-indigo-500">
             Título Profesional
           </label>
-
-          <label
-            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" [(ngModel)]="documentos.ciCopia" class="w-4 h-4 accent-blue-500">
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.ciCopia" class="w-4 h-4 accent-indigo-500">
             C.I. (Copia)
           </label>
-
-          <label
-            class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" [(ngModel)]="documentos.certificados" class="w-4 h-4 accent-blue-500">
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.certificados" class="w-4 h-4 accent-indigo-500">
             Certificados
           </label>
-
         </div>
       </div>
+
+      <!-- Nota contraseña -->
+      <div *ngIf="!editingDocenteId" class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs text-indigo-700 flex items-center gap-2">
+        <i class="fas fa-info-circle"></i>
+        La contraseña inicial del docente será su número de C.I.
+      </div>
+
     </div>
   </app-base-modal>
 
 
-  <app-base-modal [isOpen]="modalViewDocente" title="Ver información de Docente" subtitle="Información general"
-    size="lg" confirmText="Aceptar" cancelText="Cancelar" (confirm)="modalViewDocente = false"
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL VER DETALLE                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <app-base-modal
+    [isOpen]="modalViewDocente"
+    title="Detalle del Docente"
+    subtitle="Información completa"
+    size="lg"
+    confirmText="Cerrar"
+    cancelText="Cerrar"
+    (confirm)="modalViewDocente = false"
     (cancel)="modalViewDocente = false">
-    <div class="bg-white p-2  space-y-8">
 
+    <div class="space-y-6" *ngIf="docenteSeleccionado">
+
+      <!-- Avatar + nombre -->
       <div class="flex items-center gap-4">
-        <div
-          class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
-          {{ docenteSeleccionado?.user?.name?.charAt(0) }}{{ docenteSeleccionado?.user?.first_lastname?.charAt(0) }}
+        <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xl font-bold">
+          {{ docenteSeleccionado.user?.name?.charAt(0) }}{{ docenteSeleccionado.user?.first_lastname?.charAt(0) }}
         </div>
-
         <div>
-          <h2 class="text-xl font-bold text-slate-800">{{ docenteSeleccionado?.user?.name }}
-            {{ docenteSeleccionado?.user?.first_lastname }} {{ docenteSeleccionado?.user?.second_lastname }}</h2>
-          <p class="text-sm text-slate-500">C.I.:{{ docenteSeleccionado?.user?.ci }}</p>
+          <h2 class="text-lg font-bold text-slate-800">
+            {{ docenteSeleccionado.user?.name }}
+            {{ docenteSeleccionado.user?.first_lastname }}
+            {{ docenteSeleccionado.user?.second_lastname }}
+          </h2>
+          <p class="text-sm text-slate-500">C.I. {{ docenteSeleccionado.user?.ci }}</p>
         </div>
-
         <div class="ml-auto">
           <span class="px-3 py-1 rounded-full text-sm font-semibold"
-            [ngClass]="docenteSeleccionado?.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
-            {{ docenteSeleccionado?.status ? 'Activo' : 'Bloqueado' }}
+            [ngClass]="docenteSeleccionado.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
+            {{ docenteSeleccionado.status ? 'Activo' : 'Inactivo' }}
           </span>
         </div>
       </div>
 
+      <!-- Contacto -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Contacto
-        </h3>
-
-        <div class="grid md:grid-cols-2 gap-4 text-sm">
-
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-indigo-500 pl-3">Contacto</h3>
+        <div class="grid md:grid-cols-2 gap-3 text-sm">
           <div class="bg-slate-50 p-3 rounded-xl">
             <p class="text-slate-500">Correo</p>
-            <p class="font-semibold text-slate-800">{{ docenteSeleccionado?.user?.email }}</p>
+            <p class="font-semibold text-slate-800">{{ docenteSeleccionado.user?.email }}</p>
           </div>
-
           <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Teléfono</p>
-            <p class="font-semibold text-slate-800">{{ docenteSeleccionado?.user?.cellphone || 'No definido' }}</p>
+            <p class="text-slate-500">Celular</p>
+            <p class="font-semibold text-slate-800">{{ docenteSeleccionado.user?.cellphone || 'No definido' }}</p>
           </div>
         </div>
       </div>
 
-
+      <!-- Info profesional -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Información Profesional
-        </h3>
-        <div class="space-y-4 text-sm">
-          <!-- OTROS DATOS -->
-          <div class="grid md:grid-cols-3 gap-4">
-            <div class="bg-slate-50 p-3 rounded-xl md:col-span-2">
-              <p class="text-slate-500">Grado Académico</p>
-              <p class="font-semibold text-slate-800">{{ docenteSeleccionado?.degree?.name }}</p>
-            </div>
-          </div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-indigo-500 pl-3">Información Profesional</h3>
+        <div class="bg-slate-50 p-3 rounded-xl text-sm">
+          <p class="text-slate-500">Grado Académico</p>
+          <p class="font-semibold text-slate-800">{{ docenteSeleccionado.degree?.name ?? '—' }}</p>
         </div>
       </div>
 
+      <!-- Documentos -->
       <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Documentos
-        </h3>
-
-        <div class="grid md:grid-cols-2 gap-4 text-sm">
-
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-indigo-500 pl-3">Documentos</h3>
+        <div class="grid md:grid-cols-2 gap-3 text-sm">
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
             <span>Hoja de Vida</span>
-            <span class="text-green-600 font-semibold">
-              <i class="fa-solid "
-                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.cv, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.cv}"></i>
-            </span>
+            <i class="fas" [ngClass]="docenteSeleccionado.cv ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
           </div>
-
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
             <span>Título Profesional</span>
-            <span class="text-green-600 font-semibold">
-              <i class="fa-solid "
-                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.professional_title, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.professional_title}"></i>
-            </span>
+            <i class="fas" [ngClass]="docenteSeleccionado.professional_title ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
           </div>
-
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-            <span>Fotocopia de C.I.</span>
-            <span class="text-green-600 font-semibold">
-              <i class="fa-solid "
-                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.carnet, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.carnet}"></i>
-
-            </span>
+            <span>Fotocopia C.I.</span>
+            <i class="fas" [ngClass]="docenteSeleccionado.carnet ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
           </div>
-
           <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
             <span>Certificados</span>
-            <span class=" font-semibold">
-              <i class="fa-solid "
-                [ngClass]="{'fa-check text-green-500': docenteSeleccionado?.certificate, 'fa-xmark text-red-500': !docenteSeleccionado?.user?.certificate}"></i>
+            <i class="fas" [ngClass]="docenteSeleccionado.certificate ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materias asignadas -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-indigo-500 pl-3">Materias asignadas</h3>
+        <div *ngIf="docenteSeleccionado.subjects?.length; else noSubjects" class="flex flex-wrap gap-2">
+          <span *ngFor="let s of docenteSeleccionado.subjects"
+            class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
+            {{ s.name }} <span class="text-indigo-400">({{ s.career?.name }})</span>
+          </span>
+        </div>
+        <ng-template #noSubjects>
+          <p class="text-slate-400 text-sm">Sin materias asignadas.</p>
+        </ng-template>
+      </div>
+
+    </div>
+  </app-base-modal>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL GESTIONAR MATERIAS                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <app-base-modal
+    [isOpen]="modalOptionDocente"
+    title="Gestión de Materias"
+    subtitle="Asignar o quitar materias al docente"
+    size="lg"
+    confirmText="Cerrar"
+    cancelText="Cerrar"
+    (confirm)="modalOptionDocente = false"
+    (cancel)="modalOptionDocente = false">
+
+    <div class="space-y-6" *ngIf="docenteSeleccionado">
+
+      <!-- Info del docente -->
+      <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center font-bold text-indigo-700 text-sm">
+          {{ docenteSeleccionado.user?.name?.charAt(0) }}{{ docenteSeleccionado.user?.first_lastname?.charAt(0) }}
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">
+            {{ docenteSeleccionado.user?.name }} {{ docenteSeleccionado.user?.first_lastname }}
+          </h3>
+          <p class="text-xs text-slate-500">{{ docenteSeleccionado.degree?.name }}</p>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="w-full bg-slate-100 p-1.5 rounded-2xl">
+        <div class="flex gap-2">
+          <button (click)="tabDoc = 'asignar'" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition text-sm font-medium"
+            [ngClass]="tabDoc === 'asignar' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:bg-white hover:text-indigo-600'">
+            <i class="fas fa-plus"></i> Asignar materia
+          </button>
+          <button (click)="tabDoc = 'quitar'" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition text-sm font-medium"
+            [ngClass]="tabDoc === 'quitar' ? 'bg-rose-600 text-white shadow' : 'text-slate-500 hover:bg-white hover:text-rose-600'">
+            <i class="fas fa-minus"></i> Quitar materia
+          </button>
+        </div>
+      </div>
+
+      <!-- ── TAB ASIGNAR ── -->
+      <div *ngIf="tabDoc === 'asignar'" class="space-y-4">
+        <h3 class="text-sm font-semibold text-slate-700">Selecciona una materia para asignar</h3>
+
+        <div *ngIf="availableSubjects.length === 0" class="text-sm text-slate-400 text-center py-4">
+          El docente ya tiene todas las materias disponibles asignadas.
+        </div>
+
+        <div *ngIf="availableSubjects.length > 0">
+          <select [(ngModel)]="selectedSubjectIdToAssign"
+            class="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            <option [ngValue]="null">Seleccionar materia...</option>
+            <option *ngFor="let s of availableSubjects" [value]="s.id">
+              {{ s.name }} — {{ s.career?.name }} (nivel {{ s.level }})
+            </option>
+          </select>
+
+          <div class="mt-4 flex justify-end">
+            <button (click)="assignSubject()"
+              [disabled]="!selectedSubjectIdToAssign || loadingAssign"
+              class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2 rounded-xl
+                     hover:bg-indigo-500 disabled:opacity-50 transition text-sm font-medium">
+              <i class="fas" [ngClass]="loadingAssign ? 'fa-spinner fa-spin' : 'fa-plus'"></i>
+              {{ loadingAssign ? 'Asignando...' : 'Asignar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB QUITAR ── -->
+      <div *ngIf="tabDoc === 'quitar'" class="space-y-4">
+        <h3 class="text-sm font-semibold text-slate-700">Selecciona una materia para quitar</h3>
+
+        <div *ngIf="!docenteSeleccionado.subjects?.length" class="text-sm text-slate-400 text-center py-4">
+          El docente no tiene materias asignadas.
+        </div>
+
+        <div *ngIf="docenteSeleccionado.subjects?.length">
+          <select [(ngModel)]="selectedSubjectIdToRemove"
+            class="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm">
+            <option [ngValue]="null">Seleccionar materia a quitar...</option>
+            <option *ngFor="let s of docenteSeleccionado.subjects" [value]="s.id">
+              {{ s.name }} — {{ s.career?.name }}
+            </option>
+          </select>
+
+          <div class="mt-4 flex justify-end">
+            <button (click)="removeSubject()"
+              [disabled]="!selectedSubjectIdToRemove || loadingRemove"
+              class="flex items-center gap-2 bg-rose-600 text-white px-5 py-2 rounded-xl
+                     hover:bg-rose-500 disabled:opacity-50 transition text-sm font-medium">
+              <i class="fas" [ngClass]="loadingRemove ? 'fa-spinner fa-spin' : 'fa-minus'"></i>
+              {{ loadingRemove ? 'Quitando...' : 'Quitar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Materias actuales del docente como chips -->
+        <div *ngIf="docenteSeleccionado.subjects?.length" class="mt-2">
+          <p class="text-xs text-slate-500 mb-2">Materias actuales:</p>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let s of docenteSeleccionado.subjects"
+              class="bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1 rounded-full text-xs font-medium">
+              {{ s.name }}
             </span>
           </div>
-
         </div>
+
       </div>
 
     </div>
   </app-base-modal>
 
-
-
-  <app-base-modal [isOpen]="modalOptionDocente" title="Gestión de Docente" subtitle="Acciones administrativas" size="lg"
-    confirmText="Guardar" cancelText="Cancelar" (confirm)="saveDocente()" (cancel)="modalOptionDocente = false">
-
-    <div class="space-y-6">
-
-      <!-- INFO DOCENTE -->
-      <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center gap-4">
-        <div class="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-700">
-          JP
-        </div>
-
-        <div>
-          <h3 class="font-semibold text-slate-800">Juan Pérez</h3>
-          <p class="text-sm text-slate-500">Docente • Programación</p>
-        </div>
-      </div>
-
-      <!-- TABS ACCIONES -->
-      <div class="w-full bg-slate-100 p-2 rounded-2xl">
-        <div class="flex w-full gap-2">
-
-          <button (click)="tabDoc='asignar'"
-            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='asignar' 
-            ? 'bg-blue-600 text-white shadow' 
-            : 'text-slate-500 hover:bg-white hover:text-blue-600'">
-            <i class="fa-solid fa-plus"></i> Asignar
-          </button>
-
-          <button (click)="tabDoc='quitar'"
-            class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition" [ngClass]="tabDoc==='quitar' 
-            ? 'bg-red-600 text-white shadow' 
-            : 'text-slate-500 hover:bg-white hover:text-red-600'">
-            <i class="fa-solid fa-minus"></i> Quitar
-          </button>
-
-        </div>
-      </div>
-
-      <!-- ===================== -->
-      <!-- ASIGNAR MATERIA -->
-      <!-- ===================== -->
-      <div *ngIf="tabDoc==='asignar'" class="space-y-4">
-
-        <h3 class="font-semibold text-slate-700">Asignar materia</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-          <!-- Select 1 -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Carrera</label>
-            <select
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Seleccionar carrera</option>
-              <option> Ingeniería en Sistemas</option>
-              <option> Licenciatura en Matemática</option>
-            </select>
-          </div>
-
-          <!-- Select 2 -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Materia</label>
-            <select
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Seleccionar materia</option>
-              <option>Programación I</option>
-              <option>Matemática Discreta</option>
-            </select>
-          </div>
-
-          <!-- Select 3 -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Turno</label>
-            <select
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Seleccionar turno</option>
-              <option>Mañana</option>
-              <option>Tarde</option>
-            </select>
-          </div>
-          
-
-        </div>
-      </div>
-
-      <!-- ===================== -->
-      <!-- QUITAR MATERIA -->
-      <!-- ===================== -->
-      <div *ngIf="tabDoc==='quitar'" class="space-y-4">
-
-        <h3 class="font-semibold text-slate-700">Quitar materia asignada</h3>
-
-        <select class="w-full input">
-          <option>Seleccionar materia</option>
-          <option>Programación I</option>
-        </select>
-
-        <textarea class="input" placeholder="Motivo (opcional)"></textarea>
-
-      </div>
-
-    </div>
-
-  </app-base-modal>
 </div>
