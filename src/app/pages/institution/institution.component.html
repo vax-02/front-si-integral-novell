@@ -1,0 +1,64 @@
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- HEADER -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">Institución</h2>
+      <p class="text-sm text-slate-500">
+        Administra la información institucional
+      </p>
+    </div>
+
+    <i class="fa-solid fa-building text-blue-600 text-xl"></i>
+  </div>
+
+  <!-- FORM -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
+
+    <h3 class="text-lg font-semibold text-slate-700 border-l-4 border-blue-500 pl-3">
+      Información Institucional
+    </h3>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="grid gap-4">
+        <!-- Dirección -->
+        <app-base-input
+          class="block w-full"
+          text="Dirección"
+          formControlName="address">
+        </app-base-input>
+
+        <!-- Celular -->
+        <app-base-input
+          class="block w-full"
+          text="Celular institucional"
+          type_i="tel"
+          formControlName="cellphone">
+        </app-base-input>
+
+        <!-- Correo -->
+        <app-base-input
+          class="block w-full"
+          text="Correo institucional"
+          type_i="email"
+          formControlName="email">
+        </app-base-input>
+
+      </div>
+
+      <div class="flex justify-end pt-5">
+
+        <app-button
+          label="Guardar Información"
+          type="primary"
+          [disabled]="loading || form.invalid">
+        </app-button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

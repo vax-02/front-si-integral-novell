@@ -21,6 +21,7 @@ import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
 import { SubjectsComponent } from './pages/subjects/subjects.component';
 import { authGuard } from './core/guards/auth.guard';
 import { CoursesComponent } from './pages/courses/courses.component';
+import { InstitutionComponent } from './pages/institution/institution.component';
 
 export const routes: Routes = [
   // Ruta para el Home
@@ -52,13 +53,10 @@ export const routes: Routes = [
     ]},
     { path: 'profile', component: ProfileComponent  },
     { path: 'password', component: ChangePasswordComponent  },
-
-
+    { path: 'institution', component: InstitutionComponent  },
   ] },
-
   // Redirección por defecto: si el usuario no escribe nada, va a /home
   { path: '', redirectTo: '', pathMatch: 'full' },
-
   // Ruta comodín: si escriben cualquier cosa que no existe, va a /home
   { path: '**', redirectTo: 'home' },
 ];
