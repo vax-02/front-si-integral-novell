@@ -18,7 +18,6 @@ import { ToastService } from '../../shared/services/toast.service';
     ButtonComponent,
     BaseModalComponent,
     BaseInputComponent,
-    BaseModalConfirmComponent,
   ],
   templateUrl: './docentes.component.html',
   styleUrl: './docentes.component.css',
@@ -48,22 +47,13 @@ export class DocentesComponent implements OnInit {
   // Modales
   modalAddDocente = false;
   modalViewDocente = false;
-  modalOptionDocente = false;
   confirmToggleOpen = false;
 
   // Datos seleccionados
   docenteSeleccionado: any = null;
   editingDocenteId: number | null = null;
 
-  // Tab del modal opciones
-  tabDoc: 'asignar' | 'quitar' = 'asignar';
-
-  // Materia a asignar / quitar
-  selectedSubjectIdToAssign: number | null = null;
-  selectedSubjectIdToRemove: number | null = null;
-  loadingAssign = false;
-  loadingRemove = false;
-
+  
   // ── Formulario crear/editar ────────────────────────────────────────────────
   nombre = '';
   apellidoPaterno = '';
@@ -175,56 +165,12 @@ export class DocentesComponent implements OnInit {
     this.modalViewDocente = true;
   }
 
-  // ── Modal Opciones (asignar/quitar materias) ──────────────────────────────
-  openOptionDocente(docente: any): void {
-    this.docenteSeleccionado = docente;
-    this.tabDoc = 'asignar';
-    this.selectedSubjectIdToAssign = null;
-    this.selectedSubjectIdToRemove = null;
-    this.modalOptionDocente = true;
-  }
 
   // Materias que aún NO tiene el docente seleccionado
   get availableSubjects(): any[] {
     if (!this.docenteSeleccionado) return this.allSubjects;
     const assigned = (this.docenteSeleccionado.subjects ?? []).map((s: any) => s.id);
     return this.allSubjects.filter(s => !assigned.includes(s.id));
-  }
-
-  assignSubject(): void {
-    if (!this.selectedSubjectIdToAssign || !this.docenteSeleccionado) return;
-    this.loadingAssign = true;
-    this.docenteService.assignSubject(this.docenteSeleccionado.id, this.selectedSubjectIdToAssign).subscribe({
-      next: (res) => {
-        this.loadingAssign = false;
-        this.docenteSeleccionado.subjects = res.subjects;
-        this.selectedSubjectIdToAssign = null;
-        this.syncDocenteInList();
-        this.toast.success('Materia asignada exitosamente');
-      },
-      error: () => {
-        this.loadingAssign = false;
-        this.toast.error('Error al asignar la materia');
-      },
-    });
-  }
-
-  removeSubject(): void {
-    if (!this.selectedSubjectIdToRemove || !this.docenteSeleccionado) return;
-    this.loadingRemove = true;
-    this.docenteService.removeSubject(this.docenteSeleccionado.id, this.selectedSubjectIdToRemove).subscribe({
-      next: (res) => {
-        this.loadingRemove = false;
-        this.docenteSeleccionado.subjects = res.subjects;
-        this.selectedSubjectIdToRemove = null;
-        this.syncDocenteInList();
-        this.toast.success('Materia removida exitosamente');
-      },
-      error: () => {
-        this.loadingRemove = false;
-        this.toast.error('Error al remover la materia');
-      },
-    });
   }
 
   // ── Toggle status (bloquear/activar) ──────────────────────────────────────

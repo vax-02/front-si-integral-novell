@@ -11,8 +11,7 @@
       </p>
     </div>
     <div class="w-full sm:w-auto">
-      <app-button label="Nuevo curso" variant="primary" [fullWidth]="true" (click)="openCreateModal()">
-      </app-button>
+      <app-button icon="fas fa-plus px-2" variant="primary" [fullWidth]="true" (click)="openCreateModal()"></app-button>
     </div>
   </div>
 
@@ -256,7 +255,7 @@
   <app-base-modal-confirm
     [isOpen]="confirmDeleteOpen"
     title="Eliminar curso"
-    message="¿Estás seguro de que deseas eliminar este curso? Esta acción no se puede deshacer."
+    message="¿Estás seguro de eliminar este curso?"
     confirmText="Sí, eliminar"
     cancelText="Cancelar"
     [loading]="deletingCourse"

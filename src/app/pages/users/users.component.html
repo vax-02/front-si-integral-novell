@@ -12,89 +12,47 @@
       </p>
     </div>
     <!-- BOTÓN -->
-    <div class="w-full sm:w-auto">
-      <app-button class="w-full sm:w-auto" label="Nuevo usuario" type="primary" (click)="openCreateModal()">
+    <div class="self-start sm:self-auto">
+      <app-button icon="fas fa-plus px-2" type="primary" (click)="openCreateModal()">
       </app-button>
     </div>
   </div>
-
-
   <!-- TARJETAS RESUMEN -->
   <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
 
     <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-xs sm:text-sm text-slate-500">Administradores</p>
-
       <div class="mt-1">
-        <ng-container *ngIf="!loading; else loadingAdmin">
-          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
-            {{ cards.tAdmins }}
-          </h3>
-        </ng-container>
-
-        <ng-template #loadingAdmin>
-          <div class="flex items-center gap-2 text-blue-700">
-            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
-            <span class="text-sm">Cargando...</span>
-          </div>
-        </ng-template>
+        <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+          {{ cards.tAdmins }}
+        </h3>
       </div>
     </div>
 
     <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-xs sm:text-sm text-slate-500">Secretarias</p>
-
       <div class="mt-1">
-        <ng-container *ngIf="!loading; else loadingAdmin">
-          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
-            {{ cards.tSecres }}
-          </h3>
-        </ng-container>
-
-        <ng-template #loadingAdmin>
-          <div class="flex items-center gap-2 text-blue-700">
-            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
-            <span class="text-sm">Cargando...</span>
-          </div>
-        </ng-template>
+        <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+          {{ cards.tSecres }}
+        </h3>
       </div>
     </div>
 
     <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-xs sm:text-sm text-slate-500">Docentes</p>
-
       <div class="mt-1">
-        <ng-container *ngIf="!loading; else loadingAdmin">
-          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
-            {{ cards.tDoc }}
-          </h3>
-        </ng-container>
-
-        <ng-template #loadingAdmin>
-          <div class="flex items-center gap-2 text-blue-700">
-            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
-            <span class="text-sm">Cargando...</span>
-          </div>
-        </ng-template>
+        <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+          {{ cards.tDoc }}
+        </h3>
       </div>
     </div>
 
     <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-xs sm:text-sm text-slate-500">Estudiantes</p>
-
       <div class="mt-1">
-        <ng-container *ngIf="!loading; else loadingAdmin">
-          <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
-            {{ cards.tEst }}
-          </h3>
-        </ng-container>
-
-        <ng-template #loadingAdmin>
-          <div class="flex items-center gap-2 text-blue-700">
-            <i class="fa-solid fa-spinner fa-spin text-xl"></i>
-            <span class="text-sm">Cargando...</span>
-          </div>
-        </ng-template>
+        <h3 class="text-lg sm:text-2xl font-bold text-blue-700">
+          {{ cards.tEst }}
+        </h3>
       </div>
     </div>
   </div>
@@ -187,7 +145,7 @@
           <tr *ngIf="loading" class="hover:bg-slate-50 transition">
             <td colspan="5" class="p-4 text-center">
               <div class="flex items-center justify-center gap-2 text-slate-600">
-                <i class="fas fa-spinner fa-spin text-indigo-600 text-xl"></i>
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
                 <span>Cargando usuarios...</span>
               </div>
             </td>
@@ -255,7 +213,8 @@
               <app-base-input text="C.I." formControlName="ci" />
               <p class="text-rose-600 text-xs" *ngIf="f['ci'].invalid && f['ci'].touched">
                 <span *ngIf="f['ci'].errors?.['required']">El CI es obligatorio.</span>
-                <span *ngIf="f['ci'].errors?.['pattern'] || f['ci'].errors?.['minlength'] || f['ci'].errors?.['maxlength']">
+                <span
+                  *ngIf="f['ci'].errors?.['pattern'] || f['ci'].errors?.['minlength'] || f['ci'].errors?.['maxlength']">
                   El CI debe ser numérico y tener entre 5 y 12 dígitos.
                 </span>
               </p>
@@ -286,7 +245,8 @@
             <div class="space-y-1">
               <app-base-input text="Celular" formControlName="celular" />
               <p class="text-rose-600 text-xs" *ngIf="f['celular'].invalid && f['celular'].touched">
-                <span *ngIf="f['celular'].errors?.['pattern'] || f['celular'].errors?.['minlength'] || f['celular'].errors?.['maxlength']">
+                <span
+                  *ngIf="f['celular'].errors?.['pattern'] || f['celular'].errors?.['minlength'] || f['celular'].errors?.['maxlength']">
                   El celular debe ser numérico y tener 8 dígitos.
                 </span>
               </p>
