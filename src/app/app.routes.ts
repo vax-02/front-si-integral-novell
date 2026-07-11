@@ -11,7 +11,6 @@ import { AttendanceComponent } from './pages/attendance/attendance.component';
 import { ProgramsComponent } from './pages/programs/programs.component';
 import { UsersComponent } from './pages/users/users.component';
 import { SettingsComponent } from './pages/settings/settings.component';
-import { ReportsComponent } from './pages/reports/reports.component';
 import { RegistrationComponent } from './pages/registration/registration.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
@@ -22,6 +21,7 @@ import { SubjectsComponent } from './pages/subjects/subjects.component';
 import { authGuard } from './core/guards/auth.guard';
 import { CoursesComponent } from './pages/courses/courses.component';
 import { InstitutionComponent } from './pages/institution/institution.component';
+import { PaymentManagementComponent } from './pages/payment-management/payment-management.component';
 
 export const routes: Routes = [
   // Ruta para el Home
@@ -40,6 +40,8 @@ export const routes: Routes = [
     { path: 'students', component: StudentsComponent },
     { path: 'docentes', component: DocentesComponent },
     { path: 'payments', component: PaymentsComponent },
+    { path: 'payments-manage', component: PaymentManagementComponent },
+
     { path: 'califications', component: CalificationsComponent },
     { path: 'attendance', component: AttendanceComponent },
     { path: 'programs', component: ProgramsComponent },
@@ -47,7 +49,7 @@ export const routes: Routes = [
 
     { path: 'subjects', component: SubjectsComponent },
     { path: 'users', component: UsersComponent },
-    { path: 'reports', component: ReportsComponent },
+    
     { path: 'settings', component: SettingsComponent, children: [
       { path: 'general', component: RegistrationComponent },
     ]},

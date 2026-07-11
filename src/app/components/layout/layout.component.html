@@ -157,7 +157,16 @@
           <a routerLink="/home/payments" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
-            Pagos
+            Cobros
+          </a>
+        </div>
+
+        
+        <div *ngIf="(!collapsed || isMobile) && openFinanzas" class="ml-6">
+          <a routerLink="/home/payments-manage" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Gestion de Pagos
           </a>
         </div>
       </div>
@@ -184,11 +193,6 @@
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
             Usuarios
-          </a>
-          <a routerLink="/home/reports" routerLinkActive="text-blue-600"
-            class="block py-2 text-sm hover:text-blue-600 transition-colors"
-            (click)="isMobile ? collapsed = true : null">
-            Reportes
           </a>
         </div>
       </div>

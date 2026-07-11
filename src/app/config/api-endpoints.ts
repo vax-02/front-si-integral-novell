@@ -20,5 +20,7 @@ export const API_ENDPOINTS = {
   courses: {
     index: `${API_BASE_URL}/courses`,
   },
-  
+  parallels: {
+    index: `${API_BASE_URL}/parallels`,
+  },
 } as const;

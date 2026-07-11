@@ -57,12 +57,8 @@
       <thead class="bg-blue-50 text-slate-600 uppercase text-xs">
         <tr>
           <th class="p-3 text-left">Docente</th>
-          <th class="p-3">Materia</th>
-          <th class="p-3">Horario</th>
-          <th class="p-3">Ingreso</th>
-          <th class="p-3">Salida</th>
+          <th class="p-3">Tiempo de atraso total</th>
           <th class="p-3">Estado</th>
-          <th class="p-3">Observación</th>
           <th class="p-3">Acciones</th>
         </tr>
       </thead>
@@ -71,10 +67,7 @@
 
         <tr class="hover:bg-blue-50/40">
           <td class="p-3 font-semibold">Carlos Mendoza</td>
-          <td class="p-3">Base de Datos II</td>
-          <td class="p-3">08:00 - 10:00</td>
           <td class="p-3"><input type="time" class="time-input" value="08:02"></td>
-          <td class="p-3"><input type="time" class="time-input" value="10:00"></td>
           <td class="p-3">
             <select class="status-present">
               <option>Presente</option>
@@ -83,32 +76,13 @@
               <option>Justificado</option>
             </select>
           </td>
-          <td class="p-3"><input placeholder="Observación" class="obs-input"></td>
+          
           <td class="p-3">
             <button class="btn-save">Guardar</button>
           </td>
         </tr>
 
-        <tr class="hover:bg-blue-50/40">
-          <td class="p-3 font-semibold">María López</td>
-          <td class="p-3">Programación Web</td>
-          <td class="p-3">10:00 - 12:00</td>
-          <td class="p-3"><input type="time" class="time-input"></td>
-          <td class="p-3"><input type="time" class="time-input"></td>
-          <td class="p-3">
-            <select class="status-absent">
-              <option>Falta</option>
-              <option>Presente</option>
-              <option>Retraso</option>
-              <option>Justificado</option>
-            </select>
-          </td>
-          <td class="p-3"><input placeholder="Observación" class="obs-input"></td>
-          <td class="p-3">
-            <button class="btn-save">Guardar</button>
-          </td>
-        </tr>
-
+        
       </tbody>
     </table>
   </div>

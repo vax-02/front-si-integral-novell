@@ -106,12 +106,12 @@
 
             <td class="px-6 py-4 text-center">
               <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
-                {{ career.duration }}
+                {{ career.duration }} año(s)
               </span>
             </td>
 
             <td class="px-6 py-4 text-center hidden md:table-cell">
-              {{ career.type }}
+              {{ career.type == 1? "Anual":"Semestral"}}
             </td>
 
             <td class="px-6 py-4 text-center font-semibold text-blue-600">
@@ -163,12 +163,12 @@
 
           <span class="flex items-center gap-2">
             <i class="fa-solid fa-clock text-slate-400"></i>
-            Duración: {{ careerSelected?.duration }}
+            Duración: {{ careerSelected?.duration }} años
           </span>
 
           <span class="flex items-center gap-2">
             <i class="fa-solid fa-layer-group text-slate-400"></i>
-            Tipo: {{ careerSelected?.type }}
+            Tipo: {{ careerSelected?.type == 1 ? 'Anual' : 'Semestral' }}
           </span>
 
         </div>
@@ -194,7 +194,7 @@
           <!-- HEADER LEVEL -->
           <div
             class="bg-slate-100 px-4 py-2 rounded-t-xl font-semibold text-slate-700 flex items-center justify-between">
-            <span>Nivel {{ group.level }}</span>
+            <span> {{ toNumeral(group.level) }} {{ careerSelected.type == 1 ? 'Año' : 'Semestre' }} </span>
           </div>
 
           <!-- TABLE -->
@@ -287,16 +287,16 @@
           <select formControlName="duration"
             class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-blue-500">
             <option value="">Seleccione la duración</option>
-            <option value="1 año">1 Año</option>
-            <option value="2 años">2 Años</option>
-            <option value="3 años">3 Años</option>
+            <option value="1">1 Año</option>
+            <option value="2">2 Años</option>
+            <option value="3">3 Años</option>
           </select>
 
           <select formControlName="type"
             class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-blue-500">
             <option value="">Seleccione el tipo</option>
-            <option value="Semestral">Semestral</option>
-            <option value="Anual">Anual</option>
+            <option value="1">Anual</option>
+            <option value="2">Semestral</option>
           </select>
         </form>
       </div>
@@ -443,7 +443,7 @@
       <app-base-input class="m-3" text="Nombre de la materia" formControlName="name"></app-base-input>
 
       <app-base-input class="m-3" text="Sigla" formControlName="sigla"></app-base-input>
-      <app-base-input  text="Nivel" formControlName="level"></app-base-input>
+      <app-base-input text="Semestre / Año" formControlName="level"></app-base-input>
 
       <div *ngIf="availableSubjectsForPrerequisite.length > 0">
         <label class="text-sm font-medium text-slate-700">Prerequisito</label>

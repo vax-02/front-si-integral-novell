@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
-import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
-import { CareerService } from '../../service/career.service';
 import { CourseService } from '../../service/course.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { CareerForSelect } from '../../interfaces/career';
+import { ParallelService } from '../../service/parallel.service';
 
 @Component({
   selector: 'app-courses',
@@ -17,7 +21,6 @@ import { CareerForSelect } from '../../interfaces/career';
     FormsModule,
     ReactiveFormsModule,
     BaseModalComponent,
-    BaseModalConfirmComponent,
     ButtonComponent,
     BaseInputComponent,
   ],
@@ -25,100 +28,64 @@ import { CareerForSelect } from '../../interfaces/career';
   styleUrl: './courses.component.css',
 })
 export class CoursesComponent implements OnInit {
-  // ── Estado de paginación y búsqueda ──────────────────────────────────────
+  formParallel!: FormGroup;
   private searchTimeout: any;
+  courseIdSelect: number = 0;
+  subtitleNewParallel: string = '';
   search = '';
   currentPage = 1;
   perPage = 10;
   lastPage = 1;
   totalCourses = 0;
 
-  // ── Datos ─────────────────────────────────────────────────────────────────
   courses: any[] = [];
-  careersForSelect: CareerForSelect[] = [];
 
-  // ── Estado de UI ──────────────────────────────────────────────────────────
+  openModalView: boolean = false;
   loading = false;
   loadingModal = false;
   openModalCreate = false;
   confirmDeleteOpen = false;
   deletingCourse = false;
-  editingCourseId: number | null = null;
-  courseToDeleteId: number | null = null;
-
-  // ── Formulario ────────────────────────────────────────────────────────────
-  courseForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private careerService: CareerService,
     private courseService: CourseService,
+    private parallelService: ParallelService,
     private toast: ToastService,
-  ) {}
+  ) {
+    this.formParallel = this.fb.group({
+      course_id: [null, Validators.required],
+      turno: ['', Validators.required],
+      parallel: ['', [Validators.required, Validators.maxLength(10)]],
+      limit: [15, [Validators.required, Validators.min(5)]],
+    });
+  }
 
   ngOnInit(): void {
-    this.initForm();
-    this.loadCareers();
     this.loadCourses();
-  }
-
-  // ── Form ──────────────────────────────────────────────────────────────────
-  initForm(): void {
-    this.courseForm = this.fb.group({
-      career_id: [null, [Validators.required]],
-      gestion: [
-        new Date().getFullYear(),
-        [Validators.required, Validators.pattern(/^\d{4}$/)],
-      ],
-      paralelo: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(2),
-          Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$/),
-        ],
-      ],
-      limit: [
-        10,
-        [Validators.required, Validators.pattern(/^[1-9]\d*$/), Validators.min(1)],
-      ],
-      turno: ['Mañana', [Validators.required]],
-    });
-  }
-
-  get f() {
-    return this.courseForm.controls;
-  }
-
-  // ── Carga de datos ────────────────────────────────────────────────────────
-  loadCareers(): void {
-    this.careerService.getCareersForSelect().subscribe({
-      next: (response) => {
-        this.careersForSelect = response.careers;
-      },
-      error: () => {
-        this.toast.error('Error al cargar las carreras');
-      },
-    });
   }
 
   loadCourses(): void {
     this.loading = true;
-    this.courseService.getCourses(this.currentPage, this.perPage, this.search).subscribe({
-      next: (response) => {
-        this.loading = false;
-        this.totalCourses = response.total;
-        this.currentPage = response.courses.current_page;
-        this.lastPage = response.courses.last_page;
-        this.courses = response.courses.data;
-      },
-      error: () => {
-        this.loading = false;
-        this.toast.error('Error al cargar los cursos');
-      },
-    });
+    this.courseService
+      .getCourses(this.currentPage, this.perPage, this.search)
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.totalCourses = response.total;
+          this.currentPage = response.courses.current_page;
+          this.lastPage = response.courses.last_page;
+          this.courses = response.courses.data;
+        },
+        error: () => {
+          this.loading = false;
+          this.toast.error('Error al cargar los cursos');
+        },
+      });
   }
-
+  viewParallels(id: number) {
+    this.openModalView = true;
+  }
   // ── Búsqueda con debounce ─────────────────────────────────────────────────
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
@@ -157,130 +124,141 @@ export class CoursesComponent implements OnInit {
   }
 
   // ── Modal crear ───────────────────────────────────────────────────────────
-  openCreateModal(): void {
-    this.editingCourseId = null;
-    this.courseForm.reset({
-      career_id: null,
-      gestion: new Date().getFullYear(),
-      paralelo: '',
-      limit: 10,
-      turno: 'Mañana',
-    });
+
+  openModalAddParallel(course: any): void {
+    this.courseIdSelect = course.id;
+    this.subtitleNewParallel = course.career.name + ' > ' + course.name;
     this.openModalCreate = true;
-  }
-
-  // ── Modal editar ──────────────────────────────────────────────────────────
-  openEditModal(course: any): void {
-    this.editingCourseId = course.id;
-    this.courseForm.patchValue({
-      career_id: course.career_id,
-      gestion: course.gestion,
-      paralelo: course.paralelo,
-      limit: course.limit,
-      turno: course.turno,
-    });
-    this.openModalCreate = true;
-  }
-
-  get modalTitle(): string {
-    return this.editingCourseId ? 'Editar curso' : 'Crear curso';
-  }
-
-  get confirmText(): string {
-    return this.editingCourseId ? 'Actualizar' : 'Guardar';
   }
 
   // ── Guardar (create / update) ─────────────────────────────────────────────
   save(): void {
-    if (this.courseForm.invalid) {
-      this.courseForm.markAllAsTouched();
+    this.formParallel.patchValue({
+      course_id: this.courseIdSelect,
+    });
+    console.log(this.formParallel.value);
+    if (this.formParallel.invalid) {
+      this.formParallel.markAllAsTouched();
+      alert('Complete correctamente los campos requeridos.');
       return;
     }
-
     this.loadingModal = true;
-
-    const payload = {
-      career_id: Number(this.courseForm.value.career_id),
-      gestion: String(this.courseForm.value.gestion),
-      paralelo: this.courseForm.value.paralelo,
-      limit: Number(this.courseForm.value.limit),
-      turno: this.courseForm.value.turno,
-    };
-
-    const isEdit = !!this.editingCourseId;
-
-    const request$ = isEdit
-      ? this.courseService.updateCourse(this.editingCourseId!, payload)
-      : this.courseService.createCourse(payload);
-
-    request$.subscribe({
-      next: () => {
+    this.parallelService.createParallel(this.formParallel.value).subscribe({
+      next: (resp) => {
         this.loadingModal = false;
-        this.openModalCreate = false;
-        this.editingCourseId = null;
-        this.loadCourses();
-        this.toast.success(
-          isEdit ? 'Curso actualizado exitosamente' : 'Curso creado exitosamente',
-        );
+        alert('Paralelo registrado correctamente.');
       },
-      error: (error) => {
+      error: (err) => {
         this.loadingModal = false;
-        this.toast.error(
-          isEdit ? 'Error al actualizar el curso' : 'Error al crear el curso',
-        );
-        if (error?.error?.errors) {
-          const errs = error.error.errors;
-          if (errs.paralelo) this.toast.error('El paralelo ingresado ya existe en ese turno y gestión.');
-          if (errs.career_id) this.toast.error('La carrera seleccionada no es válida.');
-        }
+        alert(err.error?.message ?? 'Ocurrió un error al guardar.');
+        console.log(err.error.error)
       },
     });
   }
 
   cancel(): void {
     this.openModalCreate = false;
-    this.editingCourseId = null;
-    this.courseForm.reset({
-      career_id: null,
-      gestion: new Date().getFullYear(),
-      paralelo: '',
-      limit: 10,
-      turno: 'Mañana',
-    });
+  }
+  cancelView() {
+    this.openModalView = false;
   }
 
-  // ── Eliminar ──────────────────────────────────────────────────────────────
-  openDeleteConfirm(id: number): void {
-    this.courseToDeleteId = id;
-    this.confirmDeleteOpen = true;
+  //añadido
+  parallels = [
+    {
+      id: 1,
+      name: 'A',
+      shift: 'Mañana',
+      students: 28,
+      capacity: 35,
+    },
+
+    {
+      id: 2,
+      name: 'B',
+      shift: 'Tarde',
+      students: 35,
+      capacity: 35,
+    },
+
+    {
+      id: 3,
+      name: 'C',
+      shift: 'Noche',
+      students: 18,
+      capacity: 35,
+    },
+  ];
+
+  selectedParallel: any = null;
+
+  selectParallel(parallel: any) {
+    this.selectedParallel = parallel;
+  }
+  get totalStudents() {
+    return this.parallels.reduce((a, b) => a + b.students, 0);
   }
 
-  closeDelete(): void {
-    this.confirmDeleteOpen = false;
-    this.courseToDeleteId = null;
+  get totalCapacity() {
+    return this.parallels.reduce((a, b) => a + b.capacity, 0);
   }
 
-  deleteCourse(): void {
-    if (!this.courseToDeleteId) return;
+  schedule = [
+    {
+      hour: '08:00 - 10:00',
 
-    this.deletingCourse = true;
-    this.courseService.deleteCourse(this.courseToDeleteId).subscribe({
-      next: () => {
-        this.deletingCourse = false;
-        this.confirmDeleteOpen = false;
-        this.courseToDeleteId = null;
+      days: [
+        {
+          subject: 'Programación',
+          teacher: 'Ing. Carlos',
+        },
 
-        // Si era el último de la página, retrocede una
-        if (this.courses.length === 1 && this.currentPage > 1) {
-          this.currentPage--;
-        }
-        this.loadCourses();
-        this.toast.success('Curso eliminado exitosamente');
-      },
-      error: () => {
-        this.deletingCourse = false;
-        this.toast.error('Error al eliminar el curso');
-      },
-    });
-  }
+        {
+          subject: 'Matemática',
+          teacher: 'Lic. Ana',
+        },
+
+        {
+          subject: 'Programación',
+          teacher: 'Ing. Carlos',
+        },
+
+        null,
+
+        null,
+
+        {
+          subject: 'Inglés',
+          teacher: 'Lic. José',
+        },
+      ],
+    },
+
+    {
+      hour: '10:00 - 12:00',
+
+      days: [
+        {
+          subject: 'Base de Datos',
+          teacher: 'Ing. Pedro',
+        },
+
+        null,
+
+        {
+          subject: 'Física',
+          teacher: 'Lic. Mario',
+        },
+
+        null,
+
+        {
+          subject: 'Ética',
+          teacher: 'Lic. Sonia',
+        },
+
+        null,
+      ],
+    },
+  ];
 }

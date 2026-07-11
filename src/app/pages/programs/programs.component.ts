@@ -66,7 +66,7 @@ export class ProgramsComponent {
     this.careerForm = this.fb.group({
       name: ['', Validators.required],
       duration: ['', Validators.required],
-      type: ['Semestral', Validators.required],
+      type: ['', Validators.required],
     });
 
     this.subjectForm = this.fb.group({
@@ -120,7 +120,7 @@ export class ProgramsComponent {
         this.loading = false;
         this.loadingModalDetails = false;
         this.careerSelected = response;
-        console.log(this.careerSelected)
+        //console.log(this.careerSelected)
       },
       error: () => {
         this.loading = false;
@@ -219,7 +219,7 @@ export class ProgramsComponent {
     this.careerForm.reset({
       name: '',
       duration: '',
-      type: 'Semestral',
+      type: '',
     });
 
     this.selectedFile = null;
@@ -370,10 +370,10 @@ export class ProgramsComponent {
     this.deletingSubject = true;
     this.careerService.deleteSubject(this.activeCareerId, this.subjectToDelete.id).subscribe({
       next: () => {
-        this.deletingSubject = false;
-        this.closeDeleteSubjectConfirm();
-        this.toast.success('Materia eliminada correctamente.');
         this.loadCareerDetails(this.activeCareerId!);
+        this.closeDeleteSubjectConfirm();
+        this.deletingSubject = false;
+        this.toast.success('Materia eliminada correctamente.');
       },
       error: (error) => {
         this.deletingSubject = false;
@@ -458,8 +458,20 @@ export class ProgramsComponent {
     const formData = new FormData();
     formData.append('name', this.careerForm.get('name')?.value || '');
     formData.append('duration', this.careerForm.get('duration')?.value || '');
-    formData.append('type', this.careerForm.get('type')?.value || 'Semestral');
+    formData.append('type', this.careerForm.get('type')?.value || '');
     formData.append('file', this.selectedFile as File);
     return formData;
+  }
+  
+  toNumeral(val: number) : string{
+    switch(val){
+      case 1: return 'Primer'
+      case 2: return 'Segundo'
+      case 3: return 'Tercer'
+      case 4: return 'Cuarto'
+      case 5: return 'Quinto'
+      case 6: return 'Sexto'
+      default : return ''
+    }
   }
 }

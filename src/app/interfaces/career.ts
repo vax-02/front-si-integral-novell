@@ -1,8 +1,8 @@
 export interface Career {
   id: number;
   name: string;
-  duration: string;
-  type: string;
+  duration: number;
+  type: number;
   status: number;
   created_at: string | null;
   updated_at: string | null;

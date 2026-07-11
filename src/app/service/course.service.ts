@@ -22,24 +22,6 @@ export class CourseService {
     );
   }
 
-  createCourse(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl.courses.index}`, data, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  updateCourse(id: number, data: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl.courses.index}/${id}`, data, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  deleteCourse(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl.courses.index}/${id}`, {
-      headers: this.getHeaders(),
-    });
-  }
-
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

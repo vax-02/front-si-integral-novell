@@ -1,0 +1,604 @@
+<div class="space-y-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">
+        Gestión de Cobros
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Configura los conceptos de cobro por carrera, gestión y periodo académico.
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <app-button label="Nuevo Cobro" variant="primary" (click)="openRegisterModal()" />
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
+      <p class="text-sm text-slate-500">
+        Cobros Activos
+      </p>
+      <h3 class="text-3xl font-bold text-blue-700 mt-2">
+        18
+      </h3>
+      <p class="text-xs text-slate-400 mt-2">
+        Configuraciones vigentes
+      </p>
+
+    </div>
+
+    <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
+
+      <p class="text-sm text-slate-500">
+        Mensualidades
+      </p>
+
+      <h3 class="text-3xl font-bold text-emerald-600 mt-2">
+        120
+      </h3>
+
+      <p class="text-xs text-slate-400 mt-2">
+        Cuotas generadas
+      </p>
+
+    </div>
+
+    <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
+
+      <p class="text-sm text-slate-500">
+        Matrículas
+      </p>
+
+      <h3 class="text-3xl font-bold text-amber-500 mt-2">
+        6
+      </h3>
+
+      <p class="text-xs text-slate-400 mt-2">
+        Configuradas
+      </p>
+
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-6">
+
+    <div class="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-1 gap-4">
+
+      <input type="text" placeholder="Buscar concepto..."
+        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 text-sm">
+
+        <option>Gestión</option>
+        <option>2026</option>
+        <option>2027</option>
+
+      </select>
+
+      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 text-sm">
+
+        <option>Carrera</option>
+        <option>Sistemas</option>
+        <option>Contabilidad</option>
+
+      </select>
+
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true">
+      </app-button>
+
+    </div>
+
+  </div>
+
+  <!-- ========================================= -->
+  <!-- TABLA -->
+  <!-- ========================================= -->
+
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <!-- HEADER TABLA -->
+
+    <div class="flex justify-between items-center p-6 border-b border-slate-200">
+
+      <span class="font-semibold text-slate-700">
+
+        Configuración de Cobros
+
+      </span>
+
+      <span class="text-xs text-slate-400">
+
+        18 registros
+
+      </span>
+
+    </div>
+
+    <!-- TABLA -->
+
+    <div class="overflow-x-auto">
+
+      <table class="w-full text-sm">
+
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+
+          <tr>
+
+            <th class="p-4 text-center">
+              Gestión
+            </th>
+
+            <th class="p-4 text-center">
+              Carrera
+            </th>
+
+            <th class="p-4 text-center">
+              Periodo
+            </th>
+
+            <th class="p-4 text-center">
+              Concepto
+            </th>
+
+            <th class="p-4 text-center">
+              Monto
+            </th>
+
+            <th class="p-4 text-center">
+              Vigencia
+            </th>
+
+            <th class="p-4 text-center">
+              Estado
+            </th>
+
+            <th class="p-4 text-center">
+              Acciones
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+
+          <tr class="hover:bg-slate-50 transition">
+
+            <td class="p-4 text-center">
+
+              2026
+
+            </td>
+
+            <td class="p-4 text-center">
+
+              Ingeniería en Sistemas
+
+            </td>
+
+            <td class="p-4 text-center">
+
+              Primer Semestre
+
+            </td>
+
+            <td class="p-4 text-center">
+
+              Mensualidad
+
+            </td>
+
+            <td class="p-4 text-center font-semibold text-blue-700">
+
+              Bs. 250
+
+            </td>
+
+            <td class="p-4 text-center">
+
+              Feb - Jun
+
+            </td>
+
+            <td class="p-4 text-center">
+
+              <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+
+                Activo
+
+              </span>
+
+            </td>
+
+            <td class="p-4">
+
+              <div class="flex justify-center gap-2">
+
+                <app-button label="Cuotas" variant="secondary">
+                </app-button>
+
+                <app-button label="Editar" variant="primary">
+                </app-button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          <tr class="hover:bg-slate-50 transition">
+
+            <td class="p-4 text-center">
+              2026
+            </td>
+
+            <td class="p-4 text-center">
+              Contabilidad
+            </td>
+
+            <td class="p-4 text-center">
+              Anual
+            </td>
+
+            <td class="p-4 text-center">
+              Matrícula
+            </td>
+
+            <td class="p-4 text-center font-semibold text-blue-700">
+              Bs. 120
+            </td>
+
+            <td class="p-4 text-center">
+              Enero - Marzo
+            </td>
+
+            <td class="p-4 text-center">
+
+              <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+
+                Vigente
+
+              </span>
+
+            </td>
+
+            <td class="p-4">
+
+              <div class="flex justify-center gap-2">
+
+                <app-button label="Editar" variant="primary">
+                </app-button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <app-base-modal [isOpen]="registerModalOpen" title="Nuevo Cobro"
+    subtitle="Configure el concepto de cobro para una carrera y gestión académica." size="xl" confirmText="Guardar"
+    cancelText="Cancelar" (confirm)="saveConfiguration()" (cancel)="registerModalOpen = false">
+
+    <div class="grid lg:grid-cols-2 gap-8 p-4">
+      <div class="space-y-5">
+        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">
+          Información General
+        </h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <app-base-input text="Gestión"></app-base-input>
+
+
+          <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400">
+            <option>Carrera</option>
+            <option>SISTMAS</option>
+            <option>ASD</option>
+            <option>SECRE</option>
+
+          </select>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400">
+
+            <option>Concepto</option>
+
+            <option>Matrícula</option>
+
+            <option>Mensualidad</option>
+          </select>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <app-base-input text="Monto" type_i="number">
+          </app-base-input>
+
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <app-base-input text="Fecha Inicio" type_i="date">
+          </app-base-input>
+
+          <app-base-input text="Fecha Fin" type_i="date">
+          </app-base-input>
+
+        </div>
+
+        <div class="bg-slate-50 border rounded-xl p-5 space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-xs text-slate-500">
+                Solo para mensualidades.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+
+            <app-base-input text="Cantidad de Cuotas" type_i="number">
+            </app-base-input>
+
+            <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400">
+              <option value="">Mes Inicial</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ====================================== -->
+      <!-- VISTA PREVIA -->
+      <!-- ====================================== -->
+
+      <div class="space-y-5">
+
+        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">
+
+          Vista Previa
+
+        </h3>
+
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+
+          <div class="grid grid-cols-2 gap-3 text-sm">
+
+            <span class="font-semibold text-slate-600">
+
+              Gestión
+
+            </span>
+
+            <span>
+
+              2026
+
+            </span>
+
+            <span class="font-semibold">
+
+              Carrera
+
+            </span>
+
+            <span>
+
+              Ingeniería en Sistemas
+
+            </span>
+
+            <span class="font-semibold">
+
+              Concepto
+
+            </span>
+
+            <span>
+
+              Mensualidad
+
+            </span>
+
+            <span class="font-semibold">
+
+              Periodo
+
+            </span>
+
+            <span>
+
+              Primer Semestre
+
+            </span>
+
+            <span class="font-semibold">
+
+              Cuotas
+
+            </span>
+
+            <span>
+
+              5
+
+            </span>
+
+            <span class="font-semibold">
+
+              Monto
+
+            </span>
+
+            <span>
+
+              Bs. 250
+
+            </span>
+
+            <span class="font-semibold">
+
+              Total esperado
+
+            </span>
+
+            <span class="font-bold text-blue-700">
+
+              Bs. 1.250
+
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- CUOTAS -->
+
+        <div class="border rounded-xl overflow-hidden">
+
+          <div class="bg-slate-100 p-3 font-semibold">
+
+            Cuotas que serán generadas
+
+          </div>
+
+          <table class="w-full text-sm">
+
+            <thead class="bg-slate-50">
+
+              <tr>
+
+                <th class="p-3">
+
+                  Mes
+
+                </th>
+
+                <th class="p-3">
+
+                  Monto
+
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td class="p-3">
+
+                  Febrero
+
+                </td>
+
+                <td class="p-3">
+
+                  Bs.250
+
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td class="p-3">
+
+                  Marzo
+
+                </td>
+
+                <td class="p-3">
+
+                  Bs.250
+
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td class="p-3">
+
+                  Abril
+
+                </td>
+
+                <td class="p-3">
+
+                  Bs.250
+
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td class="p-3">
+
+                  Mayo
+
+                </td>
+
+                <td class="p-3">
+
+                  Bs.250
+
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td class="p-3">
+
+                  Junio
+
+                </td>
+
+                <td class="p-3">
+
+                  Bs.250
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </app-base-modal>
+</div>
