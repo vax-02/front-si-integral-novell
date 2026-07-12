@@ -37,7 +37,11 @@ export class CoursesComponent implements OnInit {
   perPage = 10;
   lastPage = 1;
   totalCourses = 0;
-
+  totalLimit: number = 0;
+  totalStudentsForCareer: number = 0;
+  
+  totalStudents: number = 0;
+  totalCapacity: number = 0;
   courses: any[] = [];
 
   openModalView: boolean = false;
@@ -73,6 +77,8 @@ export class CoursesComponent implements OnInit {
         next: (response) => {
           this.loading = false;
           this.totalCourses = response.total;
+          this.totalLimit = response.total_limit;
+          this.totalStudentsForCareer = response.total_students
           this.currentPage = response.courses.current_page;
           this.lastPage = response.courses.last_page;
           this.courses = response.courses.data;
@@ -83,8 +89,26 @@ export class CoursesComponent implements OnInit {
         },
       });
   }
-  viewParallels(id: number) {
+  viewParallels(course: any) {
+    this.loadingModal = true;
+    this.courseIdSelect = course.id;
+    this.subtitleNewParallel = course.career.name + ' > ' + course.name;
+
     this.openModalView = true;
+
+    this.parallelService.getParallelsByCourse(course.id).subscribe({
+      next: (resp) => {
+        console.log(resp);
+        this.loadingModal = false;
+        this.totalStudents = resp.summary.total_students;
+        this.totalCapacity = resp.summary.total_capacity;
+        this.parallels = resp.parallels;
+      },
+      error: (err) => {
+        console.log(err);
+        this.loadingModal = false;
+      },
+    });
   }
   // ── Búsqueda con debounce ─────────────────────────────────────────────────
   onSearchChange(): void {
@@ -151,7 +175,7 @@ export class CoursesComponent implements OnInit {
       error: (err) => {
         this.loadingModal = false;
         alert(err.error?.message ?? 'Ocurrió un error al guardar.');
-        console.log(err.error.error)
+        console.log(err.error.error);
       },
     });
   }
@@ -164,43 +188,12 @@ export class CoursesComponent implements OnInit {
   }
 
   //añadido
-  parallels = [
-    {
-      id: 1,
-      name: 'A',
-      shift: 'Mañana',
-      students: 28,
-      capacity: 35,
-    },
-
-    {
-      id: 2,
-      name: 'B',
-      shift: 'Tarde',
-      students: 35,
-      capacity: 35,
-    },
-
-    {
-      id: 3,
-      name: 'C',
-      shift: 'Noche',
-      students: 18,
-      capacity: 35,
-    },
-  ];
+  parallels: any[] = [];
 
   selectedParallel: any = null;
 
   selectParallel(parallel: any) {
     this.selectedParallel = parallel;
-  }
-  get totalStudents() {
-    return this.parallels.reduce((a, b) => a + b.students, 0);
-  }
-
-  get totalCapacity() {
-    return this.parallels.reduce((a, b) => a + b.capacity, 0);
   }
 
   schedule = [

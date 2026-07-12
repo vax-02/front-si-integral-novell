@@ -15,7 +15,7 @@ export class ParallelService {
     private auth: AuthService,
   ) {}
   getParallelsByCourse(courseId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl.parallels.index}/${courseId}`, {
+    return this.http.get<any>(`${this.apiUrl.parallels.index}?courseId=${courseId}`, {
       headers: this.getHeaders(),
     });
   }
