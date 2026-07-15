@@ -2,7 +2,7 @@ import { Router, RouterModule, Routes } from '@angular/router';
 import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../../core/services/auth.service';
-
+import { Roles } from '../../core/constants/roles.constants';
 @Component({
   selector: 'app-layout',
   standalone: true,
@@ -12,8 +12,8 @@ import { AuthService, User } from '../../core/services/auth.service';
 })
 export class LayoutComponent {
   private readonly router = inject(Router);
-  user : User | null ;
-  role = 'admin';
+  user!: User;
+  Roles = Roles;
   collapsed = false;
   openAcademico = true;
   openControl = false;
@@ -24,15 +24,14 @@ export class LayoutComponent {
   isMobile = false;
 
   constructor(private auth: AuthService) {
-    this.user = this.auth.user;
-
-  }
-
-  ngOnInit() {
+    this.auth.user$.subscribe((user) => {
+      if (user) {
+        this.user = user;
+       
+      }
+    });
     this.checkScreenSize();
   }
-
-  ngOnDestroy() {}
 
   @HostListener('window:resize')
   checkScreenSize() {
@@ -85,7 +84,7 @@ export class LayoutComponent {
       .join('')
       .toUpperCase();
   }
-  getColor(nombre : string = ''): string {
+  getColor(nombre: string = ''): string {
     const colors = [
       'bg-blue-600',
       'bg-red-500',

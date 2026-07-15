@@ -23,4 +23,23 @@ export const API_ENDPOINTS = {
   parallels: {
     index: `${API_BASE_URL}/parallels`,
   },
+  concepts :{
+    index : `${API_BASE_URL}/concepts`,
+    store: `${API_BASE_URL}/concepts`,
+    update: (id: number) => `${API_BASE_URL}/concepts/${id}`,
+    delete: (id: number) => `${API_BASE_URL}/concepts/${id}`,
+    show: (id: number) => `${API_BASE_URL}/concepts/${id}`,
+  },
+  studentCareers: {
+    index: `${API_BASE_URL}/student-careers`,
+    store: `${API_BASE_URL}/student-careers`,
+    withdraw: (studentId: number, careerId: number) => `${API_BASE_URL}/students/${studentId}/withdraw/${careerId}`,
+    reinstate: (studentId: number, careerId: number) => `${API_BASE_URL}/students/${studentId}/reinstate/${careerId}`,
+    getByStudent: (studentId: number) => `${API_BASE_URL}/students/${studentId}/careers`,
+    getActiveByCareer: (careerId: number, gestion: number) => `${API_BASE_URL}/careers/${careerId}/active-students/${gestion}`,
+  },
+
+  pays: {
+    index : `${API_BASE_URL}/pays`,
+  }
 } as const;

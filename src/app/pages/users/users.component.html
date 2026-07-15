@@ -62,7 +62,7 @@
             grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4">
 
     <input [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Buscar por nombre o email..." class="border border-slate-200 rounded-lg px-3 py-2 sm:px-4 sm:py-2 
-           focus:ring-2 focus:ring-indigo-400 outline-none lg:col-span-1">
+           focus:ring-2 focus:ring-blue-400 outline-none lg:col-span-1">
 
     <div class="lg:col-span-1">
       <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="loadUsers()">
@@ -90,7 +90,7 @@
           <tr>
             <th class="p-3 sm:p-4 text-left">Nombre Completo</th>
             <th class="p-3 sm:p-4 text-center">Celular</th>
-            <th class="p-3 sm:p-4 text-center">Rol</th>
+            <th class="p-3 sm:p-4 text-center">Roles</th>
             <th class="p-3 sm:p-4 text-center">Estado</th>
             <th class="p-3 sm:p-4 text-center">Acciones</th>
           </tr>
@@ -101,16 +101,22 @@
           <tr *ngFor="let user of users" class="hover:bg-slate-50 transition">
 
             <td class="p-3 sm:p-4">
-              <div class="font-semibold text-slate-700">{{ user.name }}</div>
+              <div class="font-semibold text-slate-700">{{ user.name }}{{ user.first_lastname }}
+                {{ user.second_lastname }}</div>
               <div class="text-xs text-slate-400">{{ user.email }}</div>
             </td>
 
             <td class="p-3 sm:p-4 text-center">{{ user.cellphone ? user.cellphone : 'No definido' }}</td>
 
             <td class="p-3 sm:p-4 text-center">
-              <span
-                class="bg-indigo-100 text-indigo-600 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold uppercase">
-                {{user.role.name }}
+              <span *ngFor="let rol of user.user_role"
+                class="bg-blue-100 text-blue-600 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold uppercase">
+                {{rol.role.name }}
+              </span>
+
+              <span *ngIf="!user.user_role || user.user_role.length === 0"
+                class="bg-blue-100 text-blue-600 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold uppercase">
+                Sin roles
               </span>
             </td>
             <td class="p-3 sm:p-4 text-center">
@@ -126,7 +132,8 @@
             <td class="p-3 sm:p-4 text-center">
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
 
-                <button (click)="openEditModal(user)"
+
+                <button (click)="openEditModal(user)" title="Editar"
                   class="bg-amber-500 text-white px-2 rounded-lg hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
                   <i class="text-lg fas fa-edit"></i>
                 </button>
@@ -136,6 +143,15 @@
     : 'bg-green-500 text-white hover:bg-green-600'" class="px-2 rounded-lg  transition"
                   title="{{ user.status ? 'Bloquear' : 'Desbloquear' }}">
                   <i class="text-lg fas" [ngClass]="user.status ? 'fa-unlock' : 'fa-lock'"></i>
+                </button>
+
+                <button (click)="openManageRoles(user)" title="Roles"
+                  class="bg-blue-500 text-white px-2 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition">
+                  <i class="fa-solid fa-users-gear"></i>
+                </button>
+                <button (click)="openResetPasswordModal(user)" title="Resetear Contraseña"
+                  class="bg-green-500 text-white px-2 rounded-lg hover:bg-green-300 hover:border-3 hover:border-green-500 transition">
+                  <i class="fa-solid fa-key fa-rotate-90"></i>
                 </button>
 
               </div>
@@ -170,7 +186,7 @@
           Anterior
         </button>
 
-        <span class="px-3 py-1 bg-indigo-600 text-white rounded">
+        <span class="px-3 py-1 bg-blue-600 text-white rounded">
           {{ currentPage }}
         </span>
 
@@ -219,10 +235,13 @@
                 </span>
               </p>
             </div>
-            <div class="space-y-1">
+
+            <div *ngIf="editingUserId == null" class="space-y-1">
               <select formControlName="role_id" class="w-full px-3 py-2 rounded-xl border border-slate-300">
                 <option [ngValue]="null">Seleccione un rol</option>
-                <option *ngFor="let role of roles | slice:0:2" [value]="role.id">{{ role.name }}</option>
+                <option [value]="roles.ADMIN.id">{{ roles.ADMIN.name }}</option>
+                <option [value]="roles.SECRETARIA.id">{{ roles.SECRETARIA.name }}</option>
+
               </select>
               <p class="text-rose-600 text-xs" *ngIf="f['role_id'].invalid && f['role_id'].touched">
                 <span *ngIf="f['role_id'].errors?.['required']">El rol es obligatorio.</span>
@@ -257,5 +276,58 @@
       </div>
     </form>
   </app-base-modal>
+
+  <app-base-modal [isOpen]="modalRoles" [loading]="loadingModal" title="Gestión de roles"
+    [subtitle]="subtitleModalRoles" size="md" confirmText="Guardar" cancelText="Cancelar" (confirm)="changeRoles()"
+    (cancel)="modalRoles = false">
+    <form [formGroup]="form">
+      <div class="space-y-4">
+        <h2 class="text-md font-semibold text-slate-700 border-l-4 border-blue-500 pl-2">
+          Roles
+        </h2>
+        <div class="grid grid-cols-2 gap-2">
+
+          <div *ngFor="let role of RolesList" class="flex items-center justify-between px-3 py-2 rounded-md border text-xs"
+            [ngClass]="hasRole(role.id)
+        ? 'bg-green-50 border-green-300'
+        : 'bg-gray-50 border-gray-200'">
+
+            <div class="flex items-center gap-2">
+              <span [ngClass]="hasRole(role.id)
+            ? 'text-green-700 font-medium'
+            : 'text-gray-500'">
+                {{ role.name }}
+              </span>
+
+            </div>
+
+            <button (click)="toggleRole(role)" class="text-[10px] px-2 py-1 rounded transition bg-blue-100 text-red-600">
+
+              <i class="fa-solid text-xs" [ngClass]="hasRole(role.id)
+            ? 'fa-circle-check text-green-600'
+            : 'fa-circle text-gray-400'">
+              </i>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </form>
+  </app-base-modal>
+
+  <app-base-modal-confirm
+    [isOpen]="modalConfirmReset"
+    title="Restablecer Contraseña"
+    message="¿Estás seguro de restablecer la contraseña de este usuario? Se asignará su C.I. como nueva contraseña."
+    confirmText="Sí, restablecer"
+    cancelText="Cancelar"
+    [loading]="resetLoading"
+    (confirm)="confirmResetPassword()"
+    (cancel)="cancelResetPassword()">
+  </app-base-modal-confirm>
 
 </div>

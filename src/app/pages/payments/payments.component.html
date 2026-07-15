@@ -4,11 +4,9 @@
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
     <div>
       <h1 class="text-2xl font-bold text-slate-800">Gestión de Pagos</h1>
-      <p class="text-sm text-slate-500">Administra pensiones, mensualidades y el historial financiero de estudiantes.
+      <p class="text-sm text-slate-500">Realiza pagos de los estudiantes
       </p>
     </div>
-
-    <app-button label="Registrar pago" variant="primary" (click)="openRegisterModal()"></app-button>
   </div>
 
   <!-- TARJETAS RESUMEN -->
@@ -58,191 +56,326 @@
   </div>
 
 
-  <!-- TABLA DE USUARIOS -->
+  <!-- TABLA DE ESTUDIANTES -->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
-    <div class="flex justify-between items-center p-6 border-b border-slate-200">
-      <span class="font-semibold text-slate-700">Lista de Estudiantes</span>
-      <span class="text-xs text-slate-400">1,338 usuarios registrados</span>
+    <!-- HEADER -->
+    <div
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 sm:p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de estudiantes</span>
+      <span class="text-xs text-slate-400">{{ totalStudents }} estudiantes registrados</span>
     </div>
 
-    <table class="w-full text-sm">
-      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-        <tr>
-          <th class="p-4 text-left">Estudiante</th>
-          <th class="p-4 text-center">C.I.</th>
-          <th class="p-4 text-center">Carrera</th>
-          <th class="p-4 text-center">Estado</th>
+    <!-- TABLE WRAPPER RESPONSIVE -->
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[800px] text-sm">
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-4 text-left">Estudiante</th>
+            <th class="p-4 text-center">C.I.</th>
+            <th class="p-4 text-center">Carrera</th>
+            <th class="p-4 text-center">Estado</th>
+            <th class="p-4 text-center">Acciones</th>
+          </tr>
+        </thead>
 
-          <th class="p-4 text-center">Acciones</th>
-        </tr>
-      </thead>
+        <tbody class="divide-y divide-slate-100">
 
-      <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let student of students" class="hover:bg-slate-50 transition">
+            <td class="p-4">
+              <div class="font-semibold text-slate-700">{{ student.user.name }} {{ student.user.first_lastname }}
+                {{ student.user.second_lastname }}</div>
+              <div class="text-xs text-slate-400">{{ student.user.email }}</div>
+            </td>
+            <td class="p-4 text-center">{{ student.user.ci }}</td>
+            <td class="p-4 text-center">
+              <span *ngFor="let career of student.careers"
+                class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
+                {{ career.name }}
+              </span>
+            </td>
+            <td class="p-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="{
+                'bg-emerald-100 text-emerald-600': student.user.status,
+                'bg-rose-100 text-rose-600': !student.user.status
+              }">
+                {{ student.user.status ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="p-4 text-center">
+              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+                <app-button *ngIf="student.user.status == 1" icon="fa-solid fa-eye" [variant]="'primary'"
+                  title="Ver detalle" (click)="openDetail(student)">
+                </app-button>
 
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4">
-            <div class="font-semibold text-slate-700">Carlos Mendoza</div>
-            <div class="text-xs text-slate-400">carlos.mxinstituto.edu</div>
-          </td>
-          <td class="p-4 text-center">12345678</td>
-          <td class="p-4 text-center">Diseño Grafico</td>
+              </div>
+            </td>
+          </tr>
 
-          <td class="p-4 text-center">
-            <span
-              class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">Sin deudas</span>
-          </td>
-          
-          <td class="p-4 text-center space-x-2">
-            <app-button label="Ver" variant="primary" (click)="openDetailModal()"></app-button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <tr *ngIf="loading">
+            <td colspan="5" class="p-4 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <span>Cargando estudiantes...</span>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && students.length === 0">
+            <td colspan="5" class="p-6 text-center text-slate-400 text-sm">
+              No se encontraron estudiantes.
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
+
+      <p class="text-xs text-slate-500">
+        Mostrando {{ from }} - {{ to }} de {{ totalStudents }} estudiantes
+      </p>
+
+      <div class="flex gap-2">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Anterior
+        </button>
+
+        <span class="px-3 py-1 bg-blue-600 text-white rounded">
+          {{ currentPage }}
+        </span>
+
+        <button (click)="nextPage()" [disabled]="currentPage === lastPage"
+          class="px-3 py-1 border rounded disabled:opacity-50">
+          Siguiente
+        </button>
+      </div>
+
+    </div>
+
   </div>
 
-  <!--MODALS -->
-  <app-base-modal [isOpen]="registerModalOpen" title="Registrar pago" subtitle="Registro de mensualidad" size="lg"
-    confirmText="Registrar" cancelText="Cancelar" (confirm)="savePayment()" (cancel)="registerModalOpen = false">
-    <!-- CONTENIDO DINÁMICO -->
-    <div class="flex flex-col items-center gap-6 p-3">
+  <app-base-modal [isOpen]="modalDetail" title="Historial de pago" subtitle="Historial de mensualidades" size="lg"
+    [loading]="loadingModalData" confirmText="Aceptar" (confirm)="modalDetail = false"
+    (cancel)="detailModalOpen = false">
+    <div class="bg-white rounded-xl p-6">
 
-      <!-- Estudiante -->
-      <div class="w-full max-w-md">
-        <div class="grid grid-cols-[1fr_auto] gap-3 items-center">
-          <app-base-input text="C.I. del Estudiate"/>
-          <app-button label="Buscar"></app-button>
-        </div>
-      </div>
+      <div class="flex flex-col lg:flex-row justify-between gap-6">
 
-      <!-- Pagos -->
-      <div class="w-full max-w-lg">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <app-base-input text="Monto" type_i="number"/>
-          <app-base-input text="Descuento" type_i="number"/>
+        <div class="flex items-center gap-4">
+
+          <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+
+            <i class="fa-solid fa-user-graduate text-2xl text-blue-600"></i>
+
+          </div>
+
+          <div>
+
+            <h2 class="text-xl font-bold text-slate-800">
+
+              {{ studentSelected.user.name }}
+              {{ studentSelected.user.first_lastname }}
+              {{ studentSelected.user.second_lastname }}
+
+            </h2>
+
+            <p class="text-sm text-slate-500">
+
+              C.I. {{ studentSelected.user.ci }}
+
+            </p>
+
+            <div class="flex flex-wrap gap-2 mt-2">
+
+              <span *ngFor="let career of studentSelected.careers"
+                class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+
+                {{ career.name }}
+
+              </span>
+
+            </div>
+
+          </div>
+
         </div>
+
+        <!-- Resumen -->
+
+        <div class="grid grid-cols-2 gap-3">
+
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
+
+            <p class="text-xs text-slate-500">
+
+              Total Pagado
+
+            </p>
+
+            <h3 class="text-xl font-bold text-emerald-600">
+
+              Bs. 1200
+
+            </h3>
+
+          </div>
+
+          <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 text-center">
+
+            <p class="text-xs text-slate-500">
+
+              Pendiente
+
+            </p>
+
+            <h3 class="text-xl font-bold text-rose-600">
+
+              Bs. 320
+
+            </h3>
+
+          </div>
+
+        </div>
+
       </div>
 
     </div>
 
-    <div class="grid grid-cols-1 gap-6 p-6">
 
-      <h3 class="text-center text-lg font-bold text-slate-800">Información del Pago</h3>
+    <div class="space-y-6">
 
-      <!-- Datos principales -->
-      <div class="grid grid-cols-2 gap-4">
-        <p class="font-semibold text-slate-600">Nombre completo:</p>
-        <p class="text-slate-700">Juan Carlos Núñez</p>
+      <div *ngFor="let group of pays" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
 
-        <p class="font-semibold text-slate-600">Carrera:</p>
-        <p class="text-slate-700">Ingeniería en Sistemas</p>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 
-        <p class="font-semibold text-slate-600">CI:</p>
-        <p class="text-slate-700">78965412</p>
-      </div>
+          <div class="flex justify-between items-center px-5 py-3 border-b bg-slate-50">
 
-      <!-- Datos de pagos -->
-      <h4 class="text-md font-semibold text-slate-800 border-b border-slate-200 pb-2 mt-4">Detalles de Pago</h4>
+            <div class="flex items-center gap-3">
 
-      <div class="grid grid-cols-2 gap-4 mt-2">
-        <p class="font-semibold text-slate-600">Monto a pagar:</p>
-        <p class="text-slate-700">Bs. 350</p>
+              <i class="fa-solid fa-graduation-cap text-blue-600 text-lg">
+              </i>
 
-        <p class="font-semibold text-slate-600">Descuento:</p>
-        <p class="text-slate-700">Bs. 50</p>
+              <div>
 
-        <p class="font-semibold text-slate-600">Pagos extra:</p>
-        <p class="text-slate-700">Bs. 20</p>
-      </div>
+                <h3 class="font-semibold text-slate-700">
 
-      <!-- Totales -->
-      <div class="grid grid-cols-2 gap-4 mt-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
-        <p class="font-semibold text-slate-800">Total a pagar:</p>
-        <p class="font-bold text-blue-700">Bs. 320</p>
-      </div>
+                  {{ group.career.name }}
 
-    </div>
-  </app-base-modal>
+                </h3>
 
+                <small class="text-slate-500">
 
-  <app-base-modal [isOpen]="detailModalOpen" title="Historial de pago" subtitle="Historial de mensualidades" size="lg"
-    confirmText="Aceptar"  (confirm)="detailModalOpen = false" (cancel)="detailModalOpen = false">
+                  {{ group.pays.length }} conceptos registrados
 
-    <div class="flex flex-col gap-6 p-6 w-full max-w-3xl">
-      <!-- Cabecera del estudiante -->
-      <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-        <div>
-          <h3 class="text-lg font-bold text-slate-800">Juan Carlos Núñez</h3>
-          <p class="text-sm text-slate-500">C.I.: 78965412</p>
-          <p class="text-sm text-slate-500">Carrera: Ingeniería en Sistemas</p>
+                </small>
+
+              </div>
+
+            </div>
+
+            <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full">
+
+              Gestión {{ group.pays[0].concept.gestion }}
+
+            </span>
+
+          </div>
+          <!-- Tabla -->
+          <div class="overflow-x-auto">
+
+            <table class="w-full text-sm">
+
+              <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+
+                <tr>
+
+                  <th class="px-4 py-3 text-left">Tipo</th>
+                  <th class="px-4 py-3 text-left">Concepto</th>
+                  <th class="px-4 py-3 text-left">Monto</th>
+                  <th class="px-4 py-3 text-center">Estado</th>
+                  <th class="px-4 py-3 text-center">Acciones</th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr *ngFor="let pay of group.pays" class="border-t hover:bg-slate-50 transition">
+
+                  <td class="px-4 py-3">
+
+                    <span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
+
+                      {{ pay.concept.type }}
+
+                    </span>
+
+                  </td>
+
+                  <td class="px-4 py-3 font-medium">
+
+                    {{ pay.detail }}
+
+                  </td>
+
+                  <td class="px-4 py-3 font-semibold text-emerald-600">
+
+                    Bs. {{ pay.amount }}
+
+                  </td>
+
+                  <td class="px-4 py-3 text-center">
+
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold" [ngClass]="{
+                  'bg-green-100 text-green-700': pay.status === 'Pagado',
+                  'bg-yellow-100 text-yellow-700': pay.status === 'Pendiente',
+                  'bg-red-100 text-red-700': pay.status === 'Vencido'
+                }">
+
+                      {{ pay.status }}
+
+                    </span>
+
+                  </td>
+
+                  <td class="px-4 py-3 text-center">
+
+                    <button *ngIf="pay.status !== 'Pagado'" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg
+                       bg-blue-600 hover:bg-blue-700 text-white
+                       transition-all duration-200 shadow-sm hover:shadow-md">
+
+                      <i class="fa-solid fa-print"></i>
+
+                      <span class="hidden md:inline">
+                        Imprimir
+                      </span>
+
+                    </button>
+
+                    <span *ngIf="pay.status === 'Pagado'" class="text-slate-400">
+
+                      —
+
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
         </div>
 
-        <div class="flex gap-4 mt-2 md:mt-0">
-          <p class="font-semibold text-slate-700">Total Pagado: <span class="text-emerald-600">Bs. 1,200</span></p>
-          <p class="font-semibold text-slate-700">Total Pendiente: <span class="text-rose-600">Bs. 320</span></p>
-        </div>
-      </div>
-
-      <!-- Tabla de historial -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm border border-slate-200 rounded-lg">
-          <thead class="bg-blue-50 text-slate-600 uppercase text-xs tracking-wider">
-            <tr>
-              <th class="p-3 text-left">Fecha</th>
-              <th class="p-3 text-left">Concepto</th>
-              <th class="p-3 text-left">Monto</th>
-              <th class="p-3 text-left">Estado</th>
-              <th class="p-3 text-left">Recibo</th>
-
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr class="hover:bg-blue-50 transition">
-              <td class="p-3">05/03/2026</td>
-              <td class="p-3">Pensión Marzo 2026</td>
-              <td class="p-3 font-semibold">Bs. 350</td>
-              <td class="p-3">
-                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
-                  Pagado
-                </span>
-              </td>
-              
-              <td class="p-3">
-                <i class="fa-solid fa-print"></i>
-
-              </td>
-            </tr>
-            <tr class="hover:bg-blue-50 transition">
-              <td class="p-3">05/02/2026</td>
-              <td class="p-3">Pensión Febrero 2026</td>
-              <td class="p-3 font-semibold">Bs. 350</td>
-              <td class="p-3">
-                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-semibold">
-                  Pendiente
-                </span>
-              </td>
-            </tr>
-            <tr class="hover:bg-blue-50 transition">
-              <td class="p-3">05/01/2026</td>
-              <td class="p-3">Pensión Enero 2026</td>
-              <td class="p-3 font-semibold">Bs. 350</td>
-              <td class="p-3">
-                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
-                  Pagado
-                </span>
-              </td>
-              <td class="p-3">
-                <i class="fa-solid fa-print"></i>
-
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Total de deudas -->
-      <div class="mt-4 flex justify-end">
-        <p class="font-semibold text-slate-800">Total Pendiente: <span class="text-rose-600">Bs. 320</span></p>
       </div>
     </div>
   </app-base-modal>

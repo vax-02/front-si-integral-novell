@@ -1,0 +1,527 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">
+        Gestión de Capacitaciones y Cursos Vacacionales
+      </h1>
+
+      <p class="text-sm text-slate-500">
+        Administración de cursos intensivos, talleres y programas especiales
+      </p>
+    </div>
+
+    <div class="self-start sm:self-auto flex gap-2">
+      <button (click)="openModal()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition">
+        <i class="fas fa-plus"></i>
+        Nuevo Curso
+      </button>
+    </div>
+
+  </div>
+
+  <!-- FILTROS Y BÚSQUEDA -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input type="text" placeholder="Buscar curso..."
+          class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+      </div>
+
+      <select
+        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+        <option value="">Todos los tipos</option>
+        <option value="vacacional">Vacacional</option>
+        <option value="taller">Taller</option>
+      </select>
+
+      <select  (ngModelChange)="applyFilters()"
+        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+        <option value="">Todas las modalidades</option>
+        <option value="presencial">Presencial</option>
+        <option value="virtual">Virtual</option>
+        <option value="hibrido">Híbrido</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Total Cursos</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">
+        {{ stats.total || 0 }}
+      </h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-green-100">
+      <p class="text-sm text-slate-500">Activos</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">
+        {{ stats.active || 0 }}
+      </h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-purple-100">
+      <p class="text-sm text-slate-500">Inscritos</p>
+      <h3 class="text-2xl font-bold text-purple-600 mt-1">
+        {{ stats.enrolled || 0 }}
+      </h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-amber-100">
+      <p class="text-sm text-slate-500">Cupos disponibles</p>
+      <h3 class="text-2xl font-bold text-amber-600 mt-1">
+        {{ stats.available || 0 }}
+      </h3>
+    </div>
+
+  </div>
+
+  <!-- TABLA DE CURSOS -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de capacitaciones</span>
+      <span class="text-xs text-slate-400">{{ filteredCourses.length }} cursos registrados</span>
+    </div>
+
+    <!-- Contenedor responsive -->
+    <div class="overflow-x-auto">
+      <table class="min-w-[1000px] w-full text-sm">
+
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-4 text-left">Curso</th>
+            <th class="p-4 text-center">Tipo</th>
+            <th class="p-4 text-center hidden md:table-cell">Modalidad</th>
+            <th class="p-4 text-center">Fechas</th>
+            <th class="p-4 text-center hidden lg:table-cell">Horario</th>
+            <th class="p-4 text-center">Cupos</th>
+            <th class="p-4 text-center hidden xl:table-cell">Estado</th>
+            <th class="p-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+
+          <tr *ngIf="loading">
+            <td colspan="8" class="p-6 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <span>Cargando cursos...</span>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && filteredCourses.length === 0">
+            <td colspan="8" class="p-6 text-center text-slate-500">
+              No se encontraron cursos. ¡Crea uno nuevo!
+            </td>
+          </tr>
+
+          <tr *ngFor="let course of filteredCourses" class="hover:bg-slate-50 transition">
+
+            <td class="px-6 py-4">
+              <div>
+                <p class="font-semibold text-slate-800">{{ course.name }}</p>
+                <p class="text-xs text-slate-400">{{ course.code || 'Sin código' }}</p>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getTypeBadge(course.type)">
+                {{ getTypeLabel(course.type) }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 text-center hidden md:table-cell">
+              <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getModalityBadge(course.modality)">
+                {{ getModalityLabel(course.modality) }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              <div class="text-xs">
+                <div>{{ course.start_date | date:'dd/MM/yyyy' }}</div>
+                <div class="text-slate-400">al</div>
+                <div>{{ course.end_date | date:'dd/MM/yyyy' }}</div>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-center hidden lg:table-cell">
+              <span class="text-sm">
+                {{ course.schedule || 'Por definir' }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              <div class="flex flex-col items-center">
+                <span class="font-semibold text-slate-700">
+                  {{ course.enrolled || 0 }}/{{ course.capacity || 0 }}
+                </span>
+                <div class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" [ngClass]="getProgressColor(course)"
+                    [style.width]="getProgress(course) + '%'">
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-center hidden xl:table-cell">
+              <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusBadge(course.status)">
+                {{ getStatusLabel(course.status) }}
+              </span>
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <div class="flex justify-center gap-2">
+                <button (click)="viewDetails(course)"
+                  class="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">
+                  <i class="fas fa-eye"></i>
+                </button>
+
+                <button (click)="openEditModal(course)"
+                  class="bg-amber-500 text-white p-2 rounded-lg hover:bg-amber-600 transition">
+                  <i class="fas fa-pen"></i>
+                </button>
+
+                <button (click)="openConfirmDelete(course)"
+                  class="bg-rose-500 text-white p-2 rounded-lg hover:bg-rose-600 transition">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 border-t border-slate-200">
+      <span class="text-sm text-slate-500">
+        Mostrando {{ (page - 1) * pageSize + 1 }} -
+        {{ Math.min(page * pageSize, filteredCourses.length) }} de {{ filteredCourses.length }}
+      </span>
+
+      <div class="flex gap-2">
+        <button (click)="prevPage()" [disabled]="page === 1"
+          class="px-3 py-1 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <span class="px-3 py-1 rounded-lg bg-blue-600 text-white">
+          {{ page }}
+        </span>
+
+        <button (click)="nextPage()" [disabled]="page >= totalPages"
+          class="px-3 py-1 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ MODAL CREAR/EDITAR ============ -->
+  <app-base-modal [isOpen]="modalOpen" [title]="isEditMode ? 'Editar Curso' : 'Nuevo Curso de Capacitación'"
+    [subtitle]="isEditMode ? 'Actualizar información del curso' : 'Registrar un nuevo curso de capacitación o vacacional'"
+    size="xl" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveCourse()" (cancel)="closeModal()"
+    [loading]="saving">
+
+    <form [formGroup]="courseForm" class="space-y-6">
+
+      <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fas fa-info-circle text-blue-600"></i>
+          Información General
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Nombre del Curso <span class="text-red-500">*</span>
+            </label>
+            <input type="text" formControlName="name"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Ej: Curso de Excel Avanzado">
+            <p *ngIf="courseForm.get('name')?.invalid && courseForm.get('name')?.touched"
+              class="mt-1 text-sm text-red-600">
+              El nombre es obligatorio
+            </p>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Código del Curso
+            </label>
+            <input type="text" formControlName="code"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Ej: EXCEL-2026-01">
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Tipo de Curso <span class="text-red-500">*</span>
+            </label>
+            <select formControlName="type"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+              <option value="">Seleccionar...</option>
+              <option value="vacacional">Vacacional</option>
+              <option value="taller">Taller</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Modalidad <span class="text-red-500">*</span>
+            </label>
+            <select formControlName="modality"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+              <option value="">Seleccionar...</option>
+              <option value="presencial">Presencial</option>
+              <option value="virtual">Virtual</option>
+              <option value="hibrido">Híbrido</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: FECHAS Y HORARIOS -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fas fa-calendar-alt text-blue-600"></i>
+          Fechas y Horarios
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Fecha de Inicio <span class="text-red-500">*</span>
+            </label>
+            <input type="date" formControlName="start_date"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Fecha de Fin <span class="text-red-500">*</span>
+            </label>
+            <input type="date" formControlName="end_date"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Horario
+            </label>
+            <input type="text" formControlName="schedule"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Ej: Lunes y Miércoles 8:00-10:00">
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: CAPACIDAD Y COSTO -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fas fa-users text-blue-600"></i>
+          Cupos y Costos
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Capacidad Máxima <span class="text-red-500">*</span>
+            </label>
+            <input type="number" formControlName="capacity"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Ej: 30">
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Costo (Bs)
+            </label>
+            <input type="number" formControlName="cost"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Ej: 500">
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Estado <span class="text-red-500">*</span>
+            </label>
+            <select formControlName="status"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+              <option value="1">Activo</option>
+              <option value="0">Inactivo</option>
+              <option value="2">Completado</option>
+              <option value="3">Cancelado</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4: DESCRIPCIÓN -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fas fa-file-alt text-blue-600"></i>
+          Descripción
+        </h4>
+
+        <div>
+          <label class="text-sm font-medium text-slate-700 block mb-1">
+            Descripción del Curso
+          </label>
+          <textarea formControlName="description" rows="4"
+            class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            placeholder="Describa el contenido, objetivos y requisitos del curso..."></textarea>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 5: INSTRUCTOR -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fas fa-chalkboard-teacher text-blue-600"></i>
+          Instructor
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Instructor / Facilitador
+            </label>
+            <select formControlName="docente_id"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+              <option value="">Seleccionar instructor...</option>
+              <option *ngFor="let docente of docentes" [value]="docente.id">
+                {{ docente.user?.name }} {{ docente.user?.first_lastname }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-slate-700 block mb-1">
+              Correo de contacto
+            </label>
+            <input type="email"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="capacitaciones@instituto.edu">
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+  </app-base-modal>
+
+  <!-- ============ MODAL VER DETALLES ============ -->
+  <app-base-modal [isOpen]="modalDetailsOpen" title="Detalles del Curso" [subtitle]="selectedCourse?.name || ''"
+    size="xl" confirmText="Cerrar" cancelText="" (confirm)="closeDetails()">
+
+    <div *ngIf="selectedCourse" class="space-y-6">
+
+      <!-- Información General -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Tipo</p>
+          <p class="font-medium">{{ getTypeLabel(selectedCourse.type) }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Modalidad</p>
+          <p class="font-medium">{{ getModalityLabel(selectedCourse.modality) }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Fechas</p>
+          <p class="font-medium">{{ selectedCourse.start_date | date:'dd/MM/yyyy' }} -
+            {{ selectedCourse.end_date | date:'dd/MM/yyyy' }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Estado</p>
+          <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusBadge(selectedCourse.status)">
+            {{ getStatusLabel(selectedCourse.status) }}
+          </span>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Cupos</p>
+          <p class="font-medium">{{ selectedCourse.enrolled || 0 }}/{{ selectedCourse.capacity || 0 }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Costo</p>
+          <p class="font-medium">Bs {{ selectedCourse.cost || 0 }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4 md:col-span-2">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Horario</p>
+          <p class="font-medium">{{ selectedCourse.schedule || 'No definido' }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4 md:col-span-2" *ngIf="selectedCourse.description">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Descripción</p>
+          <p class="text-slate-700 mt-1">{{ selectedCourse.description }}</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4" *ngIf="selectedCourse.docente">
+          <p class="text-xs text-slate-400 uppercase font-semibold">Instructor</p>
+          <p class="font-medium">{{ selectedCourse.docente.user?.name }}
+            {{ selectedCourse.docente.user?.first_lastname }}</p>
+        </div>
+      </div>
+
+      <!-- Lista de Inscritos (si existe) -->
+      <div *ngIf="1 > 0" class="border-t border-slate-200 pt-4">
+        <h4 class="font-semibold text-slate-700 mb-3">Estudiantes Inscritos</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-4 py-2 text-left">Estudiante</th>
+                <th class="px-4 py-2 text-left">CI</th>
+                <th class="px-4 py-2 text-center">Fecha de Inscripción</th>
+                <th class="px-4 py-2 text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let enrollment of selectedCourse.enrollments">
+                <td class="px-4 py-2">{{ enrollment.student?.user?.name }}
+                  {{ enrollment.student?.user?.first_lastname }}</td>
+                <td class="px-4 py-2">{{ enrollment.student?.user?.ci }}</td>
+                <td class="px-4 py-2 text-center">{{ enrollment.created_at | date:'dd/MM/yyyy' }}</td>
+                <td class="px-4 py-2 text-center">
+                  <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    Activo
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </app-base-modal>
+
+  <!-- ============ MODAL CONFIRMAR ELIMINAR ============ -->
+  <app-base-modal-confirm [isOpen]="confirmDeleteOpen" title="Eliminar Curso"
+    message="¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer." confirmText="Sí, eliminar"
+    cancelText="Cancelar" [loading]="deleting" (confirm)="deleteCourse()" (cancel)="closeConfirmDelete()">
+  </app-base-modal-confirm>
+
+</div>

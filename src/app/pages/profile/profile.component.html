@@ -6,18 +6,41 @@
     <div class="flex-shrink-0">
       <div
         class="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white flex items-center justify-center text-2xl md:text-3xl lg:text-4xl font-bold shadow-md">
-        {{ getIniciales(user?.name) }}
+        {{ getIniciales(user.name) }}
       </div>
     </div>
 
     <!-- INFO PRINCIPAL -->
     <div class="flex-1 text-center sm:text-left">
-      <h2 class="text-md md:text-xl lg:text-xl font-bold text-slate-800">{{ user?.name }}</h2>
-      <p class="text-slate-500 lg:text-sm text-sm md:text-base">{{ user?.email }}</p>
+      <h2 class="text-md md:text-xl lg:text-xl font-bold text-slate-800">{{ user.name }}</h2>
+      <p class="text-slate-500 lg:text-sm text-sm md:text-base">{{ user.email }}</p>
 
-      <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
-        {{ user?.role }}
-      </span>
+      <div class="relative w-64 mt-3">
+        <label class="block text-xs font-semibold text-gray-500 mb-2">
+          Rol activo
+        </label>
+        <!-- Botón -->
+        <button (click)="showRoles = !showRoles"
+          class="text-sm flex items-center justify-between rounded-lg border border-gray-300 bg-white px-2 py-1 hover:border-blue-500 transition">
+          <div class="flex items-center gap-3">
+            <span class="font-medium">
+              {{ user.currentRole.name }}
+            </span>
+          </div>
+        </button>
+
+        <!-- Lista -->
+        <div *ngIf="showRoles" class="absolute left-0 right-0 mt-2 rounded-lg border bg-white shadow-lg z-50">
+          <button *ngFor="let role of user.roles" (click)="changeRole(role)"
+            class="flex w-full items-center justify-between px-4 py-3 hover:bg-blue-50 transition">
+            <div class="flex items-center gap-3">
+              {{ role.name }}
+            </div>
+          </button>
+
+        </div>
+
+      </div>
     </div>
 
     <!-- BOTÓN -->
@@ -42,25 +65,25 @@
 
       <div>
         <p class="text-slate-500">Nombre completo</p>
-        <p class="font-semibold text-slate-800">{{ user?.name }} {{ user?.first_lastname }} {{ user?.second_lastname }}
+        <p class="font-semibold text-slate-800">{{ user.name }} {{ user.first_lastname }} {{ user.second_lastname }}
         </p>
       </div>
 
       <div>
         <p class="text-slate-500">Correo electrónico</p>
-        <p class="font-semibold text-slate-800">{{ user?.email }}</p>
+        <p class="font-semibold text-slate-800">{{ user.email }}</p>
       </div>
 
       <div>
         <p class="text-slate-500">Rol</p>
-        <p class="font-semibold text-slate-800">{{ user?.role }}</p>
+        <p class="font-semibold text-slate-800 capitalize">{{ user.currentRole.name }}</p>
       </div>
 
       <div>
         <p class="text-slate-500">Teléfono</p>
         <p class="font-semibold text-slate-800">
-          @if(user?.cellphone) {
-          {{ user?.cellphone }}
+          @if(user.cellphone) {
+          {{ user.cellphone }}
           } @else {
           <span class="text-red-500">No registrado</span>
           }
@@ -71,7 +94,7 @@
   </div>
 
   <!-- SOLO SI ES DOCENTE -->
-  <div class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
+  <div *ngIf="Roles.DOCENTE.id === user.currentRole.id" class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
 
     <h3 class="text-lg font-semibold text-slate-700 border-l-4 border-blue-500 pl-3">
       Información Profesional
@@ -87,8 +110,8 @@
     </div>
   </div>
   <!-- MODAL PARA EDITAR PERFIL -->
-  <app-base-modal [isOpen]="editModalStudent" [loading]="loading" title="Editar Perfil" size="md" confirmText="Actualizar"
-    cancelText="Cancelar" (confirm)="updateProfile()" (cancel)="cancelEdit()">
+  <app-base-modal [isOpen]="editModalStudent" [loading]="loading" title="Editar Perfil" size="md"
+    confirmText="Actualizar" cancelText="Cancelar" (confirm)="updateProfile()" (cancel)="cancelEdit()">
 
     <form [formGroup]="profileForm" class="space-y-4">
 

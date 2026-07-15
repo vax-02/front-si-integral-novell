@@ -78,20 +78,24 @@
               <div class="text-xs text-slate-400">{{ student.user.email }}</div>
             </td>
             <td class="p-4 text-center">{{ student.user.ci }}</td>
-            <td class="p-4 text-center">{{ student.career.name }}</td>
             <td class="p-4 text-center">
-              <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="{
-                'bg-emerald-100 text-emerald-600': student.status,
-                'bg-rose-100 text-rose-600': !student.status
-              }">
-                {{ student.status ? 'Activo' : 'Inactivo' }}
+              <span *ngFor="let career of student.careers" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
+                {{ career.name }}
               </span>
             </td>
             <td class="p-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="{
+                'bg-emerald-100 text-emerald-600': student.user.status,
+                'bg-rose-100 text-rose-600': !student.user.status
+              }">
+                {{ student.user.status ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+                        <td class="p-4 text-center">
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-                <app-button icon="fa-solid fa-eye" [variant]="'primary'" title="Ver" (click)="openModalView()"></app-button>
-                <app-button icon="fa-solid fa-pen" [variant]="'secondary'" title="Editar" (click)="openModalEdit()"></app-button>
-                <app-button icon="fa-solid fa-ellipsis" [variant]="'tertiary'" title="Bajas/readmisión" (click)="openModalOption()"></app-button>
+                <app-button icon="fa-solid fa-eye" [variant]="'primary'" title="Ver" (click)="openModalView(student)"></app-button>
+                <app-button icon="fa-solid fa-pen" [variant]="'secondary'" title="Editar" (click)="openModalEdit(student)"></app-button>
+                <app-button icon="fa-solid fa-ellipsis" [variant]="'tertiary'" title="Bajas/readmisión" (click)="openModalOption(student)"></app-button>
               </div>
             </td>
           </tr>
@@ -150,12 +154,12 @@
           Datos Personales
         </h3>
 
-        <div class="grid md:grid-cols-3 gap-4">
-          <app-base-input text="Nombre" />
-          <app-base-input text="Apellido paterno" />
-          <app-base-input text="Apellido Materno" />
-          <app-base-input text="C.I." />
-        </div>
+          <div class="grid md:grid-cols-3 gap-4">
+            <app-base-input text="Nombre" [(ngModel)]="enrollment.name" />
+            <app-base-input text="Apellido paterno" [(ngModel)]="enrollment.first_lastname" />
+            <app-base-input text="Apellido Materno" [(ngModel)]="enrollment.second_lastname" />
+            <app-base-input text="C.I." [(ngModel)]="enrollment.ci" />
+          </div>
       </div>
 
       <div>
@@ -164,8 +168,8 @@
         </h3>
 
         <div class="grid md:grid-cols-2 gap-4">
-          <app-base-input text="Correo electrónico" />
-          <app-base-input text="Celular" />
+          <app-base-input text="Correo electrónico" [(ngModel)]="enrollment.email" />
+          <app-base-input text="Celular" [(ngModel)]="enrollment.cellphone" />
         </div>
       </div>
 
@@ -177,17 +181,21 @@
         <div class="grid md:grid-cols-2 gap-4">
 
           <select
-            class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition">
-            <option>Carrera</option>
-            <option>Sistemas Informáticos</option>
+            class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+            [(ngModel)]="enrollment.career_id" (change)="onCareerChange()">
+            <option [ngValue]="null">Seleccionar Carrera</option>
+            <option *ngFor="let career of careersForSelect" [ngValue]="career.id">
+              {{ career.name }}
+            </option>
           </select>
 
           <select
-            class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition">
-            <option>Turno</option>
-            <option>Mañana</option>
-            <option>Tarde</option>
-            <option>Noche</option>
+            class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+            [(ngModel)]="enrollment.turno">
+            <option value="">Seleccionar Turno</option>
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noche">Noche</option>
           </select>
         </div>
       </div>
@@ -200,44 +208,81 @@
         <div class="grid md:grid-cols-3 gap-2">
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500" [(ngModel)]="enrollment.birth_certificate">
             Certificado de Nacimiento
           </label>
 
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500" [(ngModel)]="enrollment.school_diploma">
             Título de Bachiller
           </label>
 
           <label
             class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 accent-blue-500">
+            <input type="checkbox" class="w-4 h-4 accent-blue-500" [(ngModel)]="enrollment.carnet">
             Copia de C.I.
           </label>
 
         </div>
       </div>
 
+      <!-- Información de Pago -->
       <div>
         <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
           Información de Pago
         </h3>
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <app-base-input text="Matricula" />
-          <app-base-input text="Mensualidad" />
+        <!-- Validación: No hay conceptos -->
+        <div *ngIf="sinConceptos" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+            <div>
+              <p class="text-sm font-semibold text-red-700">No hay conceptos de pago configurados</p>
+              <p class="text-xs text-red-600">Para la gestión {{ enrollment.gestion }} y la carrera seleccionada no existen conceptos de pago. Debe crear los conceptos (Matrícula/Mensualidad) en Gestión de Cobros antes de inscribir estudiantes.</p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-3 rounded-xl shadow-sm">
-        <h3 class="text-md font-semibold text-slate-700 mb-3 text-center">
-          Resumen
-        </h3>
+        <!-- Cargando conceptos -->
+        <div *ngIf="loadingConceptos" class="flex items-center gap-2 text-slate-500 p-3">
+          <i class="fas fa-spinner fa-spin text-blue-600"></i>
+          <span class="text-sm">Cargando conceptos de pago...</span>
+        </div>
 
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-slate-600">Total inscripción:</span>
-          <span class="text-xl font-bold text-blue-600">Bs. 300</span>
+        <!-- Información de conceptos disponibles (solo informativo) -->
+        <div *ngIf="!sinConceptos && !loadingConceptos" class="space-y-3">
+          <div *ngIf="matriculaConcept" 
+            class="flex items-center gap-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div class="flex-1">
+              <p class="font-semibold text-slate-700">Matrícula</p>
+              <p class="text-xs text-slate-500">{{ matriculaConcept.concept_name }}</p>
+            </div>
+            <span class="text-lg font-bold text-blue-600">Bs. {{ matriculaConcept.amount }}</span>
+          </div>
+
+          <div *ngIf="mensualidadConcept"
+            class="flex items-center gap-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div class="flex-1">
+              <p class="font-semibold text-slate-700">Mensualidad</p>
+              <p class="text-xs text-slate-500">{{ mensualidadConcept.concept_name }} ({{ mensualidadConcept.cuotas }} cuotas)</p>
+            </div>
+            <span class="text-lg font-bold text-blue-600">Bs. {{ mensualidadConcept.amount }}/mes</span>
+          </div>
+
+          <div *ngIf="!matriculaConcept && !mensualidadConcept" class="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+            <p class="text-sm text-yellow-700">
+              <i class="fas fa-info-circle mr-2"></i>
+              No se encontraron conceptos de Matrícula ni Mensualidad activos para esta carrera y gestión.
+            </p>
+          </div>
+
+          <div *ngIf="matriculaConcept || mensualidadConcept" class="bg-green-50 border border-green-200 rounded-xl p-3">
+            <p class="text-sm text-green-700 text-center">
+              <i class="fas fa-check-circle mr-2"></i>
+              Los pagos se generarán automáticamente al inscribir al estudiante.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -245,30 +290,24 @@
 
   </app-base-modal>
 
-  <app-base-modal [isOpen]="viewModalStudent" title="Detalle de estudiante" subtitle="Información general" size="lg"
-    confirmText="Registrar" cancelText="Cancelar" (confirm)="saveStudent()" (cancel)="viewModalStudent = false">
-    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8">
+    <app-base-modal [isOpen]="viewModalStudent" title="Detalle de estudiante" subtitle="Información general" size="lg"
+    cancelText="Cerrar" (cancel)="viewModalStudent = false" [showConfirm]="false">
+    <div class="bg-white p-6 rounded-2xl shadow-lg space-y-8" *ngIf="selectedStudent">
 
       <!-- ===================== -->
       <!-- PERFIL -->
       <!-- ===================== -->
       <div class="flex items-center gap-4">
         <div
-          class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
-          JC
+          class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold uppercase">
+          {{ selectedStudent.user.name.charAt(0) }}{{ selectedStudent.user.first_lastname.charAt(0) }}
         </div>
 
         <div>
-          <h2 class="text-xl font-bold text-slate-800">Juan Carlos Pérez</h2>
-          <p class="text-sm text-slate-500">C.I. 12345678</p>
+          <h2 class="text-xl font-bold text-slate-800">{{ selectedStudent.user.name }} {{ selectedStudent.user.first_lastname }} {{ selectedStudent.user.second_lastname }}</h2>
+          <p class="text-sm text-slate-500">C.I. {{ selectedStudent.user.ci }}</p>
         </div>
 
-        <div class="ml-auto">
-          <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-600">
-            Al día
-          </span>
-          <!-- cambia a rojo si tiene deuda -->
-        </div>
       </div>
 
 
@@ -284,12 +323,12 @@
 
           <div class="bg-slate-50 p-3 rounded-xl">
             <p class="text-slate-500">Correo</p>
-            <p class="font-semibold text-slate-800">juan&#64;email.com</p>
+            <p class="font-semibold text-slate-800">{{ selectedStudent.user.email }}</p>
           </div>
 
           <div class="bg-slate-50 p-3 rounded-xl">
             <p class="text-slate-500">Celular</p>
-            <p class="font-semibold text-slate-800">78945612</p>
+            <p class="font-semibold text-slate-800">{{ enrollment.cellphone || 'N/A' }}</p>
           </div>
 
 
@@ -301,24 +340,18 @@
       <!-- ===================== -->
       <div>
         <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Datos Académicos
+          Carreras Inscritas
         </h3>
 
-        <div class="grid md:grid-cols-3 gap-4 text-sm">
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Carrera</p>
-            <p class="font-semibold text-slate-800">Sistemas Informáticos</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Turno</p>
-            <p class="font-semibold text-slate-800">Noche</p>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl">
-            <p class="text-slate-500">Grado / Curso</p>
-            <p class="font-semibold text-slate-800">2do / 2-B</p>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div *ngFor="let career of selectedStudent.careers" class="bg-slate-50 p-3 rounded-xl flex justify-between items-center">
+            <div>
+              <p class="text-slate-500">Carrera</p>
+              <p class="font-semibold text-slate-800">{{ career.name }}</p>
+            </div>
+            <span class="px-2 py-1 rounded text-xs" [ngClass]="career.pivot?.status === 'ACTIVO' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+              {{ career.pivot?.status || 'ACTIVO' }}
+            </span>
           </div>
         </div>
       </div>
@@ -335,151 +368,122 @@
 
           <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl">
             <span>Certificado de Nacimiento</span>
-            <span class="text-green-600 font-semibold">✔</span>
+            <span [class]="enrollment.birth_certificate ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+              {{ enrollment.birth_certificate ? '✔' : '✘' }}
+            </span>
           </div>
 
           <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl">
             <span>Título de Bachiller</span>
-            <span class="text-green-600 font-semibold">✔</span>
-          </div>
-
-          <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl">
-            <span>Fotografía 3x3</span>
-            <span class="text-red-500 font-semibold">✖</span>
+            <span [class]="enrollment.school_diploma ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+              {{ enrollment.school_diploma ? '✔' : '✘' }}
+            </span>
           </div>
 
           <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl">
             <span>Copia de C.I.</span>
-            <span class="text-green-600 font-semibold">✔</span>
+            <span [class]="enrollment.carnet ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+              {{ enrollment.carnet ? '✔' : '✘' }}
+            </span>
           </div>
 
         </div>
       </div>
-
-      <!-- ===================== -->
-      <!-- PAGOS / DEUDAS -->
-      <!-- ===================== -->
-      <div>
-        <h3 class="text-lg font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
-          Estado de Pagos
-        </h3>
-
-        <div class="grid md:grid-cols-3 gap-4 text-sm">
-
-          <div class="bg-green-50 border border-green-200 p-4 rounded-xl">
-            <p class="text-slate-500">Pagado</p>
-            <p class="text-green-600 font-bold text-lg">Bs. 300</p>
-          </div>
-
-          <div class="bg-red-50 border border-red-200 p-4 rounded-xl">
-            <p class="text-slate-500">Deuda</p>
-            <p class="text-red-600 font-bold text-lg">Bs. 100</p>
-          </div>
-
-          <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl">
-            <p class="text-slate-500">Total</p>
-            <p class="text-blue-600 font-bold text-lg">Bs. 400</p>
-          </div>
-
-        </div>
-      </div>
-
     </div>
   </app-base-modal>
 
-  <app-base-modal [isOpen]="editModalStudent" title="Detalle de estudiante" subtitle="Información general" size="lg"
-    confirmText="Guardar" cancelText="Cancelar" (confirm)="saveStudent()" (cancel)="editModalStudent = false">
-  </app-base-modal>
-
-  <app-base-modal [isOpen]="optionModalStudent" title="Gestion de estado del estudiante"
-    subtitle="Baja o retorno academico" size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="saveStudent()"
-    (cancel)="optionModalStudent = false">
-
+  <app-base-modal [isOpen]="editModalStudent" title="Editar estudiante" subtitle="Información general" size="lg"
+    confirmText="Guardar Cambios" cancelText="Cancelar" (confirm)="saveStudent()" (cancel)="editModalStudent = false">
     <div class="space-y-6">
-
-      <!-- INFO ESTUDIANTE -->
-      <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl">
-        <p class="text-sm text-slate-500">Estudiante</p>
-        <h3 class="font-semibold text-slate-800">Juan Pérez</h3>
-        <p class="text-xs text-slate-500">Sistemas Informáticos • 2do Año</p>
-      </div>
-
-      <!-- TIPO DE ACCIÓN -->
       <div>
-        <label class="text-sm font-medium text-slate-600 mb-2 block">
-          Tipo de acción
-        </label>
-
-        <div class="grid grid-cols-2 gap-3">
-
-          <button (click)="tipo='baja'" [ngClass]="tipo==='baja' 
-            ? 'bg-red-600 text-white' 
-            : 'bg-white text-slate-600 hover:bg-red-50'"
-            class="p-3 rounded-xl border transition flex flex-col items-center gap-2">
-
-            <i class="fa-solid fa-user-xmark text-lg"></i>
-            Baja definitiva
-          </button>
-
-          <button (click)="tipo='congelado'" [ngClass]="tipo==='congelado' 
-            ? 'bg-yellow-500 text-white' 
-            : 'bg-white text-slate-600 hover:bg-yellow-50'"
-            class="p-3 rounded-xl border transition flex flex-col items-center gap-2">
-
-            <i class="fa-solid fa-pause"></i>
-            Congelar
-          </button>
-
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Datos Personales
+        </h3>
+        <div class="grid md:grid-cols-3 gap-4">
+          <app-base-input text="Nombre" [(ngModel)]="enrollment.name" />
+          <app-base-input text="Apellido paterno" [(ngModel)]="enrollment.first_lastname" />
+          <app-base-input text="Apellido Materno" [(ngModel)]="enrollment.second_lastname" />
+          <app-base-input text="C.I." [(ngModel)]="enrollment.ci" />
         </div>
       </div>
 
-      <!-- FECHA -->
       <div>
-        <label class="text-sm font-medium text-slate-600">Fecha efectiva</label>
-        <input type="date"
-          class="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <!-- MOTIVO -->
-      <div>
-        <label class="text-sm font-medium text-slate-600">Motivo</label>
-        <select class="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500">
-          <option>Seleccionar motivo</option>
-          <option>Problemas económicos</option>
-          <option>Motivos personales</option>
-          <option>Traslado a otra institución</option>
-          <option>Rendimiento académico</option>
-          <option>Otro</option>
-        </select>
-      </div>
-
-      <!-- OBSERVACIONES -->
-      <div>
-        <label class="text-sm font-medium text-slate-600">Observaciones</label>
-        <textarea rows="3"
-          class="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500"
-          placeholder="Detalle adicional..."></textarea>
-      </div>
-
-      <!-- ARCHIVO -->
-      <div>
-        <label class="text-sm font-medium text-slate-600">Adjuntar documento (opcional)</label>
-
-        <div
-          class="mt-2 border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-blue-400 transition cursor-pointer">
-          <i class="fa-solid fa-upload text-slate-400"></i>
-          <p class="text-sm text-slate-500">Subir archivo</p>
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Contacto
+        </h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <app-base-input text="Correo electrónico" [(ngModel)]="enrollment.email" />
+          <app-base-input text="Celular" [(ngModel)]="enrollment.cellphone" />
         </div>
       </div>
 
-      <!-- ALERTA -->
-      <div class="bg-red-50 border border-red-100 p-3 rounded-xl text-sm text-red-600 flex items-center gap-2">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        Esta acción afectará el estado académico del estudiante.
+      <div>
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Documentos
+        </h3>
+        <div class="grid md:grid-cols-3 gap-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="enrollment.birth_certificate"> Cert. Nacimiento
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="enrollment.school_diploma"> Título Bachiller
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="enrollment.carnet"> Copia C.I.
+          </label>
+        </div>
       </div>
-
     </div>
-
   </app-base-modal>
+
+  <app-base-modal [isOpen]="optionModalStudent" title="Cambios del Estudiante" size="lg"
+    [showConfirm]="false" cancelText="Cerrar" (cancel)="optionModalStudent = false">
+    
+    <div class="space-y-8" *ngIf="selectedStudent">
+      <!-- Sección: Adición de Carrera -->
+      <div>
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-emerald-500 pl-3">
+          Adicionar Nueva Carrera
+        </h3>
+        <div class="grid md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl">
+          <select class="px-3 py-2 border rounded-lg bg-white" [(ngModel)]="newCareer.career_id">
+            <option [ngValue]="null">Seleccionar Carrera</option>
+            <option *ngFor="let c of careersForSelect" [ngValue]="c.id">{{ c.name }}</option>
+          </select>
+          <select class="px-3 py-2 border rounded-lg bg-white" [(ngModel)]="newCareer.turno">
+            <option value="">Turno</option>
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noche">Noche</option>
+          </select>
+          <app-button label="Adicionar" variant="primary" (click)="addCareer()"></app-button>
+        </div>
+      </div>
+
+      <!-- Sección: Bajas / Readmisiones -->
+      <div>
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-rose-500 pl-3">
+          Estados por Carrera (Bajas / Readmisión)
+        </h3>
+        <div class="divide-y divide-slate-100 bg-white border rounded-xl overflow-hidden">
+          <div *ngFor="let career of selectedStudent.careers" class="p-4 flex justify-between items-center hover:bg-slate-50">
+            <div>
+              <p class="font-medium text-slate-800">{{ career.name }}</p>
+              <p class="text-xs" [ngClass]="career.pivot?.status === 'ACTIVO' ? 'text-emerald-600' : 'text-rose-600'">
+                Estado: {{ career.pivot?.status || 'ACTIVO' }}
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <app-button *ngIf="career.pivot?.status === 'ACTIVO' || !career.pivot" 
+                label="Baja" variant="primary" size="sm" (click)="withdraw(career.id)"></app-button>
+              <app-button *ngIf="career.pivot?.status === 'INACTIVO' || career.pivot?.status === 'RETIRADO'" 
+                label="Readmitir" variant="primary" size="sm" (click)="reinstate(career.id)"></app-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
 
 </div>

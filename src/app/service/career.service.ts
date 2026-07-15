@@ -64,6 +64,14 @@ export class CareerService {
     });
   }
 
+  toggleStatus(id: number): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl.carrers.index}/${id}/toggle-status`,
+      {},
+      { headers: this.getHeaders() },
+    );
+  }
+
   createSubject(careerId: number, payload: any): Observable<any> {
     return this.http.post(
       `${this.apiUrl.carrers.index}/${careerId}/subjects`,

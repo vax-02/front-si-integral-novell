@@ -5,600 +5,417 @@
         Gestión de Cobros
       </h1>
       <p class="text-sm text-slate-500 mt-1">
-        Configura los conceptos de cobro por carrera, gestión y periodo académico.
+        Configura los conceptos de cobro por carrera
       </p>
     </div>
     <div class="flex gap-3">
-      <app-button label="Nuevo Cobro" variant="primary" (click)="openRegisterModal()" />
+      <app-button label="Agregar" icon="fas fa-plus" variant="primary" (click)="openRegisterModal()" />
     </div>
   </div>
 
   <div class="grid md:grid-cols-3 gap-6">
     <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-      <p class="text-sm text-slate-500">
-        Cobros Activos
-      </p>
-      <h3 class="text-3xl font-bold text-blue-700 mt-2">
-        18
-      </h3>
-      <p class="text-xs text-slate-400 mt-2">
-        Configuraciones vigentes
-      </p>
-
+      <p class="text-sm text-slate-500">Cobros Activos</p>
+      <h3 class="text-3xl font-bold text-blue-700 mt-2">{{ totalActivos }}</h3>
     </div>
-
     <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-
-      <p class="text-sm text-slate-500">
-        Mensualidades
-      </p>
-
-      <h3 class="text-3xl font-bold text-emerald-600 mt-2">
-        120
-      </h3>
-
-      <p class="text-xs text-slate-400 mt-2">
-        Cuotas generadas
-      </p>
-
+      <p class="text-sm text-slate-500">Mensualidades</p>
+      <h3 class="text-3xl font-bold text-emerald-600 mt-2">{{ totalMensualidades }}</h3>
     </div>
-
     <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-
-      <p class="text-sm text-slate-500">
-        Matrículas
-      </p>
-
-      <h3 class="text-3xl font-bold text-amber-500 mt-2">
-        6
-      </h3>
-
-      <p class="text-xs text-slate-400 mt-2">
-        Configuradas
-      </p>
-
+      <p class="text-sm text-slate-500">Matrículas</p>
+      <h3 class="text-3xl font-bold text-amber-500 mt-2">{{ totalMatriculas }}</h3>
     </div>
   </div>
 
+  <!-- FILTROS -->
   <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-6">
-
-    <div class="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-1 gap-4">
-
-      <input type="text" placeholder="Buscar concepto..."
+    <div class="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-4">
+      <input type="text" placeholder="Buscar concepto..." [(ngModel)]="filters.search"
         class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 text-sm">
-
-        <option>Gestión</option>
-        <option>2026</option>
-        <option>2027</option>
-
+      <select [(ngModel)]="filters.career_id"
+        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 text-sm">
+        <option [ngValue]="null">Carrera</option>
+        <option *ngFor="let career of carreras" [value]="career.id">{{ career.name }}</option>
       </select>
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 text-sm">
-
-        <option>Carrera</option>
-        <option>Sistemas</option>
-        <option>Contabilidad</option>
-
-      </select>
-
-      <app-button label="Filtrar" variant="secondary" [fullWidth]="true">
-      </app-button>
-
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="filter()"></app-button>
     </div>
-
   </div>
 
-  <!-- ========================================= -->
   <!-- TABLA -->
-  <!-- ========================================= -->
-
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-
-    <!-- HEADER TABLA -->
-
     <div class="flex justify-between items-center p-6 border-b border-slate-200">
-
-      <span class="font-semibold text-slate-700">
-
-        Configuración de Cobros
-
-      </span>
-
-      <span class="text-xs text-slate-400">
-
-        18 registros
-
-      </span>
-
+      <span class="font-semibold text-slate-700">Configuración de Cobros</span>
+      <span class="text-xs text-slate-400">{{ concepts.length }} registros</span>
     </div>
-
-    <!-- TABLA -->
-
     <div class="overflow-x-auto">
-
       <table class="w-full text-sm">
-
         <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-
           <tr>
-
-            <th class="p-4 text-center">
-              Gestión
-            </th>
-
-            <th class="p-4 text-center">
-              Carrera
-            </th>
-
-            <th class="p-4 text-center">
-              Periodo
-            </th>
-
-            <th class="p-4 text-center">
-              Concepto
-            </th>
-
-            <th class="p-4 text-center">
-              Monto
-            </th>
-
-            <th class="p-4 text-center">
-              Vigencia
-            </th>
-
-            <th class="p-4 text-center">
-              Estado
-            </th>
-
-            <th class="p-4 text-center">
-              Acciones
-            </th>
-
+            <th class="p-4 text-center">Gestión</th>
+            <th class="p-4 text-center">Carrera</th>
+            <th class="p-4 text-center">Concepto</th>
+            <th class="p-4 text-center">Monto</th>
+            <th class="p-4 text-center">Estado</th>
+            <th class="p-4 text-center">Acciones</th>
           </tr>
-
         </thead>
-
         <tbody class="divide-y divide-slate-100">
-
-          <tr class="hover:bg-slate-50 transition">
-
+          <tr *ngFor="let concept of concepts" class="hover:bg-slate-50 transition">
+            <td class="p-4 text-center">{{ concept.gestion }}</td>
+            <td class="p-4 text-center">{{ concept.career.name }}</td>
+            <td class="p-4 text-center">{{ concept.concept_name || concept.type }}</td>
+            <td class="p-4 text-center font-semibold text-blue-700">Bs. {{ concept.amount }}</td>
             <td class="p-4 text-center">
-
-              2026
-
-            </td>
-
-            <td class="p-4 text-center">
-
-              Ingeniería en Sistemas
-
-            </td>
-
-            <td class="p-4 text-center">
-
-              Primer Semestre
-
-            </td>
-
-            <td class="p-4 text-center">
-
-              Mensualidad
-
-            </td>
-
-            <td class="p-4 text-center font-semibold text-blue-700">
-
-              Bs. 250
-
-            </td>
-
-            <td class="p-4 text-center">
-
-              Feb - Jun
-
-            </td>
-
-            <td class="p-4 text-center">
-
-              <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-
-                Activo
-
+              <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="concept.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                {{ concept.is_active ? 'Activo' : 'Inactivo' }}
               </span>
-
             </td>
-
             <td class="p-4">
-
               <div class="flex justify-center gap-2">
-
-                <app-button label="Cuotas" variant="secondary">
+                <app-button icon="fa-solid fa-eye" variant="primary" title="Ver detalle"
+                  (click)="openViewModal(concept)"></app-button>
+                <app-button icon="fa-solid fa-pen" variant="secondary" title="Editar" (click)="openEditModal(concept)">
                 </app-button>
-
-                <app-button label="Editar" variant="primary">
-                </app-button>
-
+                <app-button icon="fa-solid fa-trash" variant="tertiary" title="Eliminar"
+                  (click)="confirmDelete(concept)"></app-button>
               </div>
-
             </td>
-
           </tr>
 
-          <tr class="hover:bg-slate-50 transition">
 
-            <td class="p-4 text-center">
-              2026
-            </td>
-
-            <td class="p-4 text-center">
-              Contabilidad
-            </td>
-
-            <td class="p-4 text-center">
-              Anual
-            </td>
-
-            <td class="p-4 text-center">
-              Matrícula
-            </td>
-
-            <td class="p-4 text-center font-semibold text-blue-700">
-              Bs. 120
-            </td>
-
-            <td class="p-4 text-center">
-              Enero - Marzo
-            </td>
-
-            <td class="p-4 text-center">
-
-              <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-
-                Vigente
-
-              </span>
-
-            </td>
-
-            <td class="p-4">
-
-              <div class="flex justify-center gap-2">
-
-                <app-button label="Editar" variant="primary">
-                </app-button>
-
+          <tr *ngIf="loading" class="hover:bg-slate-50 transition">
+            <td colspan="6" class="p-4 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <span>Cargando datos...</span>
               </div>
-
             </td>
-
           </tr>
-
         </tbody>
-
       </table>
-
     </div>
 
+    <!-- PAGINACIÓN -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
+      <p class="text-xs text-slate-500">Mostrando {{ from }} - {{ to }} de {{ totalConcepts }} conceptos</p>
+      <div class="flex gap-2">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+          class="px-3 py-1 border rounded disabled:opacity-50">Anterior</button>
+        <span class="px-3 py-1 bg-blue-600 text-white rounded">{{ currentPage }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === lastPage"
+          class="px-3 py-1 border rounded disabled:opacity-50">Siguiente</button>
+      </div>
+    </div>
   </div>
 
-  <app-base-modal [isOpen]="registerModalOpen" title="Nuevo Cobro"
-    subtitle="Configure el concepto de cobro para una carrera y gestión académica." size="xl" confirmText="Guardar"
-    cancelText="Cancelar" (confirm)="saveConfiguration()" (cancel)="registerModalOpen = false">
-
+  <!-- ============ MODAL NUEVO COBRO ============ -->
+  <app-base-modal [isOpen]="registerModalOpen"  [loading]="saving" title="Nuevo Cobro"
+    subtitle="Configure el concepto de cobro para una carrera y gestión académica." size="xl"
+    confirmText="{{ saving ? 'Guardando...' : 'Guardar' }}" cancelText="Cancelar" (confirm)="saveConfiguration()"
+    (cancel)="registerModalOpen = false">
     <div class="grid lg:grid-cols-2 gap-8 p-4">
       <div class="space-y-5">
-        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">
-          Información General
-        </h3>
-
+        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">Información General</h3>
         <div class="grid grid-cols-2 gap-4">
-          <app-base-input text="Gestión"></app-base-input>
-
-
-          <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400">
-            <option>Carrera</option>
-            <option>SISTMAS</option>
-            <option>ASD</option>
-            <option>SECRE</option>
-
-          </select>
-
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400">
-
-            <option>Concepto</option>
-
-            <option>Matrícula</option>
-
-            <option>Mensualidad</option>
-          </select>
-
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-
-          <app-base-input text="Monto" type_i="number">
-          </app-base-input>
-
-
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-
-          <app-base-input text="Fecha Inicio" type_i="date">
-          </app-base-input>
-
-          <app-base-input text="Fecha Fin" type_i="date">
-          </app-base-input>
-
-        </div>
-
-        <div class="bg-slate-50 border rounded-xl p-5 space-y-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-xs text-slate-500">
-                Solo para mensualidades.
-              </p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-
-            <app-base-input text="Cantidad de Cuotas" type_i="number">
-            </app-base-input>
-
-            <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400">
-              <option value="">Mes Inicial</option>
-              <option value="1">Enero</option>
-              <option value="2">Febrero</option>
-              <option value="3">Marzo</option>
-              <option value="4">Abril</option>
-              <option value="5">Mayo</option>
-              <option value="6">Junio</option>
-              <option value="7">Julio</option>
-              <option value="8">Agosto</option>
-              <option value="9">Septiembre</option>
-              <option value="10">Octubre</option>
-              <option value="11">Noviembre</option>
-              <option value="12">Diciembre</option>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Gestión *</label>
+            <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="configuracion.gestion">
+              <option value="">Seleccionar Gestión</option>
+              <option *ngFor="let gestion of gestiones" [value]="gestion">{{ gestion }}</option>
             </select>
           </div>
-
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Concepto *</label>
+            <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="configuracion.tipoConcepto" (change)="onTipoConceptoChange()">
+              <option value="">Seleccionar Tipo</option>
+              <option value="MATRICULA">Matrícula (Pago Único)</option>
+              <option value="MENSUALIDAD">Mensualidad (Cuotas)</option>
+            </select>
+          </div>
         </div>
-
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Carrera *</label>
+            <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="configuracion.carrera">
+              <option value="">Seleccionar Carrera</option>
+              <option *ngFor="let carrera of carreras" [value]="carrera.id">{{ carrera.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Concepto de Pago *</label>
+            <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="configuracion.concepto">
+              <option value="">Seleccionar Concepto</option>
+              <option *ngFor="let concepto of conceptosDisponibles" [value]="concepto.codigo">{{ concepto.nombre }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <app-base-input type="number" text="Monto (Bs.)*" [(ngModel)]="configuracion.monto" (input)="onMontoChange()">
+          </app-base-input>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Fecha Inicio *</label>
+            <input type="date"
+              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="configuracion.fechaInicio" (change)="onFechaChange()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Fecha Fin *</label>
+            <input type="date"
+              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="configuracion.fechaFin" (change)="onFechaChange()">
+          </div>
+        </div>
+        <div *ngIf="configuracion.tipoConcepto === 'MENSUALIDAD'" class="bg-slate-50 border rounded-xl p-5 space-y-4">
+          <p class="text-xs text-slate-500">Configuración para mensualidades</p>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Cantidad de Cuotas *</label>
+              <input type="number"
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+                [(ngModel)]="configuracion.cantidadCuotas" min="1" max="12" (change)="onCantidadCuotasChange()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Mes Inicial *</label>
+              <select
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+                [(ngModel)]="configuracion.mesInicial" (change)="onMesInicialChange()">
+                <option value="">Seleccionar Mes</option>
+                <option *ngFor="let mes of meses; let i = index" [value]="i + 1">{{ mes }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Semana de Pago *</label>
+              <select
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+                [(ngModel)]="configuracion.semanaPago" (change)="onSemanaPagoChange()">
+                <option [value]="1">1ra Semana (Día 5)</option>
+                <option [value]="2">2da Semana (Día 12)</option>
+                <option [value]="3">3ra Semana (Día 19)</option>
+                <option [value]="4">4ta Semana (Día 26)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="configuracion.tipoConcepto === 'MATRICULA'"
+          class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p class="text-sm text-blue-700"><i class="fas fa-info-circle mr-2"></i>La matrícula se generará como un pago
+            único en la fecha seleccionada.</p>
+        </div>
+        <div *ngIf="mensajeValidacion"
+          class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
+          <i class="fas fa-exclamation-triangle mr-2"></i>{{ mensajeValidacion }}
+        </div>
       </div>
-
-      <!-- ====================================== -->
-      <!-- VISTA PREVIA -->
-      <!-- ====================================== -->
-
       <div class="space-y-5">
-
-        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">
-
-          Vista Previa
-
-        </h3>
-
+        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">Vista Previa</h3>
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
-
           <div class="grid grid-cols-2 gap-3 text-sm">
-
-            <span class="font-semibold text-slate-600">
-
-              Gestión
-
-            </span>
-
-            <span>
-
-              2026
-
-            </span>
-
-            <span class="font-semibold">
-
-              Carrera
-
-            </span>
-
-            <span>
-
-              Ingeniería en Sistemas
-
-            </span>
-
-            <span class="font-semibold">
-
-              Concepto
-
-            </span>
-
-            <span>
-
-              Mensualidad
-
-            </span>
-
-            <span class="font-semibold">
-
-              Periodo
-
-            </span>
-
-            <span>
-
-              Primer Semestre
-
-            </span>
-
-            <span class="font-semibold">
-
-              Cuotas
-
-            </span>
-
-            <span>
-
-              5
-
-            </span>
-
-            <span class="font-semibold">
-
-              Monto
-
-            </span>
-
-            <span>
-
-              Bs. 250
-
-            </span>
-
-            <span class="font-semibold">
-
-              Total esperado
-
-            </span>
-
-            <span class="font-bold text-blue-700">
-
-              Bs. 1.250
-
-            </span>
-
+            <span class="font-semibold text-slate-600">Gestión</span><span>{{ configuracion.gestion || '--' }}</span>
+            <span class="font-semibold text-slate-600">Carrera</span><span>{{ getCareerName() || '--' }}</span>
+            <span
+              class="font-semibold text-slate-600">Tipo</span><span>{{ configuracion.tipoConcepto === 'MATRICULA' ? 'Pago Único' : 'Mensualidad' }}</span>
+            <span class="font-semibold text-slate-600">Concepto</span><span>{{ getConceptoNombre() || '--' }}</span>
+            <span class="font-semibold text-slate-600">Período</span><span>{{ getPeriodo() }}</span>
+            <span class="font-semibold text-slate-600">Monto Unitario</span><span>Bs. {{ configuracion.monto }}</span>
+            <span class="font-semibold text-slate-600">Total
+              {{ configuracion.tipoConcepto === 'MATRICULA' ? '' : 'Estimado' }}</span>
+            <span class="font-bold text-blue-700">Bs. {{ calcularTotal() }}</span>
+            <span *ngIf="cuotasGeneradas.length > 0 && configuracion.tipoConcepto === 'MENSUALIDAD'"
+              class="font-semibold text-slate-600">N° Cuotas</span>
+            <span
+              *ngIf="cuotasGeneradas.length > 0 && configuracion.tipoConcepto === 'MENSUALIDAD'">{{ configuracion.cantidadCuotas || 0 }}</span>
           </div>
-
         </div>
-
-        <!-- CUOTAS -->
-
-        <div class="border rounded-xl overflow-hidden">
-
-          <div class="bg-slate-100 p-3 font-semibold">
-
-            Cuotas que serán generadas
-
-          </div>
-
-          <table class="w-full text-sm">
-
-            <thead class="bg-slate-50">
-
-              <tr>
-
-                <th class="p-3">
-
-                  Mes
-
-                </th>
-
-                <th class="p-3">
-
-                  Monto
-
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              <tr>
-
-                <td class="p-3">
-
-                  Febrero
-
-                </td>
-
-                <td class="p-3">
-
-                  Bs.250
-
-                </td>
-
-              </tr>
-
-              <tr>
-
-                <td class="p-3">
-
-                  Marzo
-
-                </td>
-
-                <td class="p-3">
-
-                  Bs.250
-
-                </td>
-
-              </tr>
-
-              <tr>
-
-                <td class="p-3">
-
-                  Abril
-
-                </td>
-
-                <td class="p-3">
-
-                  Bs.250
-
-                </td>
-
-              </tr>
-
-              <tr>
-
-                <td class="p-3">
-
-                  Mayo
-
-                </td>
-
-                <td class="p-3">
-
-                  Bs.250
-
-                </td>
-
-              </tr>
-
-              <tr>
-
-                <td class="p-3">
-
-                  Junio
-
-                </td>
-
-                <td class="p-3">
-
-                  Bs.250
-
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
-
-        </div>
-
       </div>
-
     </div>
-
   </app-base-modal>
+
+  <!-- ============ MODAL VER DETALLE ============ -->
+  <app-base-modal [isOpen]="viewModalOpen" title="Detalle del Concepto"
+    subtitle="Información completa del concepto de cobro" size="lg" confirmText="Cerrar" cancelText=""
+    (confirm)="closeViewModal()" (cancel)="closeViewModal()">
+    <div *ngIf="selectedConcept" class="p-4 space-y-6">
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-slate-500 text-xs">Gestión</p>
+            <p class="font-semibold text-slate-800">{{ selectedConcept.gestion }}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Carrera</p>
+            <p class="font-semibold text-slate-800">{{ selectedConcept.career?.name }}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Tipo</p>
+            <p class="font-semibold text-slate-800">
+              {{ selectedConcept.type === 'MATRICULA' ? 'Matrícula' : 'Mensualidad' }}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Concepto</p>
+            <p class="font-semibold text-slate-800">{{ selectedConcept.concept_name }}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Monto Unitario</p>
+            <p class="font-semibold text-blue-700">Bs. {{ selectedConcept.amount }}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Estado</p>
+            <span class="px-2 py-1 rounded-full text-xs font-semibold"
+              [ngClass]="selectedConcept.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+              {{ selectedConcept.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Fecha Inicio</p>
+            <p class="font-semibold text-slate-800">{{ selectedConcept.start_date | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 text-xs">Fecha Fin</p>
+            <p class="font-semibold text-slate-800">{{ selectedConcept.end_date | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <div *ngIf="selectedConcept.type === 'MENSUALIDAD'">
+            <p class="text-slate-500 text-xs">N° Cuotas</p>
+            <p class="font-semibold text-slate-800">{{ selectedConcept.cuotas }}</p>
+          </div>
+          <div *ngIf="selectedConcept.type === 'MENSUALIDAD'">
+            <p class="text-slate-500 text-xs">Semana de Pago</p>
+            <p class="font-semibold text-slate-800">
+              {{ selectedConcept.week_pay ? selectedConcept.week_pay + 'ra Semana' : '--' }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="border rounded-xl p-4">
+        <p class="font-semibold text-slate-700 mb-2">Período de Cobro</p>
+        <p class="text-sm text-slate-600">Desde <strong>{{ selectedConcept.start_date | date:'dd/MM/yyyy' }}</strong>
+          hasta <strong>{{ selectedConcept.end_date | date:'dd/MM/yyyy' }}</strong></p>
+      </div>
+      <div *ngIf="selectedConcept.type === 'MENSUALIDAD' || selectedConcept.type === 'MATRICULA'"
+        class="border rounded-xl overflow-hidden">
+        <div class="bg-slate-100 p-3 font-semibold text-sm">
+          {{ selectedConcept.type === 'MATRICULA' ? 'Pago Único' : 'Calendario de Cuotas' }}
+          <span class="ml-2 text-xs font-normal text-slate-500">({{ cuotasGeneradas.length }} cuotas)</span>
+        </div>
+        <div *ngIf="cuotasGeneradas.length > 0">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="p-3 text-left">#</th>
+                <th class="p-3 text-left">Mes</th>
+                <th class="p-3 text-right">Monto</th>
+                <th class="p-3 text-left">Vencimiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cuota of cuotasGeneradas; let i = index" class="border-t hover:bg-slate-50">
+                <td class="p-3">{{ i + 1 }}</td>
+                <td class="p-3">{{ cuota.mes }}</td>
+                <td class="p-3 text-right">Bs. {{ cuota.monto }}</td>
+                <td class="p-3">{{ cuota.fechaVencimiento | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div *ngIf="selectedConcept.observations" class="bg-yellow-50 border border-yellow-100 rounded-xl p-3">
+        <p class="text-xs text-slate-500">Observaciones</p>
+        <p class="text-sm text-slate-700">{{ selectedConcept.observations }}</p>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- ============ MODAL EDITAR ============ -->
+  <app-base-modal [isOpen]="editModalOpen" [loading]="saving" title="Editar Concepto" subtitle="Modifique los datos del concepto de cobro"
+    size="xl" confirmText="{{ saving ? 'Guardando...' : 'Guardar Cambios' }}" cancelText="Cancelar"
+    (confirm)="updateConcept()" (cancel)="closeEditModal()">
+    <div class="grid lg:grid-cols-2 gap-8 p-4">
+      <div class="space-y-5">
+        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">Información General</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Gestión</label><input type="text" disabled
+              class="w-full px-4 py-3 border rounded-lg bg-slate-50 text-slate-500" [value]="configuracion.gestion">
+          </div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Tipo</label><input type="text" disabled
+              class="w-full px-4 py-3 border rounded-lg bg-slate-50 text-slate-500"
+              [value]="configuracion.tipoConcepto === 'MATRICULA' ? 'Matrícula' : 'Mensualidad'"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Carrera</label><input type="text" disabled
+              class="w-full px-4 py-3 border rounded-lg bg-slate-50 text-slate-500"
+              [value]="getCareerName(configuracion.carrera)"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Concepto</label><input type="text"
+              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              [(ngModel)]="configuracion.concepto"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <app-base-input type="number" text="Monto (Bs.)*" [(ngModel)]="configuracion.monto" (input)="onMontoChange()">
+          </app-base-input>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Fecha Inicio *</label><input type="date"
+              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              [(ngModel)]="configuracion.fechaInicio" (change)="onFechaChange()"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Fecha Fin *</label><input type="date"
+              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              [(ngModel)]="configuracion.fechaFin" (change)="onFechaChange()"></div>
+        </div>
+        <div *ngIf="mensajeValidacion"
+          class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700"><i
+            class="fas fa-exclamation-triangle mr-2"></i>{{ mensajeValidacion }}</div>
+      </div>
+      <div class="space-y-5">
+        <h3 class="text-lg font-semibold text-slate-800 border-b pb-2">Vista Previa</h3>
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <span class="font-semibold text-slate-600">Gestión</span><span>{{ configuracion.gestion }}</span>
+            <span class="font-semibold text-slate-600">Carrera</span><span>{{ getCareerName() }}</span>
+            <span
+              class="font-semibold text-slate-600">Tipo</span><span>{{ configuracion.tipoConcepto === 'MATRICULA' ? 'Pago Único' : 'Mensualidad' }}</span>
+            <span class="font-semibold text-slate-600">Monto Unitario</span><span>Bs. {{ configuracion.monto }}</span>
+            <span class="font-semibold text-slate-600">Total</span><span class="font-bold text-blue-700">Bs.
+              {{ calcularTotal() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- ============ MODAL CONFIRMAR ELIMINACIÓN ============ -->
+  <app-base-modal [isOpen]="deleteConfirmOpen" title="Confirmar Eliminación"
+    subtitle="¿Está seguro de eliminar este concepto?" size="md"
+    confirmText="{{ deleting ? 'Eliminando...' : 'Sí, Eliminar' }}" cancelText="Cancelar" (confirm)="deleteConcept()"
+    (cancel)="cancelDelete()">
+    <div *ngIf="conceptToDelete" class="p-4 space-y-4">
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+          <div>
+            <p class="font-semibold text-red-700">Está a punto de eliminar este concepto</p>
+            <p class="text-sm text-red-600">Esta acción podría desactivar el concepto si tiene pagos asociados.</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-500">Concepto:</span><span
+            class="font-semibold">{{ conceptToDelete.concept_name }}</span></div>
+        <div class="flex justify-between"><span
+            class="text-slate-500">Tipo:</span><span>{{ conceptToDelete.type }}</span></div>
+        <div class="flex justify-between"><span
+            class="text-slate-500">Carrera:</span><span>{{ conceptToDelete.career?.name }}</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Monto:</span><span
+            class="font-semibold text-blue-700">Bs. {{ conceptToDelete.amount }}</span></div>
+        <div class="flex justify-between"><span
+            class="text-slate-500">Gestión:</span><span>{{ conceptToDelete.gestion }}</span></div>
+      </div>
+    </div>
+  </app-base-modal>
+
 </div>

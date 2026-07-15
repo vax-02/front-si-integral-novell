@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
-
+import { Roles } from '../../core/constants/roles.constants';
 import {
   AbstractControl,
   FormBuilder,
@@ -92,21 +92,26 @@ export class LoginComponent {
 
     this.userService.login(credentials.email, credentials.password).subscribe({
       next: (response) => {
-        this.auth.saveSession(
-          response.token,
-          JSON.stringify(response.user),
-        );
+        const currentRole = [...response.user.roles].sort(
+          (a: any, b: any) => a.id - b.id,
+        )[0];
+        
+        response.user.currentRole = currentRole;
+        this.auth.saveSession(response.token, response.user);
+        switch (currentRole.id) {
+          case Roles.ADMIN.id:
+            this.router.navigate(['/home/dashboard']);
+            break;
 
-        if (response.user.role_id == 1) {
-          this.router.navigate(['/home/dashboard']);
+          case Roles.DOCENTE.id:
+            this.router.navigate(['/home/professor']);
+            break;
+          case Roles.ESTUDIANTE.id:
+            this.router.navigate(['/home/student']);
+            break;
+          default:
+            this.router.navigate(['/home']);
         }
-        /*else if (response.user.role_id == 2) {
-          localStorage.setItem('userRole', 'my-subjects');
-          this.router.navigate(['/home/professor']);
-        } else if (response.user.role_id == 3) {
-          localStorage.setItem('userRole', 'admin');
-          this.router.navigate(['/home/dashboard']);
-        }*/
         this.loading.set(false);
       },
       error: (error) => {
@@ -117,8 +122,8 @@ export class LoginComponent {
           case 'INACTIVO':
             this.msg_error = 'Tu cuenta está inactiva';
             break;
-        default:
-          this.msg_error = 'Error inesperado';
+          default:
+            this.msg_error = 'Error inesperado';
         }
         this.loading.set(false);
       },

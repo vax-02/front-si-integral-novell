@@ -22,6 +22,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { CoursesComponent } from './pages/courses/courses.component';
 import { InstitutionComponent } from './pages/institution/institution.component';
 import { PaymentManagementComponent } from './pages/payment-management/payment-management.component';
+import { TrainingComponent } from './pages/training/training.component';
 
 export const routes: Routes = [
   // Ruta para el Home
@@ -33,9 +34,6 @@ export const routes: Routes = [
     { path: 'my-schedule', component:  MyScheduleComponent },
     { path: 'my-pensul', component: MyPensulComponent },
 
-
-
-
     { path: 'dashboard', component: HomeComponent },
     { path: 'students', component: StudentsComponent },
     { path: 'docentes', component: DocentesComponent },
@@ -46,6 +44,8 @@ export const routes: Routes = [
     { path: 'attendance', component: AttendanceComponent },
     { path: 'programs', component: ProgramsComponent },
     { path: 'courses', component: CoursesComponent },
+    { path: 'training', component: TrainingComponent },
+
 
     { path: 'subjects', component: SubjectsComponent },
     { path: 'users', component: UsersComponent },

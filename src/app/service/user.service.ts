@@ -59,6 +59,20 @@ export class UserService {
     });
   }
 
+  syncUserRoles(userId: number, roleIds: number[]): Observable<any> {
+    return this.http.put(`${this.apiUrl.users}/${userId}/roles`, { role_ids: roleIds }, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  resetPassword(userId: number): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl.users}/${userId}/reset-password`,
+      {},
+      { headers: this.getHeaders() },
+    );
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

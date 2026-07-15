@@ -27,6 +27,36 @@ export class StudentService {
     });
   }
 
+  createStudent(data: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl.students.index, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  updateStudent(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl.students.index}/${id}`, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  addCareer(data: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl.studentCareers.store, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  withdrawCareer(studentId: number, careerId: number): Observable<any> {
+    return this.http.post<any>(this.apiUrl.studentCareers.withdraw(studentId, careerId), {}, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  reinstateCareer(studentId: number, careerId: number): Observable<any> {
+    return this.http.post<any>(this.apiUrl.studentCareers.reinstate(studentId, careerId), {}, {
+      headers: this.getHeaders(),
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

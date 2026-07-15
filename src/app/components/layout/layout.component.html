@@ -45,7 +45,7 @@
     <!-- NAV -->
     <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
 
-      @if(role === 'student') {
+      @if(Roles.ESTUDIANTE.id === user.currentRole.id) {
       <!-- SECCION DEL ESTUDIANTE-->
       <div>
         <div (click)="toggleAcademico()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
@@ -79,7 +79,7 @@
       </div>
       }
 
-      @if (role == 'admin') {
+      @if (Roles.ADMIN.id == user.currentRole.id) {
       <!-- DASHBOARD -->
       <a routerLink="/home/dashboard" routerLinkActive="bg-blue-50 text-blue-700"
         class="flex items-center p-3 rounded-xl hover:bg-slate-50 group transition"
@@ -134,7 +134,7 @@
             (click)="isMobile ? collapsed = true : null">
             Materias
           </a>
-          <a routerLink="/home/programs" routerLinkActive="text-blue-600"
+          <a routerLink="/home/training" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
             Capacitaciones
@@ -220,7 +220,7 @@
             (click)="isMobile ? collapsed = true : null">
             Contraseña
           </a>
-          @if (role == 'admin') {
+          @if (Roles.ADMIN.id ==  user.currentRole.id) {
           <a routerLink="/home/institution" routerLinkActive="text-blue-600" 
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -242,13 +242,13 @@
           (click)="isMobile ? collapsed = true : null">
           <div class="flex items-center" [ngClass]="collapsed && !isMobile ? 'justify-center' : 'gap-3'">
             <div class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold"
-              [ngClass]="getColor(user?.name)">
-              {{ getInitials(user?.name ) }}
+              [ngClass]="getColor(user.name)">
+              {{ getInitials(user.name ) }}
             </div>
             <div *ngIf="!collapsed || isMobile" class="flex-1 min-w-0">
-              <p class="text-sm font-bold truncate">{{ user?.name }} {{ user?.first_lastname }}
-                {{ user?.second_lastname }}</p>
-              <p class="text-xs text-slate-500 capitalize">{{ user?.role }}</p>
+              <p class="text-sm font-bold truncate">{{ user.name }} {{ user.first_lastname }}
+                {{ user.second_lastname }}</p>
+              <p class="text-xs text-slate-500 capitalize">{{ user.currentRole.name }}</p>
             </div>
           </div>
         </a>

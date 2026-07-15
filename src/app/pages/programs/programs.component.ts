@@ -145,32 +145,18 @@ export class ProgramsComponent {
     this.resetForm();
   }
 
-  openConfirmDelete(career: any) {
-    this.careerToDelete = career;
-    this.confirmDeleteOpen = true;
-  }
-
-  closeConfirmDelete() {
-    this.confirmDeleteOpen = false;
-    this.careerToDelete = null;
-  }
-
-  deleteCareer() {
-    if (!this.careerToDelete) {
-      return;
-    }
-
+  toggleCareerStatus(career: any) {
     this.deletingCareer = true;
-    this.careerService.deleteCareer(this.careerToDelete.id).subscribe({
-      next: () => {
+    this.careerService.toggleStatus(career.id).subscribe({
+      next: (response) => {
         this.deletingCareer = false;
-        this.closeConfirmDelete();
-        this.toast.success('Carrera eliminada correctamente.');
+        career.status = response.status;
+        this.toast.success(response.message || 'Estado actualizado correctamente.');
         this.loadCareers();
       },
       error: (error) => {
         this.deletingCareer = false;
-        this.toast.error(error?.error?.message || 'No se pudo eliminar la carrera.');
+        this.toast.error(error?.error?.message || 'No se pudo cambiar el estado de la carrera.');
       },
     });
   }
@@ -298,6 +284,7 @@ export class ProgramsComponent {
       return;
     }
 
+    this.loadCareers();
     this.subjectForm.reset({
       name: '',
       sigla: '',
@@ -374,6 +361,7 @@ export class ProgramsComponent {
         this.closeDeleteSubjectConfirm();
         this.deletingSubject = false;
         this.toast.success('Materia eliminada correctamente.');
+        this.loadCareers()
       },
       error: (error) => {
         this.deletingSubject = false;

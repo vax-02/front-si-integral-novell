@@ -68,6 +68,10 @@
             </th>
 
             <th class="p-4 text-center">
+              Estado
+            </th>
+
+            <th class="p-4 text-center">
               Materias
             </th>
 
@@ -84,7 +88,7 @@
         <tbody class="divide-y divide-slate-100">
 
           <tr *ngIf="loading">
-            <td colspan="6" class="p-6 text-center">
+            <td colspan="7" class="p-6 text-center">
               <div class="flex items-center justify-center gap-2 text-slate-600">
                 <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
                 <span>Cargando carreras...</span>
@@ -93,7 +97,7 @@
           </tr>
 
           <tr *ngIf="!loading && data.Careers.length === 0">
-            <td colspan="6" class="p-6 text-center text-slate-500">
+            <td colspan="7" class="p-6 text-center text-slate-500">
               No se encontraron carreras.
             </td>
           </tr>
@@ -114,12 +118,21 @@
               {{ career.type == 1? "Anual":"Semestral"}}
             </td>
 
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="career.status
+              ? 'bg-emerald-100 text-emerald-600'
+              : 'bg-rose-100 text-rose-600'">
+                {{ career.status ? 'Habilitado' : 'Inhabilitado' }}
+              </span>
+              
+            </td>
+
             <td class="px-6 py-4 text-center font-semibold text-blue-600">
               {{ career.subjects_count }}
             </td>
 
             <td class="px-6 py-4 text-center font-semibold text-emerald-600 hidden lg:table-cell">
-              {{ career.students_count }}
+              {{ career.active_students_count || 0 }}
             </td>
 
             <td class="p-3 sm:p-4 text-center">
@@ -129,9 +142,12 @@
                   <i class="fas fa-eye"></i>
                 </button>
 
-                <button (click)="openConfirmDelete(career)"
-                  class="bg-rose-500 text-white px-3 py-2 rounded-lg hover:bg-rose-600 transition">
-                  <i class="fas fa-trash"></i>
+                <button (click)="toggleCareerStatus(career)" [ngClass]="career.status
+                  ? 'bg-rose-500 text-white hover:bg-rose-600'
+                  : 'bg-green-500 text-white hover:bg-green-600'"
+                  class="px-3 py-2 rounded-lg transition"
+                  title="{{ career.status ? 'Desactivar' : 'Activar' }}">
+                  <i class="fas" [ngClass]="career.status ? 'fa-lock' : 'fa-unlock'"></i>
                 </button>
               </div>
             </td>
@@ -425,10 +441,6 @@
     </div>
 
   </app-base-modal>
-
-  <app-base-modal-confirm [isOpen]="confirmDeleteOpen" title="Eliminar carrera" message="¿Deseas eliminar esta carrera?"
-    confirmText="Sí, eliminar" cancelText="Cancelar" [loading]="deletingCareer" (confirm)="deleteCareer()"
-    (cancel)="closeConfirmDelete()"></app-base-modal-confirm>
 
   <app-base-modal-confirm [isOpen]="confirmSubjectDeleteOpen" title="Eliminar materia"
     message="¿Deseas eliminar esta materia?" confirmText="Sí, eliminar" cancelText="Cancelar"

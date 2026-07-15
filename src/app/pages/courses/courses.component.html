@@ -150,6 +150,7 @@
     </div>
   </div>
 
+  <!-- MODAL CREAR PARALELO -->
   <app-base-modal [isOpen]="openModalCreate" title="Crear paralelo" [subtitle]="subtitleNewParallel" size="md"
     confirmText="Guardar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="save()" (cancel)="cancel()">
     <form [formGroup]="formParallel">
@@ -184,8 +185,9 @@
     </form>
   </app-base-modal>
 
+  <!-- MODAL VER PARALELOS + HORARIO -->
   <app-base-modal [isOpen]="openModalView" title="Ver paralelos" [subtitle]="subtitleNewParallel" size="xl"
-    confirmText="Guardar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="save()" (cancel)="cancelView()">
+    confirmText="Cerrar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="cancelView()" (cancel)="cancelView()">
 
     <div class="space-y-6">
 
@@ -215,7 +217,7 @@
 
       </div>
 
-      <!-- Lista -->
+      <!-- Lista de paralelos -->
       <div class="grid lg:grid-cols-2 gap-4">
 
         <div *ngFor="let parallel of parallels" (click)="selectParallel(parallel)"
@@ -245,109 +247,65 @@
               </span>
             </div>
             <div class="w-full h-3 bg-gray-200 rounded-full mt-2">
-              <div class="h-3 bg-blue-600 rounded-full" [style.width.%]="parallel.students_count+1*100/parallel.limit">
+              <div class="h-3 bg-blue-600 rounded-full" [style.width.%]="(parallel.students_count * 100) / parallel.limit">
               </div>
             </div>
-
           </div>
-
         </div>
 
       </div>
 
-    </div>
+      <!-- EDITOR DE HORARIO -->
+      <div *ngIf="selectedParallel" class="mt-8">
 
-
-
-
-    <div *ngIf="selectedParallel" class="mt-8">
-
-      <div class="flex items-center justify-between mb-4">
-
-        <div>
-
-          <h2 class="text-xl font-bold text-slate-700">
-
-            Horario - Paralelo {{selectedParallel.name}}
-
-          </h2>
-
-          <p class="text-sm text-slate-500">
-
-            Turno {{selectedParallel.shift}}
-
-          </p>
-
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-700">
+              Horario - Paralelo {{selectedParallel.parallel}}
+            </h2>
+            <p class="text-sm text-slate-500">
+              Turno {{selectedParallel.turno}}
+            </p>
+          </div>
+          <button (click)="saveSchedule()" [disabled]="savingSchedule"
+            class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50">
+            <i *ngIf="savingSchedule" class="fas fa-spinner fa-spin mr-2"></i>
+            <i *ngIf="!savingSchedule" class="fas fa-save mr-2"></i>
+            Guardar Horario
+          </button>
         </div>
 
-      </div>
-
-      <div class="overflow-auto rounded-xl border">
-
-        <table class="min-w-full border-collapse">
-
-          <thead class="bg-slate-100">
-
-            <tr>
-
-              <th class="border p-3 w-32">
-
-                Hora
-
-              </th>
-
-              <th class="border p-3">Lunes</th>
-
-              <th class="border p-3">Martes</th>
-
-              <th class="border p-3">Miércoles</th>
-
-              <th class="border p-3">Jueves</th>
-
-              <th class="border p-3">Viernes</th>
-
-              <th class="border p-3">Sábado</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            <tr *ngFor="let block of schedule">
-
-              <td class="border p-3 font-semibold">
-
-                {{block.hour}}
-
-              </td>
-
-              <td class="border p-2" *ngFor="let day of block.days">
-
-                <div *ngIf="day" class="rounded-lg bg-blue-100 p-2">
-
-                  <p class="font-semibold">
-
-                    {{day.subject}}
-
-                  </p>
-
-                  <small>
-
-                    {{day.teacher}}
-
-                  </small>
-
-                </div>
-
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
+        <div class="overflow-auto rounded-xl border">
+          <table class="min-w-full border-collapse text-sm">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="border p-3 w-32 text-left">Hora</th>
+                <th class="border p-3" *ngFor="let day of days">{{day}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let block of timeBlocks">
+                <td class="border p-3 font-semibold whitespace-nowrap">
+                  {{block.start}} - {{block.end}}
+                </td>
+                <td class="border p-2" *ngFor="let day of days">
+                  <select 
+                    class="w-full text-xs border border-slate-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                    [ngModel]="scheduleData[day]?.[block.start + '_' + block.end] || ''"
+                    (ngModelChange)="scheduleData[day][block.start + '_' + block.end] = $event || null">
+                    <option value="">—</option>
+                    <option *ngFor="let subject of subjects" [value]="subject.id">
+                      {{subject.sigla}} - {{subject.name}}
+                    </option>
+                  </select>
+                  <div *ngIf="scheduleData[day]?.[block.start + '_' + block.end]" class="mt-1 text-xs text-blue-600 font-medium">
+                    {{ getSubjectName(scheduleData[day][block.start + '_' + block.end]) }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

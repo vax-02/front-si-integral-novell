@@ -11,6 +11,7 @@ import { UserService } from '../../service/user.service';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../shared/services/toast.service';
 import { AuthService, User } from '../../core/services/auth.service';
+import { Roles } from '../../core/constants/roles.constants';
 @Component({
   selector: 'app-profile',
   imports: [
@@ -26,14 +27,15 @@ export class ProfileComponent {
   editModalStudent = false;
   loading = false;
   profileForm!: FormGroup;
-  user !: User 
+  user!: User;
+  Roles = Roles;
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
     private toast: ToastService,
-    private auth: AuthService
+    private auth: AuthService,
   ) {
-    this.user = this.auth.user!
+    this.user = this.auth.user!;
   }
   ngOnInit(): void {
     this.initForm();
@@ -69,7 +71,7 @@ export class ProfileComponent {
     });
   }
   updateProfile(): void {
-    if(!this.user) return;
+    if (!this.user) return;
     this.loading = true;
     if (this.profileForm.valid) {
       const phoneValue = this.profileForm.get('phone')?.value;
@@ -83,11 +85,11 @@ export class ProfileComponent {
 
           this.loading = false;
           this.editModalStudent = false;
-          this.toast.success('Perfil actualizado')
+          this.toast.success('Perfil actualizado');
         },
         error: (error) => {
           this.loading = false;
-          this.toast.error('Erro al actualizar')
+          this.toast.error('Erro al actualizar');
         },
       });
     } else {
@@ -103,5 +105,14 @@ export class ProfileComponent {
   }
   get phone() {
     return this.profileForm.get('phone');
+  }
+
+  showRoles = false;
+
+  changeRole(role: any) {
+    this.auth.updateCurrentRole(role);
+    this.user.currentRole = role;
+    this.showRoles = false;
+    console.log(this.auth.user)
   }
 }

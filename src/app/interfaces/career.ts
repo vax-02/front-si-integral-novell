@@ -8,6 +8,7 @@ export interface Career {
   updated_at: string | null;
   subjects_count: number;
   students_count: number;
+  active_students_count: number;
 }
 
 export interface CareersResponse {

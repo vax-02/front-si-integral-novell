@@ -2,17 +2,20 @@ import { Component } from '@angular/core';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { UserService } from '../../service/user.service';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
+import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Roles, RolesList } from '../../core/constants/roles.constants';
 
 @Component({
   selector: 'app-users',
   imports: [
     ButtonComponent,
     BaseModalComponent,
+    BaseModalConfirmComponent,
     BaseInputComponent,
     CommonModule,
     FormsModule,
@@ -25,13 +28,12 @@ export class UsersComponent {
   private searchTimeout: any;
   form!: FormGroup;
   users: any[] = [];
-  roles = [
-    { id: 1, name: 'Administrador' },
-    { id: 2, name: 'Secretaria' },
-    { id: 3, name: 'Docente' },
-    { id: 4, name: 'Estudiante' },
-  ];
-
+  userRoles: any[] = [];
+  roles = Roles;
+  RolesList = RolesList;
+  modalRoles: boolean = false;
+  subtitleModalRoles: string = '';
+  selectedUserId: number | null = null;
   cards = {
     tAdmins: 0,
     tSecres: 0,
@@ -46,6 +48,9 @@ export class UsersComponent {
   totalUsers = 0;
   userModalCreate = false;
   editingUserId: number | null = null;
+  modalConfirmReset = false;
+  selectedResetUserId: number | null = null;
+  resetLoading = false;
   loading = false;
   loadingModal = false;
   constructor(
@@ -73,7 +78,14 @@ export class UsersComponent {
       ],
       role_id: [null, Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      celular: ['', [Validators.pattern(/^\d{8}$/), Validators.minLength(8), Validators.maxLength(8)]],
+      celular: [
+        '',
+        [
+          Validators.pattern(/^\d{8}$/),
+          Validators.minLength(8),
+          Validators.maxLength(8),
+        ],
+      ],
     });
   }
 
@@ -97,16 +109,17 @@ export class UsersComponent {
           this.currentPage = response.users.current_page;
           this.lastPage = response.users.last_page;
           this.users = response.users.data;
+          console.log(response.users.data);
         },
         error: (error) => {
           this.loading = false;
           this.toast.error('Error al cargar los usuarios');
+          console.log(error);
         },
       });
   }
 
   save() {
-    
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -152,13 +165,13 @@ export class UsersComponent {
             : 'Error al crear el usuario',
         );
         if (error.error && error.error.errors) {
-          if(error.error.errors.ci) {
-            this.toast.error("Ese C.I. ya fue registrado");
+          if (error.error.errors.ci) {
+            this.toast.error('Ese C.I. ya fue registrado');
           }
-          if(error.error.errors.email) {
-            this.toast.error("Ese correo electrónico ya fue registrado");
+          if (error.error.errors.email) {
+            this.toast.error('Ese correo electrónico ya fue registrado');
           }
-        } 
+        }
       },
     });
   }
@@ -197,7 +210,6 @@ export class UsersComponent {
   get confirmText(): string {
     return this.editingUserId ? 'Actualizar' : 'Crear';
   }
-
 
   toggleUserStatus(id: number) {
     this.userService.changeStatus(id).subscribe({
@@ -249,5 +261,76 @@ export class UsersComponent {
       this.currentPage = 1; // reset página
       this.loadUsers();
     }, 400);
+  }
+  openManageRoles(user: any) {
+    this.modalRoles = true;
+    this.subtitleModalRoles =
+      user.name + ' ' + user.first_lastname + ' ' + user.second_lastname;
+    this.selectedUserId = user.id;
+    this.userRoles =  user.user_role ?? []
+    console.log(this.userRoles)
+  }
+
+  hasRole(roleId: number): boolean {
+    return this.userRoles.some((role) => role.role.id === roleId);
+  }
+  toggleRole(role: any) {
+    const exists = this.hasRole(role.id);
+
+    if (exists) {
+      this.userRoles = this.userRoles.filter((r) => r.role.id !== role.id);
+    } else {
+      this.userRoles.push({ role });
+    }
+  }
+  changeRoles(){
+    if (!this.selectedUserId) return;
+
+    const roleIds = this.userRoles.map((r: any) => r.role?.id ?? r.id);
+
+    this.loadingModal = true;
+    this.userService.syncUserRoles(this.selectedUserId, roleIds).subscribe({
+      next: () => {
+        this.loadingModal = false;
+        this.modalRoles = false;
+        this.selectedUserId = null;
+        this.toast.success('Roles actualizados exitosamente');
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.loadingModal = false;
+        this.toast.error('Error al actualizar los roles');
+        console.log(error);
+      },
+    });
+  }
+
+  openResetPasswordModal(user: any) {
+    this.selectedResetUserId = user.id;
+    this.modalConfirmReset = true;
+  }
+
+  cancelResetPassword() {
+    this.modalConfirmReset = false;
+    this.selectedResetUserId = null;
+  }
+
+  confirmResetPassword() {
+    if (!this.selectedResetUserId) return;
+
+    this.resetLoading = true;
+    this.userService.resetPassword(this.selectedResetUserId).subscribe({
+      next: () => {
+        this.resetLoading = false;
+        this.modalConfirmReset = false;
+        this.selectedResetUserId = null;
+        this.toast.success('Contraseña reestablecida exitosamente');
+      },
+      error: (error) => {
+        this.resetLoading = false;
+        this.toast.error('Error al reestablecer la contraseña');
+        console.log(error);
+      },
+    });
   }
 }

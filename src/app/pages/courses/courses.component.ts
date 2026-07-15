@@ -13,6 +13,7 @@ import { BaseInputComponent } from '../../shared/base-input/base-input.component
 import { CourseService } from '../../service/course.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
+import { ScheduleService } from '../../service/schedule.service';
 
 @Component({
   selector: 'app-courses',
@@ -51,10 +52,27 @@ export class CoursesComponent implements OnInit {
   confirmDeleteOpen = false;
   deletingCourse = false;
 
+  // Schedule properties
+  subjects: any[] = [];
+  days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+  timeBlocks = [
+    { start: '08:00', end: '09:30' },
+    { start: '09:45', end: '11:15' },
+    { start: '11:30', end: '13:00' },
+    { start: '14:00', end: '15:30' },
+    { start: '15:45', end: '17:15' },
+    { start: '17:30', end: '19:00' },
+    { start: '19:15', end: '20:45' },
+  ];
+  scheduleData: { [key: string]: { [key: string]: number | null } } = {};
+  careerId: number | null = null;
+  savingSchedule = false;
+
   constructor(
     private fb: FormBuilder,
     private courseService: CourseService,
     private parallelService: ParallelService,
+    private scheduleService: ScheduleService,
     private toast: ToastService,
   ) {
     this.formParallel = this.fb.group({
@@ -78,7 +96,7 @@ export class CoursesComponent implements OnInit {
           this.loading = false;
           this.totalCourses = response.total;
           this.totalLimit = response.total_limit;
-          this.totalStudentsForCareer = response.total_students
+          this.totalStudentsForCareer = response.total_students;
           this.currentPage = response.courses.current_page;
           this.lastPage = response.courses.last_page;
           this.courses = response.courses.data;
@@ -89,16 +107,29 @@ export class CoursesComponent implements OnInit {
         },
       });
   }
+
   viewParallels(course: any) {
     this.loadingModal = true;
     this.courseIdSelect = course.id;
     this.subtitleNewParallel = course.career.name + ' > ' + course.name;
-
     this.openModalView = true;
+    this.selectedParallel = null;
+    this.careerId = course.career_id;
+
+    // Cargar materias de la carrera para el horario
+    if (this.careerId) {
+      this.scheduleService.getSubjectsByCareer(this.careerId).subscribe({
+        next: (resp) => {
+          this.subjects = resp.subjects || [];
+        },
+        error: () => {
+          this.subjects = [];
+        },
+      });
+    }
 
     this.parallelService.getParallelsByCourse(course.id).subscribe({
       next: (resp) => {
-        console.log(resp);
         this.loadingModal = false;
         this.totalStudents = resp.summary.total_students;
         this.totalCapacity = resp.summary.total_capacity;
@@ -110,7 +141,8 @@ export class CoursesComponent implements OnInit {
       },
     });
   }
-  // ── Búsqueda con debounce ─────────────────────────────────────────────────
+
+  // ── Búsqueda con debounce ──
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
@@ -119,7 +151,7 @@ export class CoursesComponent implements OnInit {
     }, 400);
   }
 
-  // ── Paginación ────────────────────────────────────────────────────────────
+  // ── Paginación ──
   nextPage(): void {
     if (this.currentPage < this.lastPage) {
       this.currentPage++;
@@ -147,35 +179,33 @@ export class CoursesComponent implements OnInit {
     return Math.min(this.currentPage * this.perPage, this.totalCourses);
   }
 
-  // ── Modal crear ───────────────────────────────────────────────────────────
-
+  // ── Modal crear paralelo ──
   openModalAddParallel(course: any): void {
     this.courseIdSelect = course.id;
     this.subtitleNewParallel = course.career.name + ' > ' + course.name;
     this.openModalCreate = true;
   }
 
-  // ── Guardar (create / update) ─────────────────────────────────────────────
+  // ── Guardar paralelo ──
   save(): void {
     this.formParallel.patchValue({
       course_id: this.courseIdSelect,
     });
-    console.log(this.formParallel.value);
     if (this.formParallel.invalid) {
       this.formParallel.markAllAsTouched();
-      alert('Complete correctamente los campos requeridos.');
+      this.toast.info('Complete correctamente los campos requeridos.');
       return;
     }
     this.loadingModal = true;
     this.parallelService.createParallel(this.formParallel.value).subscribe({
       next: (resp) => {
         this.loadingModal = false;
-        alert('Paralelo registrado correctamente.');
+        this.toast.success('Paralelo registrado correctamente.');
+        this.openModalCreate = false;
       },
       error: (err) => {
         this.loadingModal = false;
-        alert(err.error?.message ?? 'Ocurrió un error al guardar.');
-        console.log(err.error.error);
+        this.toast.error('Ocurrió un error');
       },
     });
   }
@@ -183,75 +213,93 @@ export class CoursesComponent implements OnInit {
   cancel(): void {
     this.openModalCreate = false;
   }
+
   cancelView() {
     this.openModalView = false;
+    this.selectedParallel = null;
   }
 
-  //añadido
+  // ── Schedule / Horario ──
   parallels: any[] = [];
-
   selectedParallel: any = null;
 
   selectParallel(parallel: any) {
     this.selectedParallel = parallel;
+    this.initScheduleData();
+
+    // Cargar horario existente
+    this.scheduleService.getByParallel(parallel.id).subscribe({
+      next: (resp) => {
+        const schedules = resp.schedules || [];
+        schedules.forEach((s: any) => {
+          const key = `${s.day}_${s.start_time}_${s.end_time}`;
+          const parts = this.findTimeBlockKey(s.day, s.start_time, s.end_time);
+          if (parts) {
+            this.scheduleData[s.day][parts] = s.subject_id;
+          }
+        });
+      },
+      error: () => {
+        // No hay horario guardado aún, iniciar vacío
+      },
+    });
   }
 
-  schedule = [
-    {
-      hour: '08:00 - 10:00',
+  private findTimeBlockKey(day: string, start: string, end: string): string | null {
+    for (const block of this.timeBlocks) {
+      if (block.start === start && block.end === end) {
+        return `${block.start}_${block.end}`;
+      }
+    }
+    return null;
+  }
 
-      days: [
-        {
-          subject: 'Programación',
-          teacher: 'Ing. Carlos',
-        },
+  private initScheduleData() {
+    this.scheduleData = {};
+    this.days.forEach((day) => {
+      this.scheduleData[day] = {};
+      this.timeBlocks.forEach((block) => {
+        const key = `${block.start}_${block.end}`;
+        this.scheduleData[day][key] = null;
+      });
+    });
+  }
 
-        {
-          subject: 'Matemática',
-          teacher: 'Lic. Ana',
-        },
+  getSubjectName(subjectId: number | null): string {
+    if (!subjectId) return '';
+    const subject = this.subjects.find((s) => s.id === subjectId);
+    return subject ? `${subject.sigla} - ${subject.name}` : '';
+  }
 
-        {
-          subject: 'Programación',
-          teacher: 'Ing. Carlos',
-        },
+  saveSchedule() {
+    if (!this.selectedParallel) return;
+    this.savingSchedule = true;
 
-        null,
+    const schedules: any[] = [];
+    this.days.forEach((day) => {
+      this.timeBlocks.forEach((block) => {
+        const key = `${block.start}_${block.end}`;
+        const subjectId = this.scheduleData[day]?.[key];
+        if (subjectId) {
+          schedules.push({
+            day,
+            start_time: block.start,
+            end_time: block.end,
+            subject_id: subjectId,
+          });
+        }
+      });
+    });
 
-        null,
-
-        {
-          subject: 'Inglés',
-          teacher: 'Lic. José',
-        },
-      ],
-    },
-
-    {
-      hour: '10:00 - 12:00',
-
-      days: [
-        {
-          subject: 'Base de Datos',
-          teacher: 'Ing. Pedro',
-        },
-
-        null,
-
-        {
-          subject: 'Física',
-          teacher: 'Lic. Mario',
-        },
-
-        null,
-
-        {
-          subject: 'Ética',
-          teacher: 'Lic. Sonia',
-        },
-
-        null,
-      ],
-    },
-  ];
+    this.scheduleService.saveSchedules(this.selectedParallel.id, schedules).subscribe({
+      next: () => {
+        this.savingSchedule = false;
+        this.toast.success('Horario guardado correctamente.');
+      },
+      error: () => {
+        this.savingSchedule = false;
+        this.toast.error('Error al guardar el horario.');
+      },
+    });
+  }
 }
