@@ -102,7 +102,6 @@ export class LoginComponent {
           case Roles.ADMIN.id:
             this.router.navigate(['/home/dashboard']);
             break;
-
           case Roles.DOCENTE.id:
             this.router.navigate(['/home/professor']);
             break;

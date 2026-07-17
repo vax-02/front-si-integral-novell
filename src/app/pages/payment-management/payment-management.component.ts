@@ -8,32 +8,15 @@ import { CareerService } from '../../service/career.service';
 import { ConceptService } from '../../service/concept.service';
 import { ToastService } from '../../shared/services/toast.service';
 
-interface Concepto {
-  codigo: string;
-  nombre: string;
-  tipo: 'MATRICULA' | 'MENSUALIDAD';
-}
-
 interface ConfiguracionCobro {
-  gestion: string;
-  tipoConcepto: 'MATRICULA' | 'MENSUALIDAD' | '';
-  carrera: any;
-  concepto: string;
-  monto: number;
-  fechaInicio: string;
-  fechaFin: string;
-  cantidadCuotas: number;
-  mesInicial: number;
-  semanaPago: number;
+  carrera: number,
+  tipoConcepto: string,
+  descripcion: string,
+  gestion: number,
+  semestre : number,
+  monto: number    
 }
 
-interface CuotaGenerada {
-  mes: string;
-  mesNumero: number;
-  monto: number;
-  fechaVencimiento: string;
-  estado: 'PENDIENTE' | 'PAGADO' | 'VENCIDO';
-}
 
 @Component({
   selector: 'app-payment-management',
@@ -65,7 +48,7 @@ export class PaymentManagementComponent {
 
   filters = {
     search: '',
-    management_id: null,
+    gestion: null,
     career_id: null,
     page: 1,
     per_page: 10,
@@ -80,148 +63,51 @@ export class PaymentManagementComponent {
 
   carreras: any[] = [];
 
-  public conceptosDisponibles: Concepto[] = [
-    { codigo: 'MAT', nombre: 'Matrícula', tipo: 'MATRICULA' },
-    { codigo: 'MEN', nombre: 'Mensualidad', tipo: 'MENSUALIDAD' },
-    { codigo: 'INS', nombre: 'Inscripción', tipo: 'MATRICULA' },
-  ];
-
-  public meses: string[] = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ];
 
   public configuracion: ConfiguracionCobro = {
-    gestion: '',
+    carrera: 0,
     tipoConcepto: '',
-    carrera: '',
-    concepto: '',
-    monto: 0,
-    fechaInicio: '',
-    fechaFin: '',
-    cantidadCuotas: 0,
-    mesInicial: 1,
-    semanaPago: 1,
+    descripcion: '',
+    gestion: 0,
+    semestre : 0,
+    monto: 0    
   };
 
-  public cuotasGeneradas: CuotaGenerada[] = [];
   public mensajeValidacion: string = '';
 
-  // Propiedades computadas
   get totalActivos(): number {
-    return this.concepts.filter((c) => c.is_active).length;
+    return this.concepts.length;
   }
 
   get totalMensualidades(): number {
-    return this.concepts.filter((c) => c.type === 'MENSUALIDAD').length;
+    return this.concepts.filter((c) => c.type === 'Mensualidad').length;
   }
 
   get totalMatriculas(): number {
-    return this.concepts.filter((c) => c.type === 'MATRICULA').length;
+    return this.concepts.filter((c) => c.type === 'Matricula').length;
   }
 
-  // ============ Eventos del formulario ============
   onTipoConceptoChange(): void {
     this.limpiarCampos();
-    this.generarCuotas();
     this.validarConfiguracion();
   }
 
   onFechaChange(): void {
-    this.generarCuotas();
     this.validarConfiguracion();
   }
 
   onMontoChange(): void {
-    this.generarCuotas();
     this.validarConfiguracion();
   }
 
   onSemanaPagoChange(): void {
-    this.generarCuotas();
     this.validarConfiguracion();
   }
 
-  onCantidadCuotasChange(): void {
-    if (this.configuracion.cantidadCuotas > 12) {
-      this.configuracion.cantidadCuotas = 12;
-    }
-    if (this.configuracion.cantidadCuotas < 1) {
-      this.configuracion.cantidadCuotas = 1;
-    }
-    this.generarCuotas();
-    this.validarConfiguracion();
-  }
-
-  onMesInicialChange(): void {
-    this.generarCuotas();
-    this.validarConfiguracion();
-  }
-
-  generarCuotas(): void {
-    this.cuotasGeneradas = [];
-    this.mensajeValidacion = '';
-
-    if (
-      !this.configuracion.tipoConcepto ||
-      !this.configuracion.fechaInicio ||
-      this.configuracion.monto <= 0
-    ) {
-      return;
-    }
-
-    if (this.configuracion.tipoConcepto === 'MATRICULA') {
-      this.cuotasGeneradas.push({
-        mes: 'Matrícula Única',
-        mesNumero: 0,
-        monto: this.configuracion.monto,
-        fechaVencimiento: this.configuracion.fechaInicio,
-        estado: 'PENDIENTE',
-      });
-    } else if (this.configuracion.tipoConcepto === 'MENSUALIDAD') {
-      const cantidad = this.configuracion.cantidadCuotas || 1;
-      const mesInicio = this.configuracion.mesInicial || 1;
-      const semanaPago = this.configuracion.semanaPago || 1;
-      const gestion =
-        parseInt(this.configuracion.gestion) || new Date().getFullYear();
-      const diasSemana = [5, 12, 19, 26];
-
-      for (let i = 0; i < cantidad; i++) {
-        let mesNumero = mesInicio + i;
-        let year = gestion;
-        if (mesNumero > 12) {
-          mesNumero -= 12;
-          year++;
-        }
-        const dia = diasSemana[Math.min(semanaPago - 1, 3)];
-        const mesStr = mesNumero.toString().padStart(2, '0');
-        const diaStr = dia.toString().padStart(2, '0');
-        const fechaVencimiento = `${year}-${mesStr}-${diaStr}`;
-
-        this.cuotasGeneradas.push({
-          mes: this.meses[mesNumero - 1],
-          mesNumero: mesNumero,
-          monto: this.configuracion.monto,
-          fechaVencimiento: fechaVencimiento,
-          estado: 'PENDIENTE',
-        });
-      }
-    }
-  }
-
+  
   validarConfiguracion(): boolean {
     this.mensajeValidacion = '';
-    if (!this.configuracion.gestion) {
+    if (this.configuracion.gestion == 0 ) {
       this.mensajeValidacion = 'Seleccione una gestión académica';
       return false;
     }
@@ -233,39 +119,9 @@ export class PaymentManagementComponent {
       this.mensajeValidacion = 'Seleccione una carrera';
       return false;
     }
-    if (!this.configuracion.concepto) {
-      this.mensajeValidacion = 'Seleccione un concepto de pago';
-      return false;
-    }
     if (this.configuracion.monto <= 0) {
       this.mensajeValidacion = 'El monto debe ser mayor a 0';
       return false;
-    }
-    if (!this.configuracion.fechaInicio || !this.configuracion.fechaFin) {
-      this.mensajeValidacion = 'Seleccione las fechas de inicio y fin';
-      return false;
-    }
-
-    const fechaInicio = new Date(this.configuracion.fechaInicio);
-    const fechaFin = new Date(this.configuracion.fechaFin);
-    if (fechaInicio > fechaFin) {
-      this.mensajeValidacion =
-        'La fecha de inicio debe ser menor a la fecha fin';
-      return false;
-    }
-
-    if (this.configuracion.tipoConcepto === 'MENSUALIDAD') {
-      if (
-        !this.configuracion.cantidadCuotas ||
-        this.configuracion.cantidadCuotas < 1
-      ) {
-        this.mensajeValidacion = 'Especifique la cantidad de cuotas';
-        return false;
-      }
-      if (!this.configuracion.mesInicial) {
-        this.mensajeValidacion = 'Seleccione el mes inicial';
-        return false;
-      }
     }
     return true;
   }
@@ -276,50 +132,23 @@ export class PaymentManagementComponent {
     return carrera ? carrera.name : '';
   }
 
-  getConceptoNombre(codigo?: string): string {
-    const cod = codigo || this.configuracion.concepto;
-    const concepto = this.conceptosDisponibles.find(
-      (item) => item.codigo === cod,
-    );
-    return concepto ? concepto.nombre : '';
-  }
 
-  getPeriodo(): string {
-    if (!this.configuracion.fechaInicio || !this.configuracion.fechaFin)
-      return '--';
-    const inicio = new Date(this.configuracion.fechaInicio);
-    const fin = new Date(this.configuracion.fechaFin);
-    if (inicio.getFullYear() === fin.getFullYear()) {
-      return `${this.meses[inicio.getMonth()]} - ${this.meses[fin.getMonth()]} ${fin.getFullYear()}`;
-    }
-    return `${inicio.getFullYear()} - ${fin.getFullYear()}`;
-  }
 
-  calcularTotal(): number {
-    if (this.cuotasGeneradas.length === 0) return 0;
-    return this.cuotasGeneradas.reduce((sum, cuota) => sum + cuota.monto, 0);
-  }
 
   limpiarCampos(): void {
-    this.configuracion.concepto = '';
+    this.configuracion.descripcion = '';
     this.configuracion.monto = 0;
-    this.cuotasGeneradas = [];
   }
 
   resetFormulario(): void {
     this.configuracion = {
-      gestion: '',
+      carrera: 0,
       tipoConcepto: '',
-      carrera: '',
-      concepto: '',
+      descripcion: '',
+      gestion: 0,
+      semestre : 0,
       monto: 0,
-      fechaInicio: '',
-      fechaFin: '',
-      cantidadCuotas: 0,
-      mesInicial: 1,
-      semanaPago: 1,
     };
-    this.cuotasGeneradas = [];
     this.mensajeValidacion = '';
   }
 
@@ -337,31 +166,14 @@ export class PaymentManagementComponent {
     if (!this.validarConfiguracion()) return;
     this.saving = true;
 
-    const conceptoSeleccionado = this.conceptosDisponibles.find(
-      (c) => c.codigo === this.configuracion.concepto,
-    );
+ 
     const data = {
+      career_id: this.configuracion.carrera,
+      type: this.configuracion.tipoConcepto,
       gestion: this.configuracion.gestion,
-      tipoConcepto: this.configuracion.tipoConcepto,
-      carrera: this.configuracion.carrera,
-      concepto: conceptoSeleccionado
-        ? conceptoSeleccionado.nombre
-        : this.configuracion.concepto,
-      monto: this.configuracion.monto,
-      fechaInicio: this.configuracion.fechaInicio,
-      fechaFin: this.configuracion.fechaFin,
-      cantidadCuotas:
-        this.configuracion.tipoConcepto === 'MENSUALIDAD'
-          ? this.configuracion.cantidadCuotas
-          : 0,
-      mesInicial:
-        this.configuracion.tipoConcepto === 'MENSUALIDAD'
-          ? this.configuracion.mesInicial
-          : null,
-      semanaPago:
-        this.configuracion.tipoConcepto === 'MENSUALIDAD'
-          ? this.configuracion.semanaPago
-          : null,
+      semestre : this.configuracion.semestre == 0? null : this.configuracion.semestre,
+      amount : this.configuracion.monto,
+      description : this.configuracion.descripcion,
     };
 
 
@@ -372,65 +184,31 @@ export class PaymentManagementComponent {
         this.closeRegisterModal();
         this.resetFormulario();
         this.loadConcepts();
-        console.log("se creo")
       },
       error: (err) => {
         this.saving = false;
-        const msg =
-          err.error?.error ||
-          'Error al guardar el concepto. Intente nuevamente.';
-        this.mensajeValidacion = msg;
         this.toast.error('No se pudo guardar los datos');
-        console.log("no se creo")
-
       },
     });
   }
 
-  // ============ CRUD: Ver detalle ============
   openViewModal(concept: any) {
     this.selectedConcept = concept;
     this.viewModalOpen = true;
 
-    // Generar cuotas preview para el detalle
     this.configuracion = {
-      gestion: concept.gestion?.toString() || '',
-      tipoConcepto: concept.type || '',
       carrera: concept.career_id || '',
-      concepto: concept.concept_name || '',
+      tipoConcepto: concept.type || '',
+      gestion: concept.gestion?.toString() || '',
+      semestre: concept.semestre?.toString() || '',
+      descripcion: concept.description || '' ,
       monto: Number(concept.amount) || 0,
-      fechaInicio: concept.start_date || '',
-      fechaFin: concept.end_date || '',
-      cantidadCuotas: concept.cuotas || 0,
-      mesInicial: concept.start_month || 1,
-      semanaPago: concept.week_pay || 1,
     };
-    this.generarCuotas();
   }
 
   closeViewModal(): void {
     this.viewModalOpen = false;
     this.selectedConcept = null;
-  }
-
-  // ============ CRUD: Editar ============
-  openEditModal(concept: any) {
-    this.selectedConcept = concept;
-    this.configuracion = {
-      gestion: concept.gestion?.toString() || '',
-      tipoConcepto: concept.type || '',
-      carrera: concept.career_id,
-      concepto: concept.concept_name || '',
-      monto: Number(concept.amount) || 0,
-      fechaInicio: concept.start_date || '',
-      fechaFin: concept.end_date || '',
-      cantidadCuotas: concept.cuotas || 0,
-      mesInicial: concept.start_month || 1,
-      semanaPago: concept.week_pay || 1,
-    };
-    this.generarCuotas();
-    this.mensajeValidacion = '';
-    this.editModalOpen = true;
   }
 
   closeEditModal(): void {
@@ -439,49 +217,7 @@ export class PaymentManagementComponent {
     this.resetFormulario();
   }
 
-  updateConcept(): void {
-    if (!this.validarConfiguracion() || !this.selectedConcept) return;
-    this.saving = true;
-
-    const data = {
-      concepto: this.configuracion.concepto,
-      monto: this.configuracion.monto,
-      fechaInicio: this.configuracion.fechaInicio,
-      fechaFin: this.configuracion.fechaFin,
-      cantidadCuotas:
-        this.configuracion.tipoConcepto === 'MENSUALIDAD'
-          ? this.configuracion.cantidadCuotas
-          : 0,
-      mesInicial:
-        this.configuracion.tipoConcepto === 'MENSUALIDAD'
-          ? this.configuracion.mesInicial
-          : null,
-      semanaPago:
-        this.configuracion.tipoConcepto === 'MENSUALIDAD'
-          ? this.configuracion.semanaPago
-          : null,
-      is_active: this.selectedConcept.is_active,
-    };
-
-    this.conceptService.updateConcept(this.selectedConcept.id, data).subscribe({
-      next: (response) => {
-        this.saving = false;
-        this.toast.success(
-          response.message || 'Concepto actualizado exitosamente',
-        );
-        this.closeEditModal();
-        this.loadConcepts();
-      },
-      error: (err) => {
-        this.saving = false;
-        const msg = err.error?.error || 'Error al actualizar el concepto.';
-        this.mensajeValidacion = msg;
-        this.toast.error(msg);
-      },
-    });
-  }
-
-  // ============ CRUD: Eliminar / Desactivar ============
+  
   confirmDelete(concept: any) {
     this.conceptToDelete = concept;
     this.deleteConfirmOpen = true;
@@ -499,7 +235,7 @@ export class PaymentManagementComponent {
     this.conceptService.deleteConcept(this.conceptToDelete.id).subscribe({
       next: (response) => {
         this.deleting = false;
-        this.toast.success('Concepto eliminado/desactivado exitosamente');
+        this.toast.success('Concepto eliminado exitosamente');
         this.cancelDelete();
         this.loadConcepts();
       },
@@ -510,7 +246,6 @@ export class PaymentManagementComponent {
     });
   }
 
-  // ============ Inicialización ============
   constructor(
     private careerService: CareerService,
     private conceptService: ConceptService,
@@ -534,19 +269,24 @@ export class PaymentManagementComponent {
 
   loadConcepts() {
     this.loading = true;
-    this.conceptService.getConcepts(this.filters).subscribe({
+    // Solo enviar filtros con valor para que al estar vacíos cargue todos los datos
+    const params: any = { page: this.filters.page, per_page: this.filters.per_page };
+    if (this.filters.search.trim()) params.search = this.filters.search.trim();
+    if (this.filters.gestion) params.gestion = this.filters.gestion;
+    if (this.filters.career_id) params.career_id = this.filters.career_id;
+
+    this.conceptService.getConcepts(params).subscribe({
       next: (response) => {
-        this.concepts = response.data.data;
-        this.currentPage = response.data.current_page;
-        this.lastPage = response.data.last_page;
-        this.totalConcepts = response.data.total;
-        this.from = response.data.from ?? 0;
-        this.to = response.data.to ?? 0;
+        this.concepts = response.data;
+        this.currentPage = response.current_page;
+        this.lastPage = response.last_page;
+        this.totalConcepts = response.total;
+        this.from = response.from ?? 0;
+        this.to = response.to ?? 0;
         this.loading = false;
       },
       error: (err) => {
         this.loading = false;
-        //this.toast.error("Error al carga datos")
       },
     });
   }
