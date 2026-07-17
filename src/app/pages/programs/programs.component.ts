@@ -97,10 +97,13 @@ export class ProgramsComponent {
         this.data.total = response.total;
         this.data.totalSubjects = response.totalSubjects;
         this.data.careersActivas = response.careersActivas;
+        console.log(response)
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
         this.toast.error('Error al cargar las carreras');
+        console.log(err)
+
       },
     });
   }

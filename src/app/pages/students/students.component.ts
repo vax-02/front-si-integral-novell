@@ -14,6 +14,7 @@ export interface Student {
   id: number;
   user_id: number;
   career_id: number;
+  student_careers : any[],
   user: {
     id: number;
     name: string;

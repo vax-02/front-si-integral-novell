@@ -20,6 +20,11 @@ export class PayService {
     });
   }
 
+  getDataCards(): Observable<any> {
+    return this.http.get(`${this.apiUrl.pays.index}/cards`, {
+      headers: this.getHeaders(),
+    });
+  }
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

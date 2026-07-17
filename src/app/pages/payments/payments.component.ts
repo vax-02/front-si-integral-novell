@@ -1,29 +1,39 @@
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 import { StudentService } from '../../service/student.service';
 import { Student } from '../students/students.component';
 import { ToastService } from '../../shared/services/toast.service';
-import { CommonModule } from '@angular/common';
 import { PayService } from '../../service/pay.service';
 
 @Component({
   selector: 'app-payments',
   standalone: true,
   imports: [
+    FormsModule,
+    CommonModule,
     ButtonComponent,
     BaseModalComponent,
     BaseInputComponent,
-    CommonModule,
   ],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.css',
 })
 export class PaymentsComponent {
+
+paymentForm = {
+  career_id: null,
+  concept_id: null,
+  amount: 0,
+  discount: 0
+};  private searchTimeout: any;
   registerModalOpen = false;
   detailModalOpen = false;
   loading: boolean = false;
+  modalPay : boolean = false
   loadingModalData: boolean = false
   modalDetail: boolean = false;
   currentPage = 1;
@@ -34,6 +44,7 @@ export class PaymentsComponent {
   students: Student[] = [];
   studentSelected: Student = {
     id: 0,
+    student_careers : [],
     user_id: 0,
     career_id: 0,
     user: {
@@ -47,6 +58,9 @@ export class PaymentsComponent {
     },
     careers: [],
   };
+
+  totalPays : number = 0
+  totalPaysForMonth : number = 0
   pays : any = []
   constructor(
     private studentService: StudentService,
@@ -56,6 +70,18 @@ export class PaymentsComponent {
 
   ngOnInit() {
     this.loadStudents();
+    this.loadCards();
+  }
+  loadCards(){
+    this.payServie.getDataCards().subscribe({
+      next : (response) =>{
+        this.totalPays = response.total_pays
+        this.totalPaysForMonth = response.pays_for_month;
+      },
+      error : (err) =>{
+
+      }
+    });
   }
   openRegisterModal() {
     this.registerModalOpen = true;
@@ -98,14 +124,28 @@ export class PaymentsComponent {
       next: (response) => {
         console.log(response);
         this.pays = response.pays
+        
         this.loadingModalData = false
       },
       error: (err) => {
         this.loadingModalData = false
+        console.log(err);
 
       },
     });
   }
+  openPay(student :any){
+    this.modalPay = true;
+    this.studentSelected = student
+  }
+    onSearchChange() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.loadStudents();
+    }, 400);
+  }
+
   get from() {
     return (this.currentPage - 1) * this.perPage + 1;
   }

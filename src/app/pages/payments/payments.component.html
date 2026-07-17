@@ -13,35 +13,25 @@
   <div class="grid md:grid-cols-2 gap-6">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Ingresos del Mes</p>
-      <h3 class="text-2xl font-bold text-emerald-600 mt-1">Bs. 48,500</h3>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ totalPaysForMonth }}</h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Pagos Completados</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">1,024</h3>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ totalPays }}</h3>
     </div>
 
   </div>
 
   <!-- FILTROS -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-    <div class="grid md:grid-cols-4 gap-4">
+    <div class="grid md:grid-cols-2 gap-4">
 
-      <input type="text" placeholder="Buscar por estudiante o CI..."
+      <input type="text" placeholder="Buscar por nombre, CI o email..."
+        [(ngModel)]="search" (input)="onSearchChange()"
         class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
 
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Carrera</option>
-        <option>Sistemas</option>
-      </select>
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Estado</option>
-        <option>Pagado</option>
-        <option>Pendiente</option>
-      </select>
-
-      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
+      <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="onSearchChange()"></app-button>
 
     </div>
   </div>
@@ -80,9 +70,9 @@
             </td>
             <td class="p-4 text-center">{{ student.user.ci }}</td>
             <td class="p-4 text-center">
-              <span *ngFor="let career of student.careers"
+              <span *ngFor="let career of student.student_careers"
                 class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
-                {{ career.name }}
+                {{ career.career.name }}
               </span>
             </td>
             <td class="p-4 text-center">
@@ -90,15 +80,18 @@
                 'bg-emerald-100 text-emerald-600': student.user.status,
                 'bg-rose-100 text-rose-600': !student.user.status
               }">
-                {{ student.user.status ? 'Activo' : 'Inactivo' }}
+                {{ student.user.status == 1 ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
             <td class="p-4 text-center">
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-                <app-button *ngIf="student.user.status == 1" icon="fa-solid fa-eye" [variant]="'primary'"
+                <app-button icon="fa-solid fa-eye" [variant]="'primary'"
                   title="Ver detalle" (click)="openDetail(student)">
                 </app-button>
-
+                <app-button icon="fa-solid fa-credit-card" [variant]="'primary'"
+                  title="Pagar" (click)="openPay(student)">
+                </app-button>
+                
               </div>
             </td>
           </tr>
@@ -152,116 +145,59 @@
   <app-base-modal [isOpen]="modalDetail" title="Historial de pago" subtitle="Historial de mensualidades" size="lg"
     [loading]="loadingModalData" confirmText="Aceptar" (confirm)="modalDetail = false"
     (cancel)="detailModalOpen = false">
+    
     <div class="bg-white rounded-xl p-6">
 
-      <div class="flex flex-col lg:flex-row justify-between gap-6">
+  <div class="flex items-center justify-between gap-6">
 
-        <div class="flex items-center gap-4">
+    <!-- Información del estudiante -->
+    <div class="flex items-center gap-4 flex-1">
 
-          <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-
-            <i class="fa-solid fa-user-graduate text-2xl text-blue-600"></i>
-
-          </div>
-
-          <div>
-
-            <h2 class="text-xl font-bold text-slate-800">
-
-              {{ studentSelected.user.name }}
-              {{ studentSelected.user.first_lastname }}
-              {{ studentSelected.user.second_lastname }}
-
-            </h2>
-
-            <p class="text-sm text-slate-500">
-
-              C.I. {{ studentSelected.user.ci }}
-
-            </p>
-
-            <div class="flex flex-wrap gap-2 mt-2">
-
-              <span *ngFor="let career of studentSelected.careers"
-                class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-
-                {{ career.name }}
-
-              </span>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- Resumen -->
-
-        <div class="grid grid-cols-2 gap-3">
-
-          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
-
-            <p class="text-xs text-slate-500">
-
-              Total Pagado
-
-            </p>
-
-            <h3 class="text-xl font-bold text-emerald-600">
-
-              Bs. 1200
-
-            </h3>
-
-          </div>
-
-          <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 text-center">
-
-            <p class="text-xs text-slate-500">
-
-              Pendiente
-
-            </p>
-
-            <h3 class="text-xl font-bold text-rose-600">
-
-              Bs. 320
-
-            </h3>
-
-          </div>
-
-        </div>
-
+      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+        <i class="fa-solid fa-user-graduate text-xl text-blue-600"></i>
       </div>
 
-    </div>
+      <div>
+        <h2 class="text-xl font-bold text-slate-800">
+          {{ studentSelected.user.name }}
+          {{ studentSelected.user.first_lastname }}
+          {{ studentSelected.user.second_lastname }}
+        </h2>
 
+        <p class="text-base text-slate-500">
+          C.I. {{ studentSelected.user.ci }}
+        </p>
+
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span 
+            *ngFor="let career of studentSelected.student_careers"
+            class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+            {{ career.career.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
     <div class="space-y-6">
-
       <div *ngFor="let group of pays" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-
           <div class="flex justify-between items-center px-5 py-3 border-b bg-slate-50">
-
             <div class="flex items-center gap-3">
-
               <i class="fa-solid fa-graduation-cap text-blue-600 text-lg">
               </i>
-
               <div>
 
                 <h3 class="font-semibold text-slate-700">
 
-                  {{ group.career.name }}
+                  {{ group.career_name }}
 
                 </h3>
 
                 <small class="text-slate-500">
 
-                  {{ group.pays.length }} conceptos registrados
+                  {{ group.payments.length }} pago(s) registrado(s)
 
                 </small>
 
@@ -269,38 +205,22 @@
 
             </div>
 
-            <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full">
-
-              Gestión {{ group.pays[0].concept.gestion }}
-
-            </span>
-
           </div>
           <!-- Tabla -->
           <div class="overflow-x-auto">
-
             <table class="w-full text-sm">
-
               <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
-
                 <tr>
-
-                  <th class="px-4 py-3 text-left">Tipo</th>
                   <th class="px-4 py-3 text-left">Concepto</th>
+                  <th class="px-4 py-3 text-left">Descripción</th>
                   <th class="px-4 py-3 text-left">Monto</th>
                   <th class="px-4 py-3 text-center">Estado</th>
                   <th class="px-4 py-3 text-center">Acciones</th>
-
                 </tr>
-
               </thead>
-
               <tbody>
-
-                <tr *ngFor="let pay of group.pays" class="border-t hover:bg-slate-50 transition">
-
+                <tr *ngFor="let pay of group.payments" class="border-t hover:bg-slate-50 transition">
                   <td class="px-4 py-3">
-
                     <span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
 
                       {{ pay.concept.type }}
@@ -311,7 +231,7 @@
 
                   <td class="px-4 py-3 font-medium">
 
-                    {{ pay.detail }}
+                    {{ pay.description != null ? pay.description : '...' }}
 
                   </td>
 
@@ -329,7 +249,7 @@
                   'bg-red-100 text-red-700': pay.status === 'Vencido'
                 }">
 
-                      {{ pay.status }}
+                      {{ pay.status == 1? 'Cancelado' : '...' }}
 
                     </span>
 
@@ -337,15 +257,11 @@
 
                   <td class="px-4 py-3 text-center">
 
-                    <button *ngIf="pay.status !== 'Pagado'" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg
+                    <button *ngIf="pay.status ==1" title="Imprimir recibo" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg
                        bg-blue-600 hover:bg-blue-700 text-white
                        transition-all duration-200 shadow-sm hover:shadow-md">
 
                       <i class="fa-solid fa-print"></i>
-
-                      <span class="hidden md:inline">
-                        Imprimir
-                      </span>
 
                     </button>
 
@@ -369,5 +285,146 @@
 
       </div>
     </div>
+  </app-base-modal>
+
+
+   <app-base-modal [isOpen]="modalPay" title="Realizar pago" subtitle="ingrese todos los datos" size="lg"
+    [loading]="loadingModalData" confirmText="Aceptar" (confirm)="modalPay = false"
+    (cancel)="modalPay = false">
+    <div class="bg-white rounded-xl p-6 space-y-6">
+
+  <!-- Información del pago -->
+  <div class="flex items-center gap-4 border-b pb-4">
+
+    <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+      <i class="fa-solid fa-money-bill-wave text-xl text-emerald-600"></i>
+    </div>
+
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">
+        {{ studentSelected.user.name }} {{ studentSelected.user.first_lastname }} {{ studentSelected.user.second_lastname }}
+      </h2>
+
+      <p class="text-sm text-slate-500">
+        C.I.: {{ studentSelected.user.ci }}
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- Formulario -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+    <!-- Carrera -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">
+        Carrera
+      </label>
+
+      <select
+        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none"
+        [(ngModel)]="paymentForm.career_id"
+        >
+
+        <option value="">
+          Seleccione carrera
+        </option>
+
+        <option *ngFor="let career of studentSelected.student_careers" value="career.career.id">{{ career.career.name }}</option>
+
+      </select>
+    </div>
+
+
+    <!-- Concepto -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">
+        Concepto
+      </label>
+
+      <select
+        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none"
+        [(ngModel)]="paymentForm.concept_id">
+
+        <option value="">
+          Seleccione concepto
+        </option>
+
+      </select>
+    </div>
+
+
+    <!-- Monto -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">
+        Monto
+      </label>
+
+      <div class="relative">
+
+        <span class="absolute left-3 top-3 text-slate-500">
+          Bs.
+        </span>
+
+        <input
+          type="number"
+          class="w-full pl-10 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none"
+          [(ngModel)]="paymentForm.amount"
+          placeholder="0.00">
+
+      </div>
+
+    </div>
+
+
+    <!-- Descuento -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">
+        Descuento
+      </label>
+
+      <div class="relative">
+
+        <span class="absolute left-3 top-3 text-slate-500">
+          Bs.
+        </span>
+
+        <input
+          type="number"
+          class="w-full pl-10 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none"
+          [(ngModel)]="paymentForm.discount"
+          placeholder="0.00">
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <!-- Resumen -->
+  <div class="bg-slate-50 border rounded-xl p-4 flex justify-between items-center">
+
+    <div>
+      <p class="text-sm text-slate-500">
+        Total a pagar
+      </p>
+
+      <h3 class="text-2xl font-bold text-emerald-600">
+        Bs. {{ paymentForm.amount - paymentForm.discount }}
+      </h3>
+      
+    </div>
+
+    <i class="fa-solid fa-file-invoice-dollar text-3xl text-emerald-500"></i>
+
+  </div>
+
+
+</div>
+
   </app-base-modal>
 </div>

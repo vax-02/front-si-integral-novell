@@ -79,8 +79,8 @@
             </td>
             <td class="p-4 text-center">{{ student.user.ci }}</td>
             <td class="p-4 text-center">
-              <span *ngFor="let career of student.careers" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
-                {{ career.name }}
+              <span *ngFor="let career of student.student_careers" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
+                {{ career.career.name }}
               </span>
             </td>
             <td class="p-4 text-center">
