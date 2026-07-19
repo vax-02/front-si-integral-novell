@@ -102,6 +102,7 @@ export class ProgramsComponent {
       error: (err) => {
         this.loading = false;
         this.toast.error('Error al cargar las carreras');
+        console.log('error en la carga de carreras')
         console.log(err)
 
       },
@@ -441,6 +442,9 @@ export class ProgramsComponent {
         this.errorSubjects = error?.error?.preview?.rows?.filter((row: any) => !row.valid).length || 0;
         this.importErrors = error?.error?.preview?.errors || [];
         this.toast.error(error?.error?.message || 'No se pudo guardar el plan de estudios.');
+
+        console.log('---------------')
+        console.log(error)
       },
     });
   }

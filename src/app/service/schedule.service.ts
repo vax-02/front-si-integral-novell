@@ -4,8 +4,6 @@ import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../config/api-endpoints';
 import { AuthService } from '../core/services/auth.service';
 
-const API_BASE = 'http://localhost:8000/api';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -15,22 +13,25 @@ export class ScheduleService {
     private auth: AuthService,
   ) {}
 
-  getSubjectsByCareer(careerId: number): Observable<any> {
-    return this.http.get(`${API_BASE}/subjects/${careerId}/by-career`, {
-      headers: this.getHeaders(),
-    });
+  getSubjectsByCareer(careerId: number, level?: number, search?: string): Observable<any> {
+    let url = API_ENDPOINTS.schedules.byCareer(careerId);
+    const params: string[] = [];
+    if (level) params.push(`level=${level}`);
+    if (search) params.push(`search=${encodeURIComponent(search)}`);
+    if (params.length) url += '?' + params.join('&');
+    return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getByParallel(parallelId: number): Observable<any> {
     return this.http.get(
-      `${API_BASE}/schedules/parallel/${parallelId}`,
+      API_ENDPOINTS.schedules.byParallel(parallelId),
       { headers: this.getHeaders() },
     );
   }
 
   saveSchedules(parallelId: number, schedules: any[]): Observable<any> {
     return this.http.post(
-      `${API_BASE}/schedules/save`,
+      API_ENDPOINTS.schedules.save,
       { parallel_id: parallelId, schedules },
       { headers: this.getHeaders() },
     );

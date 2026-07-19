@@ -227,7 +227,7 @@
           <div class="flex justify-between">
             <div>
               <h2 class="font-bold text-lg">
-                Paralelo {{parallel.parallel}}
+                Paralelo {{parallel.paralelo}}
               </h2>
               <p>
                 {{ parallel.turno }}
@@ -254,6 +254,15 @@
         </div>
 
       </div>
+
+    </div>
+  </app-base-modal>
+
+
+
+  <!-- MODAL HORARIO -->
+  <app-base-modal [isOpen]="modalSchedule" title="Horario" [subtitle]="subtitleNewParallel" size="2xl"
+    confirmText="Cerrar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="modalSchedule = false" (cancel)="modalSchedule = false">
 
       <!-- EDITOR DE HORARIO -->
       <div *ngIf="selectedParallel" class="mt-8">
@@ -288,18 +297,31 @@
                 <td class="border p-3 font-semibold whitespace-nowrap">
                   {{block.start}} - {{block.end}}
                 </td>
-                <td class="border p-2" *ngFor="let day of days">
-                  <select 
-                    class="w-full text-xs border border-slate-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 outline-none"
-                    [ngModel]="scheduleData[day]?.[block.start + '_' + block.end] || ''"
-                    (ngModelChange)="scheduleData[day][block.start + '_' + block.end] = $event || null">
-                    <option value="">—</option>
-                    <option *ngFor="let subject of subjects" [value]="subject.id">
-                      {{subject.sigla}} - {{subject.name}}
-                    </option>
-                  </select>
-                  <div *ngIf="scheduleData[day]?.[block.start + '_' + block.end]" class="mt-1 text-xs text-blue-600 font-medium">
-                    {{ getSubjectName(scheduleData[day][block.start + '_' + block.end]) }}
+                <td class="border p-1" *ngFor="let day of days">
+                  <div class="relative">
+                    <input
+                      type="text"
+                      class="w-full text-xs border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                      [ngModel]="searchTexts[getCellKey(day, block.start + '_' + block.end)] || ''"
+                      (ngModelChange)="onSubjectSearch(day, block.start + '_' + block.end, $event)"
+                      (focus)="onSubjectFocus(day, block.start + '_' + block.end)"
+                      (blur)="onSubjectBlur(day, block.start + '_' + block.end)"
+                      placeholder="Buscar materia..."
+                      [style.background-color]="getSubjectColor(scheduleData[day]?.[block.start + '_' + block.end])"
+                      autocomplete="off">
+                    
+                    <!-- Dropdown de sugerencias -->
+                    <div
+                      *ngIf="showDropdowns[getCellKey(day, block.start + '_' + block.end)]"
+                      class="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                      <div
+                        *ngFor="let subject of filteredSubjects[getCellKey(day, block.start + '_' + block.end)]"
+                        (mousedown)="selectSubject(day, block.start + '_' + block.end, subject)"
+                        class="px-3 py-2 text-xs cursor-pointer hover:bg-blue-50 border-b border-slate-100 last:border-b-0"
+                        [style.background-color]="getSubjectColor(subject.id)">
+                        <span class="font-semibold">{{subject.sigla}}</span> - {{subject.name}}
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -307,8 +329,5 @@
           </table>
         </div>
       </div>
-
-    </div>
-  </app-base-modal>
-
+    </app-base-modal>
 </div>

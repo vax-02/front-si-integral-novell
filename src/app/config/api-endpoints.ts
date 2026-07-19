@@ -23,6 +23,11 @@ export const API_ENDPOINTS = {
   parallels: {
     index: `${API_BASE_URL}/parallels`,
   },
+  schedules: {
+    byCareer: (careerId: number) => `${API_BASE_URL}/subjects/${careerId}/by-career`,
+    byParallel: (parallelId: number) => `${API_BASE_URL}/schedules/parallel/${parallelId}`,
+    save: `${API_BASE_URL}/schedules/save`,
+  },
   concepts :{
     index : `${API_BASE_URL}/concepts`,
     store: `${API_BASE_URL}/concepts`,
