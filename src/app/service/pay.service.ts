@@ -25,8 +25,29 @@ export class PayService {
       headers: this.getHeaders(),
     });
   }
+
+  createPay(data: any): Observable<any> {
+    return this.http.post(this.apiUrl.pays.store, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
+
+  anularPay(payId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl.pays.index}/${payId}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getReceipt(payId:number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl.pays.index}/${payId}/receipt`, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
+      'Accept': 'application/pdf'
     });
   }}

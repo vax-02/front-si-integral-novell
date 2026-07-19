@@ -13,7 +13,7 @@ export class BaseModalComponent {
   @Input() title = '';
   @Input() subtitle?: string;
 
-  @Input() size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  @Input() size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' = 'md'
 
   @Input() confirmText = 'Guardar';
   @Input() cancelText = 'Cancelar';
@@ -38,6 +38,9 @@ export class BaseModalComponent {
         return 'max-w-3xl';
       case 'xl':
         return 'max-w-5xl';
+      case '2xl':
+        return 'max-w-7xl';
+      
       default:
         return 'max-w-xl';
     }

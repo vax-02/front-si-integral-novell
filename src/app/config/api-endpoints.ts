@@ -41,5 +41,7 @@ export const API_ENDPOINTS = {
 
   pays: {
     index : `${API_BASE_URL}/pays`,
+    store: `${API_BASE_URL}/pays`,
+    receipt: (id: number) => `${API_BASE_URL}/pays/${id}/receipt`,
   }
 } as const;
