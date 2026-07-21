@@ -23,17 +23,25 @@ import { CoursesComponent } from './pages/courses/courses.component';
 import { InstitutionComponent } from './pages/institution/institution.component';
 import { PaymentManagementComponent } from './pages/payment-management/payment-management.component';
 import { TrainingComponent } from './pages/training/training.component';
+import { DocenteSubjectsComponent } from './docente-subjects/docente-subjects.component';
+import { RepositoryComponent } from './docente-subjects/repository/repository.component';
 
 export const routes: Routes = [
   // Ruta para el Home
   { path: '', component: PresentationComponent },
   { path: 'login', component: LoginComponent },
   { path: 'home', canActivate: [authGuard], component:  LayoutComponent, children: [
+    //docentes
+    { path: 'professor', component: DocenteSubjectsComponent },
+    { path: 'professor/repository', component: RepositoryComponent },
+
+    
     //estudiantes
     { path: 'my-subjects', component: MySubjectsComponent },
     { path: 'my-schedule', component:  MyScheduleComponent },
     { path: 'my-pensul', component: MyPensulComponent },
 
+    //admin
     { path: 'dashboard', component: HomeComponent },
     { path: 'students', component: StudentsComponent },
     { path: 'docentes', component: DocentesComponent },
@@ -53,9 +61,11 @@ export const routes: Routes = [
     { path: 'settings', component: SettingsComponent, children: [
       { path: 'general', component: RegistrationComponent },
     ]},
+    { path: 'institution', component: InstitutionComponent  },
+    
+    //general
     { path: 'profile', component: ProfileComponent  },
     { path: 'password', component: ChangePasswordComponent  },
-    { path: 'institution', component: InstitutionComponent  },
   ] },
   // Redirección por defecto: si el usuario no escribe nada, va a /home
   { path: '', redirectTo: '', pathMatch: 'full' },

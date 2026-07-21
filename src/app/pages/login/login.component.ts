@@ -55,7 +55,7 @@ export class LoginComponent {
       '',
       [
         Validators.required,
-        Validators.minLength(8),
+        Validators.minLength(6),
         Validators.maxLength(64),
         noDangerousCharsValidator,
       ],

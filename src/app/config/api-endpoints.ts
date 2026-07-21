@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   users: `${API_BASE_URL}/users`,
   degrees: `${API_BASE_URL}/degrees`,
   docentes: `${API_BASE_URL}/docentes`,
+  docenteMySubjects: `${API_BASE_URL}/docente/my-subjects`,
   students: {
     index: `${API_BASE_URL}/students`,
   },
@@ -53,6 +54,12 @@ export const API_ENDPOINTS = {
     getActiveByCareer: (careerId: number, gestion: number) => `${API_BASE_URL}/careers/${careerId}/active-students/${gestion}`,
   },
 
+  materials: {
+    index: `${API_BASE_URL}/materials`,
+    store: `${API_BASE_URL}/materials`,
+    delete: (id: number) => `${API_BASE_URL}/materials/${id}`,
+    download: (id: number) => `${API_BASE_URL}/materials/${id}/download`,
+  },
   pays: {
     index : `${API_BASE_URL}/pays`,
     store: `${API_BASE_URL}/pays`,

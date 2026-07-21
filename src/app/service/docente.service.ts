@@ -55,6 +55,14 @@ export class DocenteService {
     );
   }
 
+  /** Obtener las materias asignadas al docente logueado */
+  getMySubjects(): Observable<any> {
+    return this.http.get<any>(
+      this.apiUrl.docenteMySubjects,
+      { headers: this.getHeaders() },
+    );
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

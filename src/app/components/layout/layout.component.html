@@ -79,6 +79,34 @@
       </div>
       }
 
+       @if(Roles.DOCENTE.id === user.currentRole.id) {
+      <!-- SECCION DEL ESTUDIANTE-->
+      <div>
+        <div (click)="toggleAcademico()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed && !isMobile ? 'justify-center' : 'justify-between'">
+          <div class="flex items-center" [ngClass]="collapsed && !isMobile ? '' : 'gap-4'">
+            <i class="fa-solid fa-graduation-cap text-slate-500 group-hover:text-blue-600 text-lg"></i>
+            <span *ngIf="!collapsed || isMobile" class="text-xs font-bold uppercase text-slate-400">Académico</span>
+          </div>
+          <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down transition-transform"
+            [class.rotate-180]="openAcademico"></i>
+        </div>
+
+        <!-- SUBMENU -->
+        <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
+          <a routerLink="/home/professor" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Mis materias
+          </a>
+          <a routerLink="/home/my-schedule" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Horario
+          </a>
+        </div>
+      </div>
+      }
       @if (Roles.ADMIN.id == user.currentRole.id) {
       <!-- DASHBOARD -->
       <a routerLink="/home/dashboard" routerLinkActive="bg-blue-50 text-blue-700"
