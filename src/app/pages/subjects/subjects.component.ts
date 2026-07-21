@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SubjectService } from '../../service/subject.service';
+import { DocenteService } from '../../service/docente.service';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
 
 @Component({
@@ -27,15 +28,28 @@ export class SubjectsComponent {
     career: '',
   };
 
-  modalAssignOpen = false;
-  modalHistoryOpen = false;
+  // Modal Detalle
+  modalDetailOpen = false;
+  detailLoading = false;
   selectedSubject: any = null;
+  subjectParallels: any[] = [];
+  subjectDocentes: any[] = [];
+
+  // Modal Asignar docente (dentro del detalle)
   docenteSearch = '';
   docentesFiltered: any[] = [];
-  assignedDocentes: any[] = [];
+  selectedParallelIdForAssign: number | null = null;
+  assigningDocente = false;
+
+  // Modal Histórico
+  modalHistoryOpen = false;
+  historyLoading = false;
   subjectHistory: any[] = [];
 
-  constructor(private subjectService: SubjectService) {}
+  constructor(
+    private subjectService: SubjectService,
+    private docenteService: DocenteService,
+  ) {}
 
   ngOnInit() {
     this.loadSubjects();
@@ -88,49 +102,121 @@ export class SubjectsComponent {
     return this.pageTo || Math.min(this.currentPage * this.perPage, this.totalSubjects);
   }
 
-  openAssignModal(subject: any) {
+  // ──────────────────────────────────────────────
+  //  DETALLE
+  // ──────────────────────────────────────────────
+  openDetailModal(subject: any) {
     this.selectedSubject = subject;
-    this.docenteSearch = '';
-    this.docentesFiltered = [];
-    this.assignedDocentes = subject.docentes || [];
-    this.modalAssignOpen = true;
+    this.subjectParallels = [];
+    this.subjectDocentes = [];
+    this.detailLoading = true;
+    this.modalDetailOpen = true;
+
+    this.subjectService.getDetail(subject.id).subscribe({
+      next: (resp) => {
+        this.detailLoading = false;
+        this.subjectParallels = resp.parallels || [];
+        this.subjectDocentes = resp.docentes || [];
+      },
+      error: () => {
+        this.detailLoading = false;
+        this.subjectParallels = [];
+        this.subjectDocentes = [];
+      },
+    });
   }
 
-  closeAssignModal() {
-    this.modalAssignOpen = false;
+  closeDetailModal() {
+    this.modalDetailOpen = false;
     this.selectedSubject = null;
+    this.subjectParallels = [];
+    this.subjectDocentes = [];
     this.docenteSearch = '';
     this.docentesFiltered = [];
+    this.selectedParallelIdForAssign = null;
   }
 
+  // Búsqueda de docentes para asignar
   searchDocentes() {
-    const query = this.docenteSearch.trim().toLowerCase();
+    const query = this.docenteSearch.trim();
     if (!query) {
       this.docentesFiltered = [];
       return;
     }
-
-    this.docentesFiltered = [
-      { id: 1, name: 'Juan Pérez' },
-      { id: 2, name: 'María Gómez' },
-      { id: 3, name: 'Carlos Rojas' },
-    ].filter((docente) => docente.name.toLowerCase().includes(query));
+    this.docenteService.getDocentes(1, 20, query).subscribe({
+      next: (resp) => {
+        this.docentesFiltered = resp.docentes?.data || [];
+      },
+      error: () => {
+        this.docentesFiltered = [];
+      },
+    });
   }
 
+  /** Asignar docente seleccionado a la materia + paralelo */
   assignDocente(docente: any) {
-    const alreadyAssigned = this.assignedDocentes.some((item) => item.id === docente.id);
-    if (!alreadyAssigned) {
-      this.assignedDocentes = [...this.assignedDocentes, docente];
-    }
+    if (!this.selectedSubject || !this.selectedParallelIdForAssign) return;
+
+    this.assigningDocente = true;
+    this.subjectService.assignDocente(
+      this.selectedSubject.id,
+      docente.id,
+      this.selectedParallelIdForAssign,
+    ).subscribe({
+      next: (resp) => {
+        this.assigningDocente = false;
+        // Recargar el detalle
+        this.loadDetailAfterAction();
+        this.docenteSearch = '';
+        this.docentesFiltered = [];
+        this.selectedParallelIdForAssign = null;
+      },
+      error: () => {
+        this.assigningDocente = false;
+      },
+    });
   }
 
+  /** Desasignar docente (baja lógica) */
+  removeDocente(docenteId: number, parallelId: number) {
+    if (!this.selectedSubject) return;
+
+    this.subjectService.removeDocente(this.selectedSubject.id, docenteId, parallelId).subscribe({
+      next: () => {
+        this.loadDetailAfterAction();
+      },
+    });
+  }
+
+  private loadDetailAfterAction() {
+    if (!this.selectedSubject) return;
+    this.subjectService.getDetail(this.selectedSubject.id).subscribe({
+      next: (resp) => {
+        this.subjectParallels = resp.parallels || [];
+        this.subjectDocentes = resp.docentes || [];
+      },
+    });
+  }
+
+  // ──────────────────────────────────────────────
+  //  HISTÓRICO
+  // ──────────────────────────────────────────────
   openHistoryModal(subject: any) {
     this.selectedSubject = subject;
-    this.subjectHistory = [
-      { id: 1, name: 'Juan Pérez', period: '2025-1' },
-      { id: 2, name: 'María Gómez', period: '2024-2' },
-    ];
+    this.subjectHistory = [];
+    this.historyLoading = true;
     this.modalHistoryOpen = true;
+
+    this.subjectService.getHistory(subject.id).subscribe({
+      next: (resp) => {
+        this.historyLoading = false;
+        this.subjectHistory = resp.history || [];
+      },
+      error: () => {
+        this.historyLoading = false;
+        this.subjectHistory = [];
+      },
+    });
   }
 
   closeHistoryModal() {

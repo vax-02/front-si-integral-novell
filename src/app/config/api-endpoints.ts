@@ -31,6 +31,12 @@ export const API_ENDPOINTS = {
     update: (id: number) => `${API_BASE_URL}/schedules/${id}`,
     delete: (id: number) => `${API_BASE_URL}/schedules/${id}`,
   },
+  subjects: {
+    detail: (id: number) => `${API_BASE_URL}/subjects/${id}/detail`,
+    history: (id: number) => `${API_BASE_URL}/subjects/${id}/history`,
+    assignDocente: (id: number) => `${API_BASE_URL}/subjects/${id}/assign-docente`,
+    removeDocente: (id: number) => `${API_BASE_URL}/subjects/${id}/remove-docente`,
+  },
   concepts :{
     index : `${API_BASE_URL}/concepts`,
     store: `${API_BASE_URL}/concepts`,

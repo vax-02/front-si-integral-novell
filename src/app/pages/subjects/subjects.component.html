@@ -73,10 +73,12 @@
             <td class="p-4 text-center">{{ subject.career?.name || '-' }}</td>
             <td class="p-4 text-center">
               <div class="flex justify-center gap-2">
-                <button (click)="openAssignModal(subject)" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs hover:bg-blue-700">
-                  <i class="fa-solid fa-user-plus"></i>
+                <button (click)="openDetailModal(subject)" title="Detalle"
+                  class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs hover:bg-blue-700 transition">
+                  <i class="fa-solid fa-circle-info"></i>
                 </button>
-                <button (click)="openHistoryModal(subject)" class="px-3 py-2 rounded-lg bg-amber-500 text-white text-xs hover:bg-amber-600">
+                <button (click)="openHistoryModal(subject)" title="Histórico"
+                  class="px-3 py-2 rounded-lg bg-amber-500 text-white text-xs hover:bg-amber-600 transition">
                   <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
               </div>
@@ -107,56 +109,205 @@
     </div>
   </div>
 
-  <app-base-modal [isOpen]="modalAssignOpen" title="Asignar docente" subtitle="Buscar y asignar un docente a la materia" size="md"
-    confirmText="Cerrar" cancelText="Cancelar" (confirm)="closeAssignModal()" (cancel)="closeAssignModal()" [showConfirm]="true" [showCancel]="false">
-    <div class="space-y-4" *ngIf="selectedSubject">
+  <!-- ──────────────────────────────────────────────── -->
+  <!--  MODAL DETALLE                                  -->
+  <!-- ──────────────────────────────────────────────── -->
+  <app-base-modal [isOpen]="modalDetailOpen" title="Detalle de materia" [subtitle]="selectedSubject?.sigla || ''" size="2xl"
+    confirmText="Cerrar" cancelText="Cancelar" (confirm)="closeDetailModal()" (cancel)="closeDetailModal()" [showCancel]="false">
+
+    <div *ngIf="detailLoading" class="flex items-center justify-center py-10">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
+      <span class="ml-2 text-slate-500">Cargando detalle...</span>
+    </div>
+
+    <div *ngIf="!detailLoading && selectedSubject" class="space-y-6">
+
+      <!-- Info materia -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h3 class="text-lg font-bold text-slate-800">{{ selectedSubject.name }}</h3>
+        <p class="text-sm text-slate-500">{{ selectedSubject.sigla }} • {{ selectedSubject.career?.name || 'Sin carrera' }}</p>
+      </div>
+
+      <!-- Paralelos donde se dicta -->
       <div>
-        <p class="text-sm font-semibold text-slate-700">Materia: {{ selectedSubject.name }}</p>
-        <p class="text-xs text-slate-500">{{ selectedSubject.sigla }} • {{ selectedSubject.career?.name || '-' }}</p>
+        <h4 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-book text-blue-500"></i>
+          Paralelos donde se dicta
+        </h4>
+
+        <div *ngIf="subjectParallels.length === 0" class="text-sm text-slate-400 py-4 text-center border rounded-lg">
+          Esta materia no está asignada a ningún paralelo.
+        </div>
+
+        <div *ngIf="subjectParallels.length > 0" class="overflow-auto rounded-lg border">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+              <tr>
+                <th class="p-3 text-left">Curso</th>
+                <th class="p-3 text-center">Paralelo</th>
+                <th class="p-3 text-center">Turno</th>
+                <th class="p-3 text-center">Cupo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr *ngFor="let parallel of subjectParallels" class="hover:bg-slate-50">
+                <td class="p-3 font-medium text-slate-700">{{ parallel.course?.name || '-' }}</td>
+                <td class="p-3 text-center text-slate-600">{{ parallel.paralelo }}</td>
+                <td class="p-3 text-center text-slate-600">{{ parallel.turno }}</td>
+                <td class="p-3 text-center text-slate-600">{{ parallel.students_count || 0 }} / {{ parallel.limit || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="space-y-2">
-        <label class="text-sm font-medium text-slate-700">Buscar docente</label>
-        <input type="text" [(ngModel)]="docenteSearch" (ngModelChange)="searchDocentes()"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm"
-          placeholder="Escriba el nombre del docente">
-      </div>
+      <!-- Docentes asignados -->
+      <div>
+        <h4 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-chalkboard-user text-green-500"></i>
+          Docentes asignados
+        </h4>
 
-      <div *ngIf="docentesFiltered.length > 0" class="space-y-2">
-        <p class="text-xs font-semibold uppercase text-slate-400">Resultados</p>
-        <button *ngFor="let docente of docentesFiltered" (click)="assignDocente(docente)"
-          class="w-full text-left px-3 py-2 rounded-lg border border-slate-200 hover:bg-blue-50 text-sm">
-          {{ docente.name }}
-        </button>
-      </div>
+        <div *ngIf="subjectDocentes.length === 0" class="text-sm text-slate-400 py-4 text-center border rounded-lg">
+          No hay docentes asignados a esta materia.
+        </div>
 
-      <div *ngIf="assignedDocentes.length > 0" class="space-y-2">
-        <p class="text-xs font-semibold uppercase text-slate-400">Docentes asignados</p>
-        <div *ngFor="let docente of assignedDocentes" class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-          <span>{{ docente.name }}</span>
-          <span class="text-xs text-slate-400">Asignado</span>
+        <div *ngIf="subjectDocentes.length > 0" class="overflow-auto rounded-lg border mb-4">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+              <tr>
+                <th class="p-3 text-left">Docente</th>
+                <th class="p-3 text-left">Curso</th>
+                <th class="p-3 text-center">Paralelo</th>
+                <th class="p-3 text-center">Turno</th>
+                <th class="p-3 text-center">Asignado el</th>
+                <th class="p-3 text-center">Estado</th>
+                <th class="p-3 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr *ngFor="let docente of subjectDocentes" class="hover:bg-slate-50">
+                <td class="p-3 font-medium text-slate-700">{{ docente.name }}</td>
+                <td class="p-3 text-slate-600">{{ docente.course_name }}</td>
+                <td class="p-3 text-center text-slate-600">{{ docente.parallel_name }}</td>
+                <td class="p-3 text-center text-slate-600">{{ docente.parallel_turno }}</td>
+                <td class="p-3 text-center text-slate-500 text-xs">{{ docente.created_at | date:'dd/MM/yyyy' }}</td>
+                <td class="p-3 text-center">
+                  <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    Activo
+                  </span>
+                </td>
+                <td class="p-3 text-center">
+                  <button (click)="removeDocente(docente.id, docente.parallel_id)" title="Desasignar"
+                    class="px-2 py-1 rounded bg-red-100 text-red-600 text-xs hover:bg-red-200 transition">
+                    <i class="fa-solid fa-user-minus"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Asignar nuevo docente -->
+        <div class="bg-slate-50 rounded-xl p-4">
+          <h5 class="text-sm font-semibold text-slate-600 mb-3">Asignar nuevo docente</h5>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-slate-500">Seleccionar paralelo</label>
+              <select [(ngModel)]="selectedParallelIdForAssign"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option [value]="null">Seleccione un paralelo</option>
+                <option *ngFor="let parallel of subjectParallels" [value]="parallel.id">
+                  {{ parallel.course?.name }} - Paralelo {{ parallel.paralelo }} ({{ parallel.turno }})
+                </option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-slate-500">Buscar docente</label>
+              <input type="text" [(ngModel)]="docenteSearch" (ngModelChange)="searchDocentes()"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Escriba el nombre del docente">
+            </div>
+          </div>
+
+          <!-- Resultados de búsqueda -->
+          <div *ngIf="docentesFiltered.length > 0" class="space-y-1 max-h-40 overflow-y-auto">
+            <p class="text-xs font-semibold uppercase text-slate-400">Resultados</p>
+            <button *ngFor="let docente of docentesFiltered" (click)="assignDocente(docente)"
+              [disabled]="assigningDocente || !selectedParallelIdForAssign"
+              class="w-full text-left px-3 py-2 rounded-lg border border-slate-200 hover:bg-blue-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-between">
+              <span>{{ docente.user?.name }} {{ docente.user?.first_lastname }}</span>
+              <span class="text-xs text-blue-500">
+                <i class="fa-solid fa-plus"></i> Asignar
+              </span>
+            </button>
+          </div>
+
+          <div *ngIf="assigningDocente" class="text-sm text-blue-600 mt-2">
+            <i class="fas fa-spinner fa-spin mr-1"></i> Asignando docente...
+          </div>
         </div>
       </div>
     </div>
   </app-base-modal>
 
-  <app-base-modal [isOpen]="modalHistoryOpen" title="Historial docente" subtitle="Materias dictadas por docente" size="md"
+  <!-- ──────────────────────────────────────────────── -->
+  <!--  MODAL HISTÓRICO                                -->
+  <!-- ──────────────────────────────────────────────── -->
+  <app-base-modal [isOpen]="modalHistoryOpen" title="Historial de asignaciones" [subtitle]="selectedSubject?.sigla || ''" size="2xl"
     confirmText="Cerrar" cancelText="Cancelar" (confirm)="closeHistoryModal()" (cancel)="closeHistoryModal()" [showCancel]="false">
-    <div class="space-y-4" *ngIf="selectedSubject">
-      <div>
-        <p class="text-sm font-semibold text-slate-700">{{ selectedSubject.name }}</p>
-        <p class="text-xs text-slate-500">{{ selectedSubject.sigla }}</p>
+
+    <div *ngIf="historyLoading" class="flex items-center justify-center py-10">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
+      <span class="ml-2 text-slate-500">Cargando historial...</span>
+    </div>
+
+    <div *ngIf="!historyLoading && selectedSubject" class="space-y-4">
+      <div class="bg-slate-50 rounded-xl p-4">
+        <h3 class="text-lg font-bold text-slate-800">{{ selectedSubject.name }}</h3>
+        <p class="text-sm text-slate-500">{{ selectedSubject.sigla }} • {{ selectedSubject.career?.name || 'Sin carrera' }}</p>
       </div>
 
-      <div *ngIf="subjectHistory.length > 0" class="space-y-2">
-        <div *ngFor="let item of subjectHistory" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
-          <div class="font-medium text-slate-700">{{ item.name }}</div>
-          <div class="text-xs text-slate-400">Período: {{ item.period }}</div>
-        </div>
+      <div *ngIf="subjectHistory.length === 0" class="text-sm text-slate-400 py-8 text-center border rounded-lg">
+        No hay historial de asignaciones para esta materia.
       </div>
 
-      <div *ngIf="subjectHistory.length === 0" class="text-sm text-slate-500">
-        No hay historial registrado para esta materia.
+      <div *ngIf="subjectHistory.length > 0" class="overflow-auto rounded-lg border">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+            <tr>
+              <th class="p-3 text-left">#</th>
+              <th class="p-3 text-left">Docente</th>
+              <th class="p-3 text-left">Curso</th>
+              <th class="p-3 text-center">Paralelo</th>
+              <th class="p-3 text-center">Turno</th>
+              <th class="p-3 text-center">Estado</th>
+              <th class="p-3 text-center">Asignado</th>
+              <th class="p-3 text-center">Última actualización</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr *ngFor="let item of subjectHistory; let i = index" class="hover:bg-slate-50 transition">
+              <td class="p-3 text-slate-500">{{ i + 1 }}</td>
+              <td class="p-3 font-medium text-slate-700">{{ item.name }}</td>
+              <td class="p-3 text-slate-600">{{ item.course_name }}</td>
+              <td class="p-3 text-center text-slate-600">{{ item.parallel_name }}</td>
+              <td class="p-3 text-center text-slate-600">{{ item.parallel_turno }}</td>
+              <td class="p-3 text-center">
+                <span *ngIf="item.status" class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                  Activo
+                </span>
+                <span *ngIf="!item.status" class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                  Inactivo
+                </span>
+              </td>
+              <td class="p-3 text-center text-slate-500 text-xs">{{ item.created_at | date:'dd/MM/yyyy' }}</td>
+              <td class="p-3 text-center text-slate-500 text-xs">{{ item.updated_at | date:'dd/MM/yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </app-base-modal>

@@ -36,6 +36,38 @@ export class SubjectService {
     });
   }
 
+  /** Obtener detalle: paralelos donde se dicta + docentes asignados */
+  getDetail(subjectId: number): Observable<any> {
+    return this.http.get(this.apiUrl.subjects.detail(subjectId), {
+      headers: this.getHeaders(),
+    });
+  }
+
+  /** Obtener historial de asignaciones docentes */
+  getHistory(subjectId: number): Observable<any> {
+    return this.http.get(this.apiUrl.subjects.history(subjectId), {
+      headers: this.getHeaders(),
+    });
+  }
+
+  /** Asignar docente a materia + paralelo */
+  assignDocente(subjectId: number, docenteId: number, parallelId: number): Observable<any> {
+    return this.http.post(
+      this.apiUrl.subjects.assignDocente(subjectId),
+      { docente_id: docenteId, parallel_id: parallelId },
+      { headers: this.getHeaders() },
+    );
+  }
+
+  /** Desasignar docente (baja lógica) */
+  removeDocente(subjectId: number, docenteId: number, parallelId: number): Observable<any> {
+    return this.http.post(
+      this.apiUrl.subjects.removeDocente(subjectId),
+      { docente_id: docenteId, parallel_id: parallelId },
+      { headers: this.getHeaders() },
+    );
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
