@@ -80,7 +80,7 @@
             <td class="p-4 text-center">
               <span class="px-3 py-1 rounded-full text-xs font-semibold"
                 [ngClass]="docente.user.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
-                {{ docente.user.status ? 'Activo' : 'Inactivo' }}
+                {{ docente.user.status == 1 ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
             <td class="p-4 text-center">

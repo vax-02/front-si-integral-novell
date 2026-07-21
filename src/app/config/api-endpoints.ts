@@ -27,6 +27,9 @@ export const API_ENDPOINTS = {
     byCareer: (careerId: number) => `${API_BASE_URL}/subjects/${careerId}/by-career`,
     byParallel: (parallelId: number) => `${API_BASE_URL}/schedules/parallel/${parallelId}`,
     save: `${API_BASE_URL}/schedules/save`,
+    store: `${API_BASE_URL}/schedules`,
+    update: (id: number) => `${API_BASE_URL}/schedules/${id}`,
+    delete: (id: number) => `${API_BASE_URL}/schedules/${id}`,
   },
   concepts :{
     index : `${API_BASE_URL}/concepts`,

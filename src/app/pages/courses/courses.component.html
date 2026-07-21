@@ -258,76 +258,169 @@
     </div>
   </app-base-modal>
 
-
-
-  <!-- MODAL HORARIO -->
+  <!-- MODAL HORARIO CRUD -->
   <app-base-modal [isOpen]="modalSchedule" title="Horario" [subtitle]="subtitleNewParallel" size="2xl"
-    confirmText="Cerrar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="modalSchedule = false" (cancel)="modalSchedule = false">
+    confirmText="Cerrar" cancelText="Cancelar" [loading]="false" (confirm)="modalSchedule = false" (cancel)="modalSchedule = false">
 
-      <!-- EDITOR DE HORARIO -->
-      <div *ngIf="selectedParallel" class="mt-8">
+    <div *ngIf="selectedParallel" class="mt-4">
 
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-700">
-              Horario - Paralelo {{selectedParallel.parallel}}
-            </h2>
-            <p class="text-sm text-slate-500">
-              Turno {{selectedParallel.turno}}
-            </p>
-          </div>
-          <button (click)="saveSchedule()" [disabled]="savingSchedule"
-            class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50">
-            <i *ngIf="savingSchedule" class="fas fa-spinner fa-spin mr-2"></i>
-            <i *ngIf="!savingSchedule" class="fas fa-save mr-2"></i>
-            Guardar Horario
-          </button>
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-700">
+            Horario - Paralelo {{selectedParallel.paralelo}}
+          </h2>
+          <p class="text-sm text-slate-500">
+            Turno {{selectedParallel.turno}}
+          </p>
         </div>
+        <button (click)="openAddScheduleForm()"
+          class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm hover:bg-green-700 transition">
+          <i class="fas fa-plus mr-2"></i>
+          Agregar Materia
+        </button>
+      </div>
 
-        <div class="overflow-auto rounded-xl border">
-          <table class="min-w-full border-collapse text-sm">
-            <thead class="bg-slate-100">
-              <tr>
-                <th class="border p-3 w-32 text-left">Hora</th>
-                <th class="border p-3" *ngFor="let day of days">{{day}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let block of timeBlocks">
-                <td class="border p-3 font-semibold whitespace-nowrap">
-                  {{block.start}} - {{block.end}}
-                </td>
-                <td class="border p-1" *ngFor="let day of days">
-                  <div class="relative">
-                    <input
-                      type="text"
-                      class="w-full text-xs border border-slate-300 rounded px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none"
-                      [ngModel]="searchTexts[getCellKey(day, block.start + '_' + block.end)] || ''"
-                      (ngModelChange)="onSubjectSearch(day, block.start + '_' + block.end, $event)"
-                      (focus)="onSubjectFocus(day, block.start + '_' + block.end)"
-                      (blur)="onSubjectBlur(day, block.start + '_' + block.end)"
-                      placeholder="Buscar materia..."
-                      [style.background-color]="getSubjectColor(scheduleData[day]?.[block.start + '_' + block.end])"
-                      autocomplete="off">
-                    
-                    <!-- Dropdown de sugerencias -->
-                    <div
-                      *ngIf="showDropdowns[getCellKey(day, block.start + '_' + block.end)]"
-                      class="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                      <div
-                        *ngFor="let subject of filteredSubjects[getCellKey(day, block.start + '_' + block.end)]"
-                        (mousedown)="selectSubject(day, block.start + '_' + block.end, subject)"
-                        class="px-3 py-2 text-xs cursor-pointer hover:bg-blue-50 border-b border-slate-100 last:border-b-0"
-                        [style.background-color]="getSubjectColor(subject.id)">
-                        <span class="font-semibold">{{subject.sigla}}</span> - {{subject.name}}
-                      </div>
+      <!-- Formulario Agregar / Editar -->
+      <div *ngIf="showScheduleForm" class="bg-slate-50 border rounded-xl p-4 mb-6">
+        <h3 class="text-md font-semibold text-slate-700 mb-3">
+          {{ editingScheduleId ? 'Editar' : 'Agregar' }} materia al horario
+        </h3>
+        <form [formGroup]="scheduleForm">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Materia -->
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-slate-600">Materia</label>
+              <select formControlName="subject_id"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option [value]="null">Seleccione materia</option>
+                <option *ngFor="let sub of subjects" [value]="sub.id">
+                  {{ sub.sigla }} - {{ sub.name }}
+                </option>
+              </select>
+              <div *ngIf="scheduleForm.get('subject_id')?.invalid && scheduleForm.get('subject_id')?.touched"
+                class="text-xs text-red-500">Requerido</div>
+            </div>
+
+            <!-- Día -->
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-slate-600">Día</label>
+              <select formControlName="day"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Seleccione día</option>
+                <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+              </select>
+              <div *ngIf="scheduleForm.get('day')?.invalid && scheduleForm.get('day')?.touched"
+                class="text-xs text-red-500">Requerido</div>
+            </div>
+
+            <!-- Hora de inicio (fin se calcula automáticamente) -->
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-slate-600">Hora</label>
+              <select formControlName="start_time"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Seleccione hora</option>
+                <option *ngFor="let block of timeBlocks" [value]="block.start">{{ block.start }} - {{ block.end }}</option>
+              </select>
+              <div *ngIf="scheduleForm.get('start_time')?.invalid && scheduleForm.get('start_time')?.touched"
+                class="text-xs text-red-500">Requerido</div>
+            </div>
+          </div>
+
+          <!-- Acciones formulario -->
+          <div class="flex gap-2 mt-4">
+            <button (click)="saveScheduleItem()" [disabled]="savingScheduleItem"
+              class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50 transition">
+              <i *ngIf="savingScheduleItem" class="fas fa-spinner fa-spin mr-2"></i>
+              <i *ngIf="!savingScheduleItem" class="fas fa-save mr-2"></i>
+              {{ editingScheduleId ? 'Actualizar' : 'Guardar' }}
+            </button>
+            <button (click)="cancelScheduleForm()" type="button"
+              class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-100 transition">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Grilla de horarios: filas = horas, columnas = días -->
+      <div *ngIf="schedules.length > 0; else noSchedule" class="overflow-auto rounded-xl border mb-4">
+        <table class="w-full min-w-[700px] border-collapse text-sm">
+          <thead>
+            <tr>
+              <th class="bg-slate-100 border p-3 text-left text-slate-600 font-semibold min-w-[100px]">Hora</th>
+              <th *ngFor="let day of days" class="bg-slate-100 border p-3 text-center text-slate-600 font-semibold min-w-[120px]">
+                {{ getDayName(day) }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let block of timeBlocks">
+              <td class="border p-3 text-slate-500 font-medium whitespace-nowrap">
+                {{ block.start }} - {{ block.end }}
+              </td>
+              <td *ngFor="let day of days" class="border p-2 text-center align-top" 
+                  [class.bg-blue-50]="hasSchedule(day, block.start)"
+                  style="height: 80px;">
+                <ng-container *ngIf="getScheduleForSlot(day, block.start) as slot">
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="text-xs font-semibold text-slate-800 leading-tight">
+                      {{ slot.subject?.sigla }}
+                    </span>
+                    <span class="text-[10px] text-slate-500 leading-tight">
+                      {{ slot.subject?.name }}
+                    </span>
+                    <div class="flex gap-1 mt-1">
+                      <button (click)="openEditScheduleForm(slot)" title="Editar"
+                        class="w-6 h-6 rounded-full bg-amber-400 text-white text-xs hover:bg-amber-500 transition flex items-center justify-center">
+                        <i class="fas fa-pen text-[10px]"></i>
+                      </button>
+                      <button (click)="confirmDeleteSchedule(slot.id)" title="Eliminar"
+                        class="w-6 h-6 rounded-full bg-red-400 text-white text-xs hover:bg-red-500 transition flex items-center justify-center">
+                        <i class="fas fa-times text-[10px]"></i>
+                      </button>
                     </div>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </ng-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </app-base-modal>
+
+      <!-- Mensaje sin horarios -->
+      <ng-template #noSchedule>
+        <div class="text-center py-10 text-slate-400 text-sm">
+          No hay horarios configurados para este paralelo. Haga clic en "Agregar Materia" para comenzar.
+        </div>
+      </ng-template>
+    </div>
+  </app-base-modal>
+
+  <!-- Modal Confirmar Eliminar Horario -->
+  <div *ngIf="confirmDeleteScheduleOpen"
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+      <div class="text-center">
+        <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800 mb-2">¿Eliminar horario?</h3>
+        <p class="text-sm text-slate-500 mb-6">
+          Esta acción eliminará esta asignación de materia del horario. No se puede deshacer.
+        </p>
+      </div>
+      <div class="flex gap-3 justify-center">
+        <button (click)="cancelDeleteSchedule()"
+          class="px-6 py-2.5 border border-slate-300 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition">
+          Cancelar
+        </button>
+        <button (click)="deleteSchedule()" [disabled]="savingScheduleItem"
+          class="px-6 py-2.5 bg-red-500 text-white rounded-xl text-sm hover:bg-red-600 disabled:opacity-50 transition">
+          <i *ngIf="savingScheduleItem" class="fas fa-spinner fa-spin mr-2"></i>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

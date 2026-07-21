@@ -55,33 +55,24 @@ export class CoursesComponent implements OnInit {
   // Schedule properties
   subjects: any[] = [];
   days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'];
-  timeBlocks = [
-    { start: '09:00', end: '10:00' },
-    { start: '10:00', end: '11:00' },
-    { start: '11:00', end: '12:00' },
-    { start: '14:00', end: '15:00' },
-    { start: '16:00', end: '17:00' },
-    { start: '17:00', end: '18:00' },
-    { start: '19:15', end: '20:45' },
-  ];
-  scheduleData: { [key: string]: { [key: string]: number | null } } = {};
+  timeBlocks: { start: string; end: string }[] = [];
   careerId: number | null = null;
   savingSchedule = false;
 
-  // Autocomplete properties
-  searchTexts: { [cellKey: string]: string } = {};
-  showDropdowns: { [cellKey: string]: boolean } = {};
-  filteredSubjects: { [cellKey: string]: any[] } = {};
-  selectedCourseLevel: number = 0;
+  // Schedule CRUD
+  schedules: any[] = [];
+  selectedParallel: any = null;
+  modalSchedule: boolean = false;
 
-  // Colors for repeated subjects
-  subjectColors: { [subjectId: number]: string } = {};
-  private colorPalette = [
-    '#FEF3C7', '#DBEAFE', '#D1FAE5', '#FCE7F3', '#E0E7FF',
-    '#FED7AA', '#C7D2FE', '#A7F3D0', '#FDE68A', '#DDD6FE',
-    '#FECACA', '#BBDEFB', '#C8E6C9', '#F8BBD0', '#C5CAE9',
-    '#FFE0B2', '#B3E5FC', '#DCEDC8', '#FFCCBC', '#D7CCC8',
-  ];
+  // Form for adding/editing schedule items
+  scheduleForm: FormGroup;
+  editingScheduleId: number | null = null;
+  savingScheduleItem = false;
+  showScheduleForm = false;
+
+  // Confirm delete
+  confirmDeleteScheduleId: number | null = null;
+  confirmDeleteScheduleOpen = false;
 
   constructor(
     private fb: FormBuilder,
@@ -95,6 +86,13 @@ export class CoursesComponent implements OnInit {
       turno: ['', Validators.required],
       parallel: ['', [Validators.required, Validators.maxLength(10)]],
       limit: [15, [Validators.required, Validators.min(5)]],
+    });
+
+    this.scheduleForm = this.fb.group({
+      subject_id: [null, Validators.required],
+      day: ['', Validators.required],
+      start_time: ['', Validators.required],
+      end_time: [''],
     });
   }
 
@@ -223,18 +221,22 @@ export class CoursesComponent implements OnInit {
     this.selectedParallel = null;
   }
 
-  // ── Schedule / Horario ──
+  // ── Schedule / Horario CRUD ──
   parallels: any[] = [];
-  selectedParallel: any = null;
+  selectedCourseLevel: number = 0;
 
-  modalSchedule : boolean = false
   selectParallel(parallel: any) {
     this.selectedParallel = parallel;
-    this.initScheduleData();
     this.modalSchedule = true;
-    this.searchTexts = {};
-    this.showDropdowns = {};
-    this.filteredSubjects = {};
+    this.schedules = [];
+    this.showScheduleForm = false;
+    this.editingScheduleId = null;
+    this.scheduleForm.reset();
+    this.confirmDeleteScheduleId = null;
+    this.confirmDeleteScheduleOpen = false;
+
+    // Establecer bloques horarios según el turno del paralelo
+    this.setTimeBlocksByTurno(parallel.turno);
 
     // Cargar materias de la carrera filtradas por el nivel del curso
     if (this.careerId && this.selectedCourseLevel) {
@@ -249,46 +251,43 @@ export class CoursesComponent implements OnInit {
     }
 
     // Cargar horario existente
-    this.scheduleService.getByParallel(parallel.id).subscribe({
+    this.loadSchedules();
+  }
+
+  /** Define los bloques horarios según el turno del paralelo */
+  private setTimeBlocksByTurno(turno: string): void {
+    const blocks: Record<string, { start: string; end: string }[]> = {
+      'Mañana': [
+        { start: '09:00', end: '10:00' },
+        { start: '10:00', end: '11:00' },
+        { start: '11:00', end: '12:00' },
+        { start: '12:00', end: '13:00' },
+      ],
+      'Tarde': [
+        { start: '14:00', end: '15:00' },
+        { start: '15:00', end: '16:00' },
+        { start: '16:00', end: '17:00' },
+        { start: '17:00', end: '18:00' },
+      ],
+      'Noche': [
+        { start: '18:00', end: '19:00' },
+        { start: '19:00', end: '20:00' },
+        { start: '20:00', end: '21:00' },
+        { start: '21:00', end: '22:00' },
+      ],
+    };
+    this.timeBlocks = blocks[turno] || [];
+  }
+
+  loadSchedules() {
+    if (!this.selectedParallel) return;
+    this.scheduleService.getByParallel(this.selectedParallel.id).subscribe({
       next: (resp) => {
-        const schedules = resp.schedules || [];
-        schedules.forEach((s: any) => {
-          const key = `${s.day}_${s.start_time}_${s.end_time}`;
-          const parts = this.findTimeBlockKey(s.day, s.start_time, s.end_time);
-          if (parts) {
-            this.scheduleData[s.day][parts] = s.subject_id;
-            // Set the search text for this cell
-            const cellKey = `${s.day}_${parts}`;
-            if (s.subject) {
-              this.searchTexts[cellKey] = `${s.subject.sigla} - ${s.subject.name}`;
-            }
-          }
-        });
-        this.updateSubjectColors();
+        this.schedules = resp.schedules || [];
       },
       error: () => {
-        // No hay horario guardado aún, iniciar vacío
+        this.schedules = [];
       },
-    });
-  }
-
-  private findTimeBlockKey(day: string, start: string, end: string): string | null {
-    for (const block of this.timeBlocks) {
-      if (block.start === start && block.end === end) {
-        return `${block.start}_${block.end}`;
-      }
-    }
-    return null;
-  }
-
-  private initScheduleData() {
-    this.scheduleData = {};
-    this.days.forEach((day) => {
-      this.scheduleData[day] = {};
-      this.timeBlocks.forEach((block) => {
-        const key = `${block.start}_${block.end}`;
-        this.scheduleData[day][key] = null;
-      });
     });
   }
 
@@ -298,130 +297,141 @@ export class CoursesComponent implements OnInit {
     return subject ? `${subject.sigla} - ${subject.name}` : '';
   }
 
-  // ── Autocomplete search ──
-  onSubjectSearch(day: string, blockKey: string, value: string) {
-    const cellKey = `${day}_${blockKey}`;
-    this.searchTexts[cellKey] = value;
+  // ── Add / Edit Schedule Item ──
+  openAddScheduleForm() {
+    this.editingScheduleId = null;
+    this.scheduleForm.reset();
+    this.showScheduleForm = true;
+  }
 
-    // If the user cleared the input, remove the subject
-    if (!value.trim()) {
-      this.scheduleData[day][blockKey] = null;
-      this.showDropdowns[cellKey] = false;
-      this.updateSubjectColors();
+  openEditScheduleForm(schedule: any) {
+    this.editingScheduleId = schedule.id;
+    this.scheduleForm.patchValue({
+      subject_id: schedule.subject_id,
+      day: schedule.day,
+      start_time: schedule.start_time,
+      end_time: schedule.end_time,
+    });
+    this.showScheduleForm = true;
+  }
+
+  cancelScheduleForm() {
+    this.showScheduleForm = false;
+    this.editingScheduleId = null;
+    this.scheduleForm.reset();
+  }
+
+  saveScheduleItem() {
+    if (this.scheduleForm.invalid) {
+      this.scheduleForm.markAllAsTouched();
+      this.toast.info('Complete todos los campos requeridos.');
       return;
     }
 
-    // Filter subjects locally
-    const searchLower = value.toLowerCase();
-    const filtered = this.subjects.filter(
-      (s) =>
-        s.sigla.toLowerCase().includes(searchLower) ||
-        s.name.toLowerCase().includes(searchLower)
-    );
-    this.filteredSubjects[cellKey] = filtered;
-    this.showDropdowns[cellKey] = filtered.length > 0;
-  }
+    this.savingScheduleItem = true;
+    const formValue = this.scheduleForm.value;
+    const data = {
+      ...formValue,
+      end_time: this.getEndTimeByStart(formValue.start_time),
+      parallel_id: this.selectedParallel.id,
+    };
 
-  selectSubject(day: string, blockKey: string, subject: any) {
-    const cellKey = `${day}_${blockKey}`;
-    this.scheduleData[day][blockKey] = subject.id;
-    this.searchTexts[cellKey] = `${subject.sigla} - ${subject.name}`;
-    this.showDropdowns[cellKey] = false;
-    this.updateSubjectColors();
-  }
-
-  onSubjectBlur(day: string, blockKey: string) {
-    // Delay to allow click on dropdown item
-    setTimeout(() => {
-      const cellKey = `${day}_${blockKey}`;
-      this.showDropdowns[cellKey] = false;
-    }, 200);
-  }
-
-  onSubjectFocus(day: string, blockKey: string) {
-    const cellKey = `${day}_${blockKey}`;
-    const value = this.searchTexts[cellKey] || '';
-    if (value.trim()) {
-      const searchLower = value.toLowerCase();
-      const filtered = this.subjects.filter(
-        (s) =>
-          s.sigla.toLowerCase().includes(searchLower) ||
-          s.name.toLowerCase().includes(searchLower)
-      );
-      this.filteredSubjects[cellKey] = filtered;
-      this.showDropdowns[cellKey] = filtered.length > 0;
+    if (this.editingScheduleId) {
+      // Update existing
+      this.scheduleService.updateSchedule(this.editingScheduleId, data).subscribe({
+        next: (resp) => {
+          this.savingScheduleItem = false;
+          this.toast.success('Horario actualizado correctamente.');
+          this.cancelScheduleForm();
+          this.loadSchedules();
+        },
+        error: () => {
+          this.savingScheduleItem = false;
+          this.toast.error('Error al actualizar el horario.');
+        },
+      });
+    } else {
+      // Create new
+      this.scheduleService.createSchedule(data).subscribe({
+        next: (resp) => {
+          this.savingScheduleItem = false;
+          this.toast.success('Horario agregado correctamente.');
+          this.cancelScheduleForm();
+          this.loadSchedules();
+        },
+        error: () => {
+          this.savingScheduleItem = false;
+          this.toast.error('Error al agregar el horario.');
+        },
+      });
     }
   }
 
-  // ── Colors for repeated subjects ──
-  private updateSubjectColors() {
-    this.subjectColors = {};
-    
-    // Count occurrences of each subject_id
-    const subjectCount: { [id: number]: number } = {};
-    const subjectPositions: { [id: number]: string[] } = {};
-    
-    this.days.forEach((day) => {
-      this.timeBlocks.forEach((block) => {
-        const key = `${block.start}_${block.end}`;
-        const subjectId = this.scheduleData[day]?.[key];
-        if (subjectId) {
-          subjectCount[subjectId] = (subjectCount[subjectId] || 0) + 1;
-          if (!subjectPositions[subjectId]) subjectPositions[subjectId] = [];
-          subjectPositions[subjectId].push(`${day}_${key}`);
-        }
-      });
-    });
-
-    // Only assign colors to subjects that appear more than once
-    let colorIndex = 0;
-    Object.keys(subjectCount).forEach((idStr) => {
-      const id = Number(idStr);
-      if (subjectCount[id] > 1) {
-        this.subjectColors[id] = this.colorPalette[colorIndex % this.colorPalette.length];
-        colorIndex++;
-      }
-    });
+  // ── Delete Schedule Item ──
+  confirmDeleteSchedule(scheduleId: number) {
+    this.confirmDeleteScheduleId = scheduleId;
+    this.confirmDeleteScheduleOpen = true;
   }
 
-  getSubjectColor(subjectId: number | null): string {
-    if (!subjectId) return '';
-    return this.subjectColors[subjectId] || '';
+  cancelDeleteSchedule() {
+    this.confirmDeleteScheduleId = null;
+    this.confirmDeleteScheduleOpen = false;
   }
 
-  getCellKey(day: string, blockKey: string): string {
-    return `${day}_${blockKey}`;
-  }
-
-  saveSchedule() {
-    if (!this.selectedParallel) return;
-    this.savingSchedule = true;
-
-    const schedules: any[] = [];
-    this.days.forEach((day) => {
-      this.timeBlocks.forEach((block) => {
-        const key = `${block.start}_${block.end}`;
-        const subjectId = this.scheduleData[day]?.[key];
-        if (subjectId) {
-          schedules.push({
-            day,
-            start_time: block.start,
-            end_time: block.end,
-            subject_id: subjectId,
-          });
-        }
-      });
-    });
-
-    this.scheduleService.saveSchedules(this.selectedParallel.id, schedules).subscribe({
+  deleteSchedule() {
+    if (!this.confirmDeleteScheduleId) return;
+    this.savingScheduleItem = true;
+    this.scheduleService.deleteSchedule(this.confirmDeleteScheduleId).subscribe({
       next: () => {
-        this.savingSchedule = false;
-        this.toast.success('Horario guardado correctamente.');
+        this.savingScheduleItem = false;
+        this.toast.success('Horario eliminado correctamente.');
+        this.cancelDeleteSchedule();
+        this.loadSchedules();
       },
       error: () => {
-        this.savingSchedule = false;
-        this.toast.error('Error al guardar el horario.');
+        this.savingScheduleItem = false;
+        this.toast.error('Error al eliminar el horario.');
       },
     });
+  }
+
+  // ── Get day name in Spanish ──
+  getDayName(day: string): string {
+    const dayMap: { [key: string]: string } = {
+      'Lunes': 'Lunes',
+      'Martes': 'Martes',
+      'Miercoles': 'Miércoles',
+      'Jueves': 'Jueves',
+      'Viernes': 'Viernes',
+      'Sabado': 'Sábado',
+      'Domingo': 'Domingo',
+    };
+    return dayMap[day] || day;
+  }
+
+  // ── Grilla de horarios ──
+  /** Normaliza hora "09:00:00" -> "09:00" para comparar */
+  private normalizeTime(time: string): string {
+    return time ? time.substring(0, 5) : '';
+  }
+
+  /** Devuelve el schedule (o null) para un día y hora de inicio dados */
+  getScheduleForSlot(day: string, startTime: string): any {
+    return this.schedules.find(s =>
+      s.day === day && this.normalizeTime(s.start_time) === startTime
+    ) || null;
+  }
+
+  /** Obtiene la hora fin a partir de la hora de inicio según los bloques definidos */
+  getEndTimeByStart(startTime: string): string {
+    const block = this.timeBlocks.find(b => b.start === startTime);
+    return block ? block.end : '';
+  }
+
+  /** Retorna true si una celda tiene materia asignada */
+  hasSchedule(day: string, startTime: string): boolean {
+    return this.schedules.some(s =>
+      s.day === day && this.normalizeTime(s.start_time) === startTime
+    );
   }
 }

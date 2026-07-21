@@ -37,6 +37,29 @@ export class ScheduleService {
     );
   }
 
+  createSchedule(data: any): Observable<any> {
+    return this.http.post(
+      API_ENDPOINTS.schedules.store,
+      data,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  updateSchedule(id: number, data: any): Observable<any> {
+    return this.http.put(
+      API_ENDPOINTS.schedules.update(id),
+      data,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  deleteSchedule(id: number): Observable<any> {
+    return this.http.delete(
+      API_ENDPOINTS.schedules.delete(id),
+      { headers: this.getHeaders() },
+    );
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
