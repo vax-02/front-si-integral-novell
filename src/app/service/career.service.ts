@@ -31,6 +31,12 @@ export class CareerService {
     });
   }
 
+  getMyPensum(): Observable<any> {
+    return this.http.get(this.apiUrl.studentPensum, {
+      headers: this.getHeaders(),
+    });
+  }
+
   downloadTemplate(): Observable<Blob> {
     return this.http.get(this.apiUrl.carrers.downloadTemplate, {
       headers: this.getHeaders(),

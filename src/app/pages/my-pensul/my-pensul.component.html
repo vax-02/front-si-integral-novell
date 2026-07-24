@@ -3,18 +3,33 @@
   <!-- HEADER -->
   <div class="flex justify-between items-center">
     <div>
-      <h1 class="text-3xl font-bold text-slate-800">Pensum Académico</h1>
+      <h1 class="text-3xl font-bold text-slate-800">Plan de estudios</h1>
       <p class="text-sm text-slate-500 mt-1">
-        Malla curricular por carrera a nivel técnico superior
+        Malla curricular por carrera
       </p>
     </div>
 
-    <app-button label="Descargar pensul"></app-button>
   </div>
+
+  <!-- LOADING -->
+  @if (loading()) {
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-12 text-center">
+    <p class="text-slate-500">Cargando plan de estudios...</p>
+  </div>
+  }
+
+  <!-- ERROR -->
+  @if (error(); as errMsg) {
+  <div class="bg-red-50 rounded-xl shadow-sm border border-red-200 p-6 text-center">
+    <p class="text-red-600">{{ errMsg }}</p>
+  </div>
+  }
+
+  @if (!loading() && !error()) {
 
   <!-- SELECTOR DE CARRERA -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
-    <select class="input md:col-span-3" [(ngModel)]="carreraSeleccionadaId"
+    <select class="input md:col-span-3 focus-blue-500" [(ngModel)]="carreraSeleccionadaId"
       (ngModelChange)="seleccionarCarrera($event)">
       <option [ngValue]="null" disabled>Selecciona una carrera</option>
       @for (carrera of carreras(); track carrera.id) {
@@ -28,62 +43,69 @@
   @if (carreraActual(); as carrera) {
 
   <!-- RESUMEN DE LA CARRERA -->
-  <div class="grid md:grid-cols-4 gap-6">
+  <div class="grid md:grid-cols-2 gap-6">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Duración</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">3 años</h3>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ carrera.duration }}</h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Total de materias</p>
       <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ totalMaterias(carrera) }}</h3>
     </div>
-
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Carga horaria total</p>
-      <h3 class="text-2xl font-bold text-yellow-600 mt-1">{{ totalHoras(carrera) }} hrs</h3>
-    </div>
-
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-sm text-slate-500">Título a obtener</p>
-      <h3 class="text-lg font-bold text-indigo-600 mt-1">{{ carrera.titulo }}</h3>
-    </div>
   </div>
 
-  <!-- MALLA POR AÑO -->
+  <!-- MALLA POR NIVEL (AÑO/SEMESTRE) -->
   <div class="space-y-6">
-    @for (anio of carrera.anios; track anio.numero) {
+    @for (level of carrera.levels; track level.level) {
     <div class="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden p-4">
 
       <div class="card-header flex justify-between items-center">
-        <span>{{ anio.etiqueta }}</span>
-        <span class="badge-indigo">{{ anio.materias.length }} materias</span>
+        <span>{{ level.label }}</span>
+        <span class="badge-indigo">{{ level.subjects.length }} materias</span>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-4 p-6">
-        @for (materia of anio.materias; track materia.sigla) {
-        <div class="border border-blue-100 rounded-lg p-4 space-y-2 hover:border-blue-300 transition-colors">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-semibold text-slate-400">{{ materia.sigla }}</span>
-            <span [class]="badgeAreaClass(materia.area)">{{ materia.area }}</span>
-          </div>
-
-          <h4 class="font-semibold text-slate-700 text-sm leading-snug">
-            {{ materia.nombre }}
-          </h4>
-
-          <div class="flex justify-between text-xs text-slate-500 pt-1">
-            <span>{{ materia.cargaHoraria }} hrs/sem</span>
-            <span>{{ materia.creditos }} créditos</span>
-          </div>
-
-          @if (materia.prerequisito) {
-          <p class="text-xs text-slate-400 pt-1 border-t border-slate-100 mt-2">
-            Prerrequisito: {{ materia.prerequisito }}
-          </p>
-          }
-        </div>
-        }
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-200">
+              <th class="text-left py-3 px-4 font-semibold text-slate-600">Sigla</th>
+              <th class="text-left py-3 px-4 font-semibold text-slate-600">Materia</th>
+              <th class="text-left py-3 px-4 font-semibold text-slate-600">Prerrequisito</th>
+              <th class="text-left py-3 px-4 font-semibold text-slate-600">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (materia of level.subjects; track materia.sigla) {
+            <tr class="border-b border-slate-100 hover:bg-slate-50">
+              <td class="py-3 px-4 text-xs font-semibold text-slate-400">{{ materia.sigla }}</td>
+              <td class="py-3 px-4 font-semibold text-slate-700">{{ materia.nombre }}</td>
+              <td class="py-3 px-4 text-xs text-slate-400">
+                {{ materia.prerequisito || '—' }}
+              </td>
+              <td class="py-3 px-4">
+                @if (materia.status === 'Aprobado' || materia.status === 'Aprobada') {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  {{ materia.status }}
+                </span>
+                } @else if (materia.status === 'Falta') {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  {{ materia.status }}
+                </span>
+                } @else if (materia.status === 'Cursando' || materia.status === 'En curso') {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {{ materia.status }}
+                </span>
+                } @else {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  {{ materia.status || 'Sin asignar' }}
+                </span>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
       </div>
 
     </div>
@@ -97,6 +119,8 @@
     <i class="fa-solid fa-graduation-cap text-4xl text-blue-200"></i>
     <p class="text-slate-500 mt-4">Selecciona una carrera para ver su malla curricular</p>
   </div>
+
+  }
 
   }
 

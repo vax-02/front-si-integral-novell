@@ -106,7 +106,7 @@ export class LoginComponent {
             this.router.navigate(['/home/professor']);
             break;
           case Roles.ESTUDIANTE.id:
-            this.router.navigate(['/home/student']);
+            this.router.navigate(['/home/my-pensul']);
             break;
           default:
             this.router.navigate(['/home']);

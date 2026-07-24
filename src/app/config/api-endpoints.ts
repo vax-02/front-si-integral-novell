@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
     delete: (id: number) => `${API_BASE_URL}/concepts/${id}`,
     show: (id: number) => `${API_BASE_URL}/concepts/${id}`,
   },
+  studentPensum: `${API_BASE_URL}/student/my-pensum`,
   studentCareers: {
     index: `${API_BASE_URL}/student-careers`,
     store: `${API_BASE_URL}/student-careers`,
