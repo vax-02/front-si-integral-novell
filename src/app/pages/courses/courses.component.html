@@ -287,7 +287,7 @@
           {{ editingScheduleId ? 'Editar' : 'Agregar' }} materia al horario
         </h3>
         <form [formGroup]="scheduleForm">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Materia -->
             <div class="space-y-1">
               <label class="block text-xs font-medium text-slate-600">Materia</label>
@@ -325,21 +325,24 @@
               <div *ngIf="scheduleForm.get('start_time')?.invalid && scheduleForm.get('start_time')?.touched"
                 class="text-xs text-red-500">Requerido</div>
             </div>
+            <!-- Acciones formulario -->
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-6">
+                <button (click)="saveScheduleItem()" [disabled]="savingScheduleItem" type="button"
+                  class="my-4 p-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50 transition">
+                  <i *ngIf="savingScheduleItem" class="fas fa-spinner fa-spin mr-2"></i>
+                  <i *ngIf="!savingScheduleItem" class="fas fa-save mr-2"></i>
+                  {{ editingScheduleId ? 'Actualizar' : 'Guardar' }}
+                </button>
+                <button (click)="cancelScheduleForm()" type="button"
+                  class="my-4 p-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-100 transition">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+
           </div>
 
-          <!-- Acciones formulario -->
-          <div class="flex gap-2 mt-4">
-            <button (click)="saveScheduleItem()" [disabled]="savingScheduleItem"
-              class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50 transition">
-              <i *ngIf="savingScheduleItem" class="fas fa-spinner fa-spin mr-2"></i>
-              <i *ngIf="!savingScheduleItem" class="fas fa-save mr-2"></i>
-              {{ editingScheduleId ? 'Actualizar' : 'Guardar' }}
-            </button>
-            <button (click)="cancelScheduleForm()" type="button"
-              class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-100 transition">
-              Cancelar
-            </button>
-          </div>
         </form>
       </div>
 

@@ -434,7 +434,8 @@ export class StudentsComponent {
       },
       error: (err) => {
         this.saving = false;
-        this.toast.error(err.error?.error || 'Error al adicionar carrera');
+        this.toast.error('Error al adicionar carrera');
+        console.log(err)
       }
     });
   }
