@@ -24,6 +24,7 @@ import { InstitutionComponent } from './pages/institution/institution.component'
 import { PaymentManagementComponent } from './pages/payment-management/payment-management.component';
 import { TrainingComponent } from './pages/training/training.component';
 import { DocenteSubjectsComponent } from './docente-subjects/docente-subjects.component';
+import { GradesComponent } from './docente-subjects/grades/grades.component';
 import { RepositoryComponent } from './docente-subjects/repository/repository.component';
 
 export const routes: Routes = [
@@ -32,7 +33,8 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'home', canActivate: [authGuard], component:  LayoutComponent, children: [
     //docentes
-    { path: 'professor', component: DocenteSubjectsComponent },
+    { path: 'professor/subjets', component: DocenteSubjectsComponent },
+    { path: 'professor/grades', component: GradesComponent },
     { path: 'professor/repository', component: RepositoryComponent },
 
     

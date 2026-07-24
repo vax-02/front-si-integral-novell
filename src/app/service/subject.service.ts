@@ -68,6 +68,13 @@ export class SubjectService {
     );
   }
 
+  dowloadFile(materialId : number): Observable<any>{
+    return this.http.get(this.apiUrl.materials.download(materialId),{
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

@@ -7,6 +7,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { API_ENDPOINTS } from '../../config/api-endpoints';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
+import { SubjectService } from '../../service/subject.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-repository',
@@ -47,19 +49,16 @@ export class RepositoryComponent implements OnInit {
   constructor(
     private docenteService: DocenteService,
     private http: HttpClient,
+    private subjectService: SubjectService,
     private auth: AuthService,
+    private toast: ToastService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.loadSubjects();
-    this.route.queryParams.subscribe(params => {
-      if (params['subject_id']) {
-        this.selectedSubjectId = Number(params['subject_id']);
-        this.loadMaterials();
-      }
-    });
+    this.loadMaterials();
   }
 
   loadSubjects() {
@@ -121,7 +120,8 @@ export class RepositoryComponent implements OnInit {
     formData.append('subject_id', String(this.uploadData.subject_id));
     formData.append('title', this.uploadData.title);
     formData.append('description', this.uploadData.description || '');
-    formData.append('file', this.selectedFile);
+    
+    formData.append('file', this.selectedFile, this.selectedFile.name);
     formData.append('all_parallels', this.uploadData.all_parallels ? '1' : '0');
 
     if (!this.uploadData.all_parallels) {
@@ -136,8 +136,9 @@ export class RepositoryComponent implements OnInit {
         this.resetUploadForm();
         this.loadMaterials();
       },
-      error: () => {
+      error: (ee) => {
         this.uploading = false;
+        console.log(ee)
       },
     });
   }
@@ -176,7 +177,30 @@ export class RepositoryComponent implements OnInit {
 
   // ── Descargar ──
   downloadMaterial(materialId: number) {
-    window.open(API_ENDPOINTS.materials.download(materialId), '_blank');
+    this.subjectService.dowloadFile(materialId).subscribe({
+      next: (blob : Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        // Abrir en nueva ventana
+        const newWindow = window.open(url, '_blank');
+        // Si se abrió correctamente, revocar la URL después de un tiempo
+        if (newWindow) {
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+          }, 1000);
+        } else {
+          // Si el popup fue bloqueado, descargar directamente
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `archivo_${materialId}`; // O extraer el nombre del header
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }
+      },
+      error:(err) =>{
+        this.toast.error('Error al descargar');
+        console.log(err)
+      }
+    })
   }
 
   /** Obtener el nombre de la materia por ID */
@@ -190,6 +214,7 @@ export class RepositoryComponent implements OnInit {
     const subj = this.subjects.find(s => s.id === subjectId);
     return subj ? [subj] : [];
   }
+
 
   private getHeaders(skipContentType = true): HttpHeaders {
     let headers = new HttpHeaders({ Authorization: `Bearer ${this.auth.token}` });

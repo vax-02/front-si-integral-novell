@@ -57,6 +57,12 @@ export class StudentService {
     });
   }
 
+  updateStudentParallel(studentId: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl.students.index}/${studentId}/parallel`, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

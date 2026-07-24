@@ -40,9 +40,11 @@ export class DocenteSubjectsComponent implements OnInit {
     });
   }
 
-  /** Navegar a calificaciones de la materia (placeholder) */
+  /** Navegar a calificaciones de la materia */
   goToCalifications(subject: any) {
-    console.log('Ir a calificaciones de:', subject.name);
+    this.router.navigate(['/home/professor/grades'], {
+      queryParams: { subject_id: subject.id },
+    });
   }
 
   /** Navegar al repositorio con la materia preseleccionada */

@@ -38,6 +38,11 @@ export class ParallelService {
     });
   }
 
+  getParallelsForCareerForNewStudent(id:number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl.parallels.index}/${id}/first-course`, {
+      headers: this.getHeaders(),
+    });
+  }
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

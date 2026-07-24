@@ -94,11 +94,18 @@
 
         <!-- SUBMENU -->
         <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
-          <a routerLink="/home/professor" routerLinkActive="text-blue-600"
+          <a routerLink="/home/professor/subjets" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
             Mis materias
           </a>
+
+          <a routerLink="/home/professor/repository" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Repositorio
+          </a>
+
           <a routerLink="/home/my-schedule" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
