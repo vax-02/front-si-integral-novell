@@ -9,11 +9,12 @@ import { API_ENDPOINTS } from '../../config/api-endpoints';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
 import { SubjectService } from '../../service/subject.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
 @Component({
   selector: 'app-repository',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseModalComponent],
+  imports: [CommonModule, FormsModule, BaseModalComponent, BaseModalConfirmComponent],
   templateUrl: './repository.component.html',
   styleUrl: './repository.component.css',
 })
@@ -209,10 +210,19 @@ export class RepositoryComponent implements OnInit {
     return subj ? `${subj.name} (${subj.sigla})` : '—';
   }
 
-  /** Obtener paralelos de una materia seleccionada */
+  /** Obtener paralelos de una materia seleccionada (por sigla y/o id de materia) */
   getSubjectParallels(subjectId: number): any[] {
-    const subj = this.subjects.find(s => s.id === subjectId);
-    return subj ? [subj] : [];
+    // Buscar la materia seleccionada para obtener su sigla
+    const selected = this.subjects.find(s => s.id === subjectId);
+    if (!selected) return [];
+    // Filtrar todas las entradas con la misma sigla (misma materia en diferentes paralelos)
+    return this.subjects.filter(s => s.sigla === selected.sigla);
+  }
+
+  /** Limpiar parallel_ids al cambiar de materia */
+  onSubjectSelectChange() {
+    this.uploadData.parallel_ids = [];
+    this.uploadData.all_parallels = false;
   }
 
 

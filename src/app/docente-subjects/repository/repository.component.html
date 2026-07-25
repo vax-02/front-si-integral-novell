@@ -99,38 +99,22 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMAR ELIMINAR -->
-  <div *ngIf="confirmDeleteOpen"
-    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
-      <div class="text-center">
-        <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-          <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
-        </div>
-        <h3 class="text-lg font-bold text-slate-800 mb-2">¿Eliminar material?</h3>
-        <p class="text-sm text-slate-500 mb-6">
-          Esta acción eliminará el archivo permanentemente. No se puede deshacer.
-        </p>
-      </div>
-      <div class="flex gap-3 justify-center">
-        <button (click)="cancelDelete()"
-          class="px-6 py-2.5 border border-slate-300 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition">
-          Cancelar
-        </button>
-        <button (click)="deleteMaterial()" [disabled]="deleting"
-          class="px-6 py-2.5 bg-red-500 text-white rounded-xl text-sm hover:bg-red-600 disabled:opacity-50 transition">
-          <i *ngIf="deleting" class="fas fa-spinner fa-spin mr-2"></i>
-          Eliminar
-        </button>
-      </div>
-    </div>
-  </div>
+
+  <app-base-modal-confirm
+    [isOpen]="confirmDeleteOpen"
+    title="¿Eliminar material?"
+    message="Esta acción eliminará el archivo permanentemente. No se puede deshacer."
+    confirmText="Sí, eliminar"
+    cancelText="Cancelar"
+    [loading]="deleting"
+    (confirm)="deleteMaterial()"
+    (cancel)="cancelDelete()">
+  </app-base-modal-confirm>
 
 
   <app-base-modal [isOpen]="showUploadForm" [loading]="uploading" title="Subir nuevo material" size="lg"
-    confirmText="Subir" cancelText="Cancelar" (confirm)="submitUpload()" (cancel)="showUploadForm = false">
+    confirmText="Subir" cancelText="Cancelar" (confirm)="submitUpload()" (cancel)="resetUploadForm()">
   
-    <!-- FORMULARIO SUBIR MATERIAL -->
   <div class="">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <!-- Materia -->
@@ -180,36 +164,26 @@
         <div *ngIf="!uploadData.all_parallels && uploadData.subject_id" class="mt-2">
           <p class="text-xs text-slate-400 mb-2">Selecciona los paralelos que verán este material:</p>
           <div class="flex flex-wrap gap-2">
-            <label *ngFor="let subj of subjects" (click)="toggleParallel(subj.parallel_id)"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border cursor-pointer text-xs transition"
-              [class.border-blue-400]="uploadData.parallel_ids.includes(subj.parallel_id)"
-              [class.bg-blue-50]="uploadData.parallel_ids.includes(subj.parallel_id)"
-              [class.border-slate-200]="!uploadData.parallel_ids.includes(subj.parallel_id)">
-              <input type="checkbox" [checked]="uploadData.parallel_ids.includes(subj.parallel_id)" class="hidden">
-              <i class="fas fa-check-circle text-[10px]" 
-                [class.text-blue-500]="uploadData.parallel_ids.includes(subj.parallel_id)"
-                [class.text-slate-300]="!uploadData.parallel_ids.includes(subj.parallel_id)"></i>
-              {{ subj.course_name }} - Paralelo {{ subj.parallel_name }} ({{ subj.turno }})
-            </label>
+            <ng-container *ngIf="getSubjectParallels(uploadData.subject_id) as parallelList">
+              <label *ngFor="let subj of parallelList" (click)="toggleParallel(subj.parallel_id)"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border cursor-pointer text-xs transition"
+                [class.border-blue-400]="uploadData.parallel_ids.includes(subj.parallel_id)"
+                [class.bg-blue-50]="uploadData.parallel_ids.includes(subj.parallel_id)"
+                [class.border-slate-200]="!uploadData.parallel_ids.includes(subj.parallel_id)">
+                <input type="checkbox" [checked]="uploadData.parallel_ids.includes(subj.parallel_id)" class="hidden">
+                <i class="fas fa-check-circle text-[10px]" 
+                  [class.text-blue-500]="uploadData.parallel_ids.includes(subj.parallel_id)"
+                  [class.text-slate-300]="!uploadData.parallel_ids.includes(subj.parallel_id)"></i>
+                {{ subj.course_name }} - Paralelo {{ subj.parallel_name }} ({{ subj.turno }})
+              </label>
+              <div *ngIf="parallelList.length === 0" class="text-xs text-slate-400 p-2">
+                No hay paralelos disponibles para esta materia.
+              </div>
+            </ng-container>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Acciones -->
-    <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100">
-      <button (click)="submitUpload()" [disabled]="uploading || !uploadData.subject_id || !uploadData.title || !selectedFile"
-        class="px-6 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition flex items-center gap-2">
-        <i *ngIf="uploading" class="fas fa-spinner fa-spin"></i>
-        <i *ngIf="!uploading" class="fas fa-save"></i>
-        {{ uploading ? 'Subiendo...' : 'Subir material' }}
-      </button>
-      <button (click)="resetUploadForm()" type="button"
-        class="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 transition">
-        Cancelar
-      </button>
-    </div>
   </div>
-
   </app-base-modal>
 </div>
