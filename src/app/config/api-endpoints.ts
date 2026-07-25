@@ -46,6 +46,8 @@ export const API_ENDPOINTS = {
     show: (id: number) => `${API_BASE_URL}/concepts/${id}`,
   },
   studentPensum: `${API_BASE_URL}/student/my-pensum`,
+  studentSchedule: `${API_BASE_URL}/student/my-schedule`,
+  studentSubjects: `${API_BASE_URL}/student/my-subjects`,
   studentCareers: {
     index: `${API_BASE_URL}/student-careers`,
     store: `${API_BASE_URL}/student-careers`,

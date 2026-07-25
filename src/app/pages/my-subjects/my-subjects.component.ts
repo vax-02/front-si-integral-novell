@@ -1,160 +1,116 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CareerService } from '../../service/career.service';
+import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
 
-interface NotaDetalle {
-  evaluacion: string;
-  fecha: string;
-  ponderacion: number;
-  valor: number;
+interface SubjectEntry {
+  sigla: string;
+  name: string;
+  level: number;
+  paralelo: string;
+  docente: string;
 }
 
-interface Materia {
+interface CareerLevel {
+  level: number;
+  label: string;
+}
+
+interface CareerInfo {
   id: number;
-  nombre: string;
-  sigla: string;
-  carrera: string;
-  docente: string;
-  cargaHoraria: number;
-  asistencia: number;
-  notaActual: number | null;
-  estado: 'Cursando' | 'Aprobada' | 'Reprobada';
-  notas: NotaDetalle[];
+  name: string;
+  type: number;
+  duration: number;
+  levels: CareerLevel[];
 }
 
 @Component({
   selector: 'app-my-subjects',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, BaseModalComponent],
   templateUrl: './my-subjects.component.html',
   styleUrl: './my-subjects.component.css',
 })
 export class MySubjectsComponent {
-  readonly materias = signal<Materia[]>([
-    {
-      id: 1,
-      nombre: 'Programación Web Avanzada',
-      sigla: 'INF-301',
-      carrera: 'Ingeniería en Sistemas Informáticos',
-      docente: 'Ing. Carla Mendoza',
-      cargaHoraria: 6,
-      asistencia: 94,
-      notaActual: 82,
-      estado: 'Cursando',
-      notas: [
-        {
-          evaluacion: 'Primer Parcial',
-          fecha: '15/04/2026',
-          ponderacion: 30,
-          valor: 78,
-        },
-        {
-          evaluacion: 'Segundo Parcial',
-          fecha: '20/05/2026',
-          ponderacion: 30,
-          valor: 85,
-        },
-        {
-          evaluacion: 'Prácticas',
-          fecha: 'Continuo',
-          ponderacion: 20,
-          valor: 88,
-        },
-      ],
-    },
-    {
-      id: 2,
-      nombre: 'Base de Datos II',
-      sigla: 'INF-245',
-      carrera: 'Ingeniería en Sistemas Informáticos',
-      docente: 'Lic. Roberto Quispe',
-      cargaHoraria: 5,
-      asistencia: 88,
-      notaActual: 65,
-      estado: 'Cursando',
-      notas: [
-        {
-          evaluacion: 'Primer Parcial',
-          fecha: '14/04/2026',
-          ponderacion: 30,
-          valor: 60,
-        },
-        {
-          evaluacion: 'Segundo Parcial',
-          fecha: '19/05/2026',
-          ponderacion: 30,
-          valor: 68,
-        },
-      ],
-    },
-    {
-      id: 3,
-      nombre: 'Matemática Discreta',
-      sigla: 'MAT-110',
-      carrera: 'Ingeniería en Sistemas Informáticos',
-      docente: 'Lic. Ana Flores',
-      cargaHoraria: 4,
-      asistencia: 76,
-      notaActual: 48,
-      estado: 'Reprobada',
-      notas: [
-        {
-          evaluacion: 'Primer Parcial',
-          fecha: '12/04/2026',
-          ponderacion: 30,
-          valor: 45,
-        },
-        {
-          evaluacion: 'Segundo Parcial',
-          fecha: '17/05/2026',
-          ponderacion: 30,
-          valor: 50,
-        },
-      ],
-    },
-  ]);
+  readonly carreras = signal<CareerInfo[]>([]);
+  readonly carreraSeleccionadaId = signal<number | null>(null);
+  readonly levelSeleccionado = signal<number | null>(null);
+  readonly subjects = signal<SubjectEntry[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+  modalDetail : boolean = false
 
-  readonly materiaSeleccionada = signal<Materia | null>(null);
-
-  readonly promedioGeneral = computed(() => {
-    const lista = this.materias().filter((m) => m.notaActual !== null);
-    if (lista.length === 0) return '—';
-    const suma = lista.reduce((acc, m) => acc + (m.notaActual ?? 0), 0);
-    return Math.round(suma / lista.length);
+  readonly carreraActual = computed(() => {
+    const id = this.carreraSeleccionadaId();
+    return this.carreras().find((c) => c.id === id) ?? null;
   });
 
-  readonly aprobadas = computed(
-    () => this.materias().filter((m) => m.estado === 'Aprobada').length,
-  );
+  readonly levelsDisponibles = computed(() => {
+    return this.carreraActual()?.levels ?? [];
+  });
 
-  readonly enRiesgo = computed(
-    () =>
-      this.materias().filter((m) => m.notaActual !== null && m.notaActual < 51)
-        .length,
-  );
+  readonly subjectsFiltrados = computed(() => {
+    const level = this.levelSeleccionado();
+    if (!level) return this.subjects();
+    return this.subjects().filter((s) => s.level === level);
+  });
 
-  abrirModal(materia: Materia): void {
-    this.materiaSeleccionada.set(materia);
+  constructor(private careerService: CareerService) {}
+
+  ngOnInit() {
+    this.loadData();
   }
 
-  cerrarModal(): void {
-    this.materiaSeleccionada.set(null);
+  loadData() {
+    this.loading.set(true);
+    this.error.set(null);
+
+    // Primero cargar carreras, luego subjects
+    this.careerService.getMySubjects().subscribe({
+      next: (resp) => {
+        this.loading.set(false);
+        this.carreras.set(resp.careers || []);
+        this.subjects.set(resp.subjects || []);
+
+        if (resp.careers?.length > 0) {
+          this.carreraSeleccionadaId.set(resp.careers[0].id);
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set('Error al cargar las materias.');
+        console.error(err);
+      },
+    });
   }
 
-  badgeEstadoClass(estado: Materia['estado']): string {
-    const base = 'text-xs font-semibold px-2.5 py-1 rounded-full';
-    switch (estado) {
-      case 'Cursando':
-        return `${base} bg-blue-100 text-blue-700`;
-      case 'Aprobada':
-        return `${base} bg-emerald-100 text-emerald-700`;
-      case 'Reprobada':
-        return `${base} bg-red-100 text-red-700`;
-    }
+  seleccionarCarrera(id: number) {
+    console.log('id de la carrera'+id)
+    this.carreraSeleccionadaId.set(id);
+    this.levelSeleccionado.set(null);
+    this.loadSubjectsForCareer(id);
   }
 
-  notaClass(nota: number | null): string {
-    if (nota === null) return 'font-semibold text-slate-400';
-    if (nota >= 70) return 'font-semibold text-emerald-600';
-    if (nota >= 51) return 'font-semibold text-yellow-600';
-    return 'font-semibold text-red-600';
+  seleccionarLevel(level: number | null) {
+    this.levelSeleccionado.set(level);
+  }
+
+  openDetail(){
+    this.modalDetail = true;
+
+  }
+  private loadSubjectsForCareer(careerId: number) {
+    this.loading.set(true);
+    this.careerService.getMySubjects(careerId).subscribe({
+      next: (resp) => {
+        this.loading.set(false);
+        this.subjects.set(resp.subjects || []);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set('Error al cargar las materias.');
+        console.error(err);
+      },
+    });
   }
 }

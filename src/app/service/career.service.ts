@@ -37,6 +37,24 @@ export class CareerService {
     });
   }
 
+  getMySchedule(): Observable<any> {
+    return this.http.get(this.apiUrl.studentSchedule, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getMySubjects(careerId?: number, level?: number): Observable<any> {
+    let params = '';
+    const queryParams: string[] = [];
+    if (careerId) queryParams.push(`career_id=${careerId}`);
+    if (level) queryParams.push(`level=${level}`);
+    if (queryParams.length > 0) params = '?' + queryParams.join('&');
+
+    return this.http.get(this.apiUrl.studentSubjects + params, {
+      headers: this.getHeaders(),
+    });
+  }
+
   downloadTemplate(): Observable<Blob> {
     return this.http.get(this.apiUrl.carrers.downloadTemplate, {
       headers: this.getHeaders(),
