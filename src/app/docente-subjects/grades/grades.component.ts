@@ -6,7 +6,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { DocenteService } from '../../service/docente.service';
 import { API_ENDPOINTS } from '../../config/api-endpoints';
-import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
+import { ToastService } from '../../shared/services/toast.service';
+import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
 interface GradeState {
   status: 'idle' | 'saving' | 'saved' | 'error';
@@ -16,7 +17,7 @@ interface GradeState {
 @Component({
   selector: 'app-grades',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,BaseModalConfirmComponent],
   templateUrl: './grades.component.html',
   styleUrl: './grades.component.css',
 })
@@ -25,6 +26,9 @@ export class GradesComponent implements OnInit, OnDestroy {
   subjects: any[] = [];
   loadingSubjects = false;
 
+  modalConfirm : boolean = false
+  columnIdSelect : number = 0
+  resetLoading : boolean = false
   // Materia y paralelo seleccionados
   selectedSubject: any = null;
 
@@ -38,17 +42,25 @@ export class GradesComponent implements OnInit, OnDestroy {
   // Estado de guardado por celda (studentId_columnId)
   cellStates: Record<string, GradeState> = {};
 
-  // Debounce para auto-save
-  private saveSubject = new Subject<{ studentId: number; columnId: number; value: string }>();
-  private saveSubscription?: Subscription;
+  // Nueva columna a crear
+  newColumnName = '';
+  newColumnWeight = 0;
+  savingColumn = false;
 
-  // Contador de guardados pendientes
-  pendingSaves = 0;
+  // Editar columna
+  editingColumn: any = null;
+  editColumnName = '';
+  editColumnWeight = 0;
+  savingEditColumn = false;
+
+  // Buscador de estudiantes
+  searchStudent = '';
 
   constructor(
     private docenteService: DocenteService,
     private http: HttpClient,
     private auth: AuthService,
+    private toast: ToastService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
@@ -56,20 +68,13 @@ export class GradesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadSubjects();
 
-    // Configurar auto-save con debounce de 800ms
-    this.saveSubscription = this.saveSubject
-      .pipe(debounceTime(800), distinctUntilChanged())
-      .subscribe((data) => this.saveGrade(data));
-
     // Verificar si viene subject_id en query params
     this.route.queryParams.subscribe((params) => {
       if (params['subject_id']) {
         const subjectId = Number(params['subject_id']);
-        // Esperar a que carguen las materias y seleccionar
         if (this.subjects.length > 0) {
           this.selectSubjectById(subjectId);
         } else {
-          // Esperar a que se carguen
           const sub = this.docenteService.getMySubjects().subscribe({
             next: (resp) => {
               this.subjects = resp.subjects || [];
@@ -82,10 +87,17 @@ export class GradesComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.saveSubscription) {
-      this.saveSubscription.unsubscribe();
-    }
+  ngOnDestroy(): void {}
+
+  /** Filtrar estudiantes por nombre o CI */
+  get filteredStudents() {
+    if (!this.searchStudent.trim()) return this.students;
+    const term = this.searchStudent.toLowerCase();
+    return this.students.filter(
+      (s) =>
+        s.name.toLowerCase().includes(term) ||
+        s.ci.toLowerCase().includes(term)
+    );
   }
 
   loadSubjects() {
@@ -94,7 +106,6 @@ export class GradesComponent implements OnInit, OnDestroy {
       next: (resp) => {
         this.loadingSubjects = false;
         this.subjects = resp.subjects || [];
-        // Si había un subject_id en query params, seleccionarlo
         const subjectId = this.route.snapshot.queryParams['subject_id'];
         if (subjectId && this.subjects.length > 0) {
           this.selectSubjectById(Number(subjectId));
@@ -115,7 +126,6 @@ export class GradesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Cuando cambia la materia seleccionada */
   onSubjectChange() {
     if (this.selectedSubject) {
       this.loadGrades();
@@ -126,13 +136,13 @@ export class GradesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Cargar estudiantes y calificaciones del paralelo */
   loadGrades() {
     if (!this.selectedSubject) return;
 
     this.loadingGrades = true;
     this.error = '';
     this.cellStates = {};
+    this.searchStudent = '';
 
     const url = API_ENDPOINTS.grades.students(this.selectedSubject.parallel_id);
     this.http
@@ -144,7 +154,7 @@ export class GradesComponent implements OnInit, OnDestroy {
         next: (resp) => {
           this.loadingGrades = false;
           this.students = resp.students || [];
-          this.columns = resp.columns || [];
+          this.columns = (resp.columns || []).sort((a: any, b: any) => a.order - b.order);
           this.parallel = resp.parallel || null;
         },
         error: (err) => {
@@ -153,69 +163,56 @@ export class GradesComponent implements OnInit, OnDestroy {
           this.students = [];
           this.columns = [];
           this.parallel = null;
+          console.log(err)
         },
       });
   }
 
-  /** Obtener el valor de la nota de un estudiante en una columna */
   getGrade(student: any, columnId: number): string {
     const grade = student.grades[columnId];
     return grade?.grade !== null && grade?.grade !== undefined ? String(grade.grade) : '';
   }
 
-  /** Manejar cambio en un input de nota */
-  onGradeChange(student: any, columnId: number, event: Event) {
+  /** Guardar calificación al salir del input (blur) */
+  onGradeBlur(student: any, columnId: number, event: Event) {
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
     // Validar que sea numérico
     if (value !== '' && (isNaN(Number(value)) || Number(value) < 0 || Number(value) > 100)) {
+      input.value = this.getGrade(student, columnId);
       return;
     }
 
     const key = `${student.id}_${columnId}`;
     this.cellStates[key] = { status: 'saving', message: 'Guardando...' };
 
-    // Emitir al subject con debounce
-    this.saveSubject.next({ studentId: student.id, columnId, value });
-  }
-
-  /** Guardar la calificación en la base de datos */
-  private saveGrade(data: { studentId: number; columnId: number; value: string }) {
-    if (!this.selectedSubject) return;
-
-    const key = `${data.studentId}_${data.columnId}`;
-    this.cellStates[key] = { status: 'saving', message: 'Guardando...' };
-
-    const courseId = this.selectedSubject.course_id || this.parallel?.course?.id;
+    const courseId = this.selectedSubject?.course_id || this.parallel?.course?.id;
+    const parallelId = this.selectedSubject?.parallel_id || this.parallel?.id;
 
     const body = {
-      student_id: data.studentId,
+      student_id: student.id,
       subject_id: this.selectedSubject.id,
       course_id: courseId,
-      evaluation_column_id: data.columnId,
-      qualification: data.value !== '' ? Number(data.value) : null,
+      parallel_id: parallelId,
+      evaluation_column_id: columnId,
+      grade: value !== '' ? Number(value) : null,
     };
 
     this.http.post<any>(API_ENDPOINTS.grades.save, body, { headers: this.getHeaders() }).subscribe({
       next: (resp) => {
-        this.cellStates[key] = {
-          status: 'saved',
-          message: '✓',
-        };
+        this.cellStates[key] = { status: 'saved', message: '✓' };
 
         // Actualizar la nota final del estudiante
-        const student = this.students.find((s) => s.id === data.studentId);
-        if (student && resp.final_grade !== undefined) {
+        if (resp.final_grade !== undefined) {
           student.final_grade = resp.final_grade;
         }
 
         // Actualizar grade en el objeto local
-        if (student && student.grades[data.columnId]) {
-          student.grades[data.columnId].id = resp.qualification?.id;
+        if (student.grades[columnId]) {
+          student.grades[columnId].id = resp.qualification_id;
         }
 
-        // Limpiar estado después de 2 segundos
         setTimeout(() => {
           if (this.cellStates[key]?.status === 'saved') {
             this.cellStates[key] = { status: 'idle' };
@@ -223,12 +220,7 @@ export class GradesComponent implements OnInit, OnDestroy {
         }, 2000);
       },
       error: () => {
-        this.cellStates[key] = {
-          status: 'error',
-          message: '✗ Error',
-        };
-
-        // Limpiar error después de 3 segundos
+        this.cellStates[key] = { status: 'error', message: '✗ Error' };
         setTimeout(() => {
           if (this.cellStates[key]?.status === 'error') {
             this.cellStates[key] = { status: 'idle' };
@@ -238,13 +230,140 @@ export class GradesComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Obtener el estado de una celda */
   getCellState(studentId: number, columnId: number): GradeState {
     const key = `${studentId}_${columnId}`;
     return this.cellStates[key] || { status: 'idle' };
   }
 
-  /** Volver a la lista de materias */
+  /** Agregar una nueva columna de evaluación */
+  addColumn() {
+    if (!this.selectedSubject || !this.newColumnName.trim() || this.newColumnWeight <= 0) return;
+
+    this.savingColumn = true;
+    const courseId = this.selectedSubject.course_id || this.parallel?.course?.id;
+
+    const body = {
+      subject_id: this.selectedSubject.id,
+      parallel_id: this.selectedSubject.parallel_id,
+      course_id: courseId,
+      name: this.newColumnName.trim(),
+      weight: this.newColumnWeight / 100,
+      order: this.columns.length,
+    };
+
+    this.http.post<any>(API_ENDPOINTS.grades.columns.store, body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        this.savingColumn = false;
+        this.columns.push(resp.column);
+        this.newColumnName = '';
+        this.newColumnWeight = 0;
+      },
+      error: (err) => {
+        this.savingColumn = false;
+        console.error('Error al crear columna', err);
+      },
+    });
+  }
+
+  /** Iniciar edición de columna */
+  startEditColumn(column: any) {
+    this.editingColumn = column;
+    this.editColumnName = column.name;
+    this.editColumnWeight = column.weight * 100;
+  }
+
+  /** Cancelar edición */
+  cancelEditColumn() {
+    this.editingColumn = null;
+    this.editColumnName = '';
+    this.editColumnWeight = 0;
+  }
+
+  /** Guardar edición de columna */
+  saveEditColumn() {
+    if (!this.editingColumn || !this.editColumnName.trim() || this.editColumnWeight <= 0) return;
+
+    this.savingEditColumn = true;
+
+    const body = {
+      name: this.editColumnName.trim(),
+      weight: this.editColumnWeight / 100,
+    };
+
+    this.http.put<any>(API_ENDPOINTS.grades.columns.update(this.editingColumn.id), body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        this.savingEditColumn = false;
+        const col = this.columns.find((c) => c.id === this.editingColumn.id);
+        if (col) {
+          col.name = resp.column?.name || this.editColumnName.trim();
+          col.weight = resp.column?.weight || this.editColumnWeight / 100;
+        }
+        this.cancelEditColumn();
+        this.toast.success('Columna editada correctamente')
+      },
+      error: (err) => {
+        this.savingEditColumn = false;
+        //console.error('Error al actualizar columna', err);
+        this.toast.error('Error al editar la columna')
+      },
+    });
+  }
+  /** Eliminar una columna de evaluación */
+  deleteColumn(columnId: number) {
+    this.modalConfirm = true;
+    this.columnIdSelect = columnId
+  }
+  confirmDeleteColumn(){
+    this.resetLoading = true
+    this.http.delete<any>(API_ENDPOINTS.grades.columns.delete(this.columnIdSelect), { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.columns = this.columns.filter((c) => c.id !== this.columnIdSelect);
+        if (this.editingColumn?.id === this.columnIdSelect) {
+          this.cancelEditColumn();
+        }
+        this.toast.success('Columna eliminada correctamente')
+        this.resetLoading = false
+        this.modalConfirm = false
+      },
+      error: (err) => {
+        this.toast.error('Error al eliminar columna')
+        this.resetLoading = false
+      },
+    });
+  }
+
+  /** Mover columna hacia arriba (disminuir order) */
+  moveColumnUp(index: number) {
+    if (index <= 0) return;
+    this.swapColumns(index, index - 1);
+  }
+
+  /** Mover columna hacia abajo (aumentar order) */
+  moveColumnDown(index: number) {
+    if (index >= this.columns.length - 1) return;
+    this.swapColumns(index, index + 1);
+  }
+
+  private swapColumns(i: number, j: number) {
+    const temp = this.columns[i];
+    this.columns[i] = this.columns[j];
+    this.columns[j] = temp;
+
+    this.columns.forEach((col, idx) => {
+      col.order = idx;
+    });
+
+    for (const col of [this.columns[i], this.columns[j]]) {
+      this.http.put<any>(API_ENDPOINTS.grades.columns.update(col.id), {
+        name: col.name,
+        weight: col.weight,
+        order: col.order,
+      }, { headers: this.getHeaders() }).subscribe({
+        error: (err) => console.error('Error al reordenar columna', err),
+      });
+    }
+  }
+
   goBack() {
     this.router.navigate(['/home/professor/subjets']);
   }

@@ -72,11 +72,36 @@
     </button>
   </div>
 
+  <!-- FORMULARIO PARA AÑADIR COLUMNA -->
+  <div *ngIf="!loadingGrades && !error && selectedSubject" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+    <h3 class="text-sm font-semibold text-slate-600 mb-3">
+      <i class="fas fa-plus-circle text-blue-500 mr-1.5"></i>Añadir columna de evaluación
+    </h3>
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-xs text-slate-500 mb-1">Nombre de la evaluación</label>
+        <input type="text" [(ngModel)]="newColumnName" placeholder="Ej: Primer Parcial"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div class="w-32">
+        <label class="block text-xs text-slate-500 mb-1">Ponderación (%)</label>
+        <input type="number" [(ngModel)]="newColumnWeight" min="1" max="100" placeholder="Ej: 30"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <button (click)="addColumn()" [disabled]="savingColumn || !newColumnName.trim() || newColumnWeight <= 0"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5">
+        <i *ngIf="savingColumn" class="fas fa-spinner fa-spin"></i>
+        <i *ngIf="!savingColumn" class="fas fa-plus"></i>
+        Añadir
+      </button>
+    </div>
+  </div>
+
   <!-- SIN COLUMNAS DE EVALUACIÓN -->
   <div *ngIf="!loadingGrades && !error && selectedSubject && columns.length === 0" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 text-center">
     <i class="fas fa-table text-slate-300 text-5xl mb-4"></i>
     <h3 class="text-lg font-semibold text-slate-600 mb-1">Sin columnas de evaluación</h3>
-    <p class="text-sm text-slate-400">Aún no se han configurado las columnas de evaluación para esta materia y paralelo.</p>
+    <p class="text-sm text-slate-400">Aún no se han configurado las columnas de evaluación para esta materia y paralelo. Usa el formulario de arriba para agregar una.</p>
   </div>
 
   <!-- SIN ESTUDIANTES -->
@@ -90,6 +115,16 @@
   <div *ngIf="!loadingGrades && !error && columns.length > 0 && students.length > 0"
     class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
+    <!-- BUSCADOR DE ESTUDIANTES -->
+    <div class="px-4 py-3 border-b border-slate-200 bg-slate-50/50">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-search text-slate-400"></i>
+        <input type="text" [(ngModel)]="searchStudent" placeholder="Buscar estudiante por nombre o CI..."
+          class="w-full sm:w-80 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <span class="text-xs text-slate-400 ml-auto">{{ filteredStudents.length }} de {{ students.length }}</span>
+      </div>
+    </div>
+
     <!-- Contenedor scrollable horizontal -->
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -99,17 +134,59 @@
             <th class="sticky left-0 bg-slate-50 z-10 text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-[200px]">
               Estudiante
             </th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-[100px]">
-              CI
-            </th>
             <!-- Columnas dinámicas de evaluación -->
-            <th *ngFor="let col of columns"
-              class="text-center px-3 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-[120px] border-l border-slate-100">
+            <th *ngFor="let col of columns; let colIndex = index"
+              class="text-center px-3 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-[140px] border-l border-slate-100">
               <div class="flex flex-col items-center gap-0.5">
-                <span>{{ col.name }}</span>
-                <span class="text-[10px] font-normal text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                  {{ col.weight * 100 }}%
-                </span>
+                <!-- Edición en línea -->
+                <div *ngIf="editingColumn?.id === col.id" class="flex flex-col items-center gap-1">
+                  <input type="text" [(ngModel)]="editColumnName" placeholder="Nombre"
+                    class="w-full text-center text-xs rounded border border-blue-300 px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <div class="flex items-center gap-1">
+                    <input type="number" [(ngModel)]="editColumnWeight" min="1" max="100" placeholder="%"
+                      class="w-16 text-center text-xs rounded border border-blue-300 px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <span class="text-[10px] text-slate-400">%</span>
+                  </div>
+                  <div class="flex gap-1">
+                    <button (click)="saveEditColumn()" [disabled]="savingEditColumn"
+                      class="text-[10px] px-1.5 py-0.5 bg-green-500 text-white rounded hover:bg-green-600">
+                      <i *ngIf="savingEditColumn" class="fas fa-spinner fa-spin"></i>
+                      <i *ngIf="!savingEditColumn" class="fas fa-check"></i>
+                    </button>
+                    <button (click)="cancelEditColumn()"
+                      class="text-[10px] px-1.5 py-0.5 bg-slate-400 text-white rounded hover:bg-slate-500">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Vista normal -->
+                <div *ngIf="editingColumn?.id !== col.id" class="flex flex-col items-center gap-0.5">
+                  <span>{{ col.name }}</span>
+                  <span class="text-[10px] font-normal text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                    {{ col.weight * 100 }}%
+                  </span>
+                </div>
+
+                <!-- Botones de acción de columna (si no está en edición) -->
+                <div *ngIf="editingColumn?.id !== col.id" class="flex gap-1 mt-1">
+                  <button (click)="moveColumnUp(colIndex)" [disabled]="colIndex === 0"
+                    class="text-[10px] px-1 py-0.5 text-slate-400 hover:text-slate-600 disabled:opacity-30" title="Mover izquierda">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <button (click)="moveColumnDown(colIndex)" [disabled]="colIndex >= columns.length - 1"
+                    class="text-[10px] px-1 py-0.5 text-slate-400 hover:text-slate-600 disabled:opacity-30" title="Mover derecha">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                  <button (click)="startEditColumn(col)"
+                    class="text-[10px] px-1 py-0.5 text-blue-400 hover:text-blue-600" title="Editar">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                  <button (click)="deleteColumn(col.id)"
+                    class="text-[10px] px-1 py-0.5 text-red-400 hover:text-red-600" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
               </div>
             </th>
             <!-- Columna de nota final -->
@@ -122,7 +199,7 @@
 
         <!-- Cuerpo -->
         <tbody class="divide-y divide-slate-100">
-          <ng-container *ngFor="let student of students; let i = index">
+          <ng-container *ngFor="let student of filteredStudents; let i = index">
             <tr class="hover:bg-slate-50/50 transition">
               <!-- Nombre del estudiante (sticky) -->
               <td class="sticky left-0 bg-white z-10 px-4 py-3 font-medium text-slate-700 whitespace-nowrap">
@@ -130,22 +207,20 @@
                   <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <span class="text-xs font-bold text-blue-600">{{ student.name.charAt(0) }}</span>
                   </div>
-                  <span>{{ student.name }}</span>
+                  <span>{{ student.name }} <br>
+                    <small>
+                      {{ student.ci }}
+                    </small> 
+                  </span>
                 </div>
               </td>
-
-              <!-- CI -->
-              <td class="px-4 py-3 text-slate-500 font-mono text-xs">
-                {{ student.ci }}
-              </td>
-
               <!-- Inputs de calificaciones por columna -->
               <ng-container *ngFor="let col of columns">
                 <td class="text-center px-3 py-3 border-l border-slate-100">
                   <div class="relative inline-flex items-center justify-center">
                     <input type="number"
                       [value]="getGrade(student, col.id)"
-                      (input)="onGradeChange(student, col.id, $event)"
+                      (blur)="onGradeBlur(student, col.id, $event)"
                       min="0" max="100" step="0.5"
                       class="w-20 text-center px-2 py-1.5 rounded-lg border text-sm font-mono transition-all duration-200
                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
@@ -159,13 +234,10 @@
                     <!-- Indicador de estado -->
                     <div class="absolute -right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4"
                       *ngIf="getCellState(student.id, col.id).status !== 'idle'">
-                      <!-- Spinner mientras guarda -->
                       <i *ngIf="getCellState(student.id, col.id).status === 'saving'"
                         class="fas fa-spinner fa-spin text-yellow-500 text-xs"></i>
-                      <!-- Checkmark cuando guardó -->
                       <i *ngIf="getCellState(student.id, col.id).status === 'saved'"
                         class="fas fa-check-circle text-green-500 text-sm"></i>
-                      <!-- Error -->
                       <i *ngIf="getCellState(student.id, col.id).status === 'error'"
                         class="fas fa-exclamation-circle text-red-500 text-sm"></i>
                     </div>
@@ -192,8 +264,22 @@
         Las calificaciones se guardan automáticamente al salir de cada casilla
       </span>
       <span class="text-slate-400">
-        {{ students.length }} estudiante(s) • {{ columns.length }} columna(s)
+        {{ filteredStudents.length }} de {{ students.length }} estudiante(s) • {{ columns.length }} columna(s)
       </span>
     </div>
   </div>
+
+
+
+  <app-base-modal-confirm
+    [isOpen]="modalConfirm"
+    title="ELiminar columna"
+    message="¿Estás seguro de eliminar la columna?"
+    confirmText="Sí, eliminar"
+    cancelText="Cancelar"
+    [loading]="resetLoading"
+    (confirm)="confirmDeleteColumn()"
+    (cancel)="modalConfirm = false">
+  </app-base-modal-confirm>
+
 </div>
