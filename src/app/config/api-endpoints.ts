@@ -1,6 +1,7 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+export const API_BASE_URL = 'http://localhost:8000/api';
 
 export const API_ENDPOINTS = {
+  dashboard: `${API_BASE_URL}/dashboard`,
   auth: {
     login: `${API_BASE_URL}/login`,
   },

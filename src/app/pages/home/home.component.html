@@ -1,106 +1,151 @@
 <div class="space-y-8">
 
-  <!-- TITULO -->
-  <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-slate-800">Panel Administrativo</h1>
-    <p class="text-sm text-slate-500">Resumen general del instituto</p>
-  </div>
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex justify-between items-center">
 
-  <!-- TARJETAS RESUMEN -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800">
+                Panel Administrativo
+            </h1>
 
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-slate-500 text-sm">Estudiantes</p>
-      <h2 class="text-3xl font-bold text-blue-700 mt-2">1,248</h2>
-      <p class="text-green-600 text-xs mt-2">↑ 12% este mes</p>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-slate-500 text-sm">Docentes</p>
-      <h2 class="text-3xl font-bold text-blue-700 mt-2">86</h2>
-      <p class="text-green-600 text-xs mt-2">↑ 4 nuevos</p>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-slate-500 text-sm">Carreras Activas</p>
-      <h2 class="text-3xl font-bold text-blue-700 mt-2">12</h2>
-      <p class="text-slate-400 text-xs mt-2">Actualizado hoy</p>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <p class="text-slate-500 text-sm">Ingresos del Mes</p>
-      <h2 class="text-3xl font-bold text-blue-700 mt-2">Bs. 84,520</h2>
-      <p class="text-green-600 text-xs mt-2">↑ 18% vs mes anterior</p>
-    </div>
-
-  </div>
-
-  <!-- SECCION MEDIA -->
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-    <!-- ACTIVIDAD RECIENTE -->
-    <div class="xl:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <h3 class="font-semibold text-slate-700 mb-4">Actividad Reciente</h3>
-
-      <div class="space-y-4">
-
-        <div class="flex items-center justify-between border-b pb-3">
-          <div>
-            <p class="font-medium text-slate-700">Nuevo estudiante inscrito</p>
-            <p class="text-sm text-slate-500">Juan Pérez — Ingeniería Sistemas</p>
-          </div>
-          <span class="text-xs text-slate-400">Hace 5 min</span>
+            <p class="text-slate-500 mt-1">
+                Resumen general del Instituto
+                <span class="font-bold text-blue-700">NOV</span><span class="font-bold text-red-700">ELL</span>
+            </p>
         </div>
 
-        <div class="flex items-center justify-between border-b pb-3">
-          <div>
-            <p class="font-medium text-slate-700">Pago registrado</p>
-            <p class="text-sm text-slate-500">María Gutiérrez — Bs. 350</p>
-          </div>
-          <span class="text-xs text-slate-400">Hace 18 min</span>
+        <div class="text-right">
+            <p class="text-sm text-slate-500">Gestión Académica</p>
+            <h3 class="font-bold text-blue-700 text-lg">
+                2026
+            </h3>
         </div>
 
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="font-medium text-slate-700">Docente asignado</p>
-            <p class="text-sm text-slate-500">Carlos Rojas → Base de Datos</p>
-          </div>
-          <span class="text-xs text-slate-400">Hace 1 hora</span>
+    </div>
+
+
+    <!-- ================= KPIs ================= -->
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <p class="text-slate-500 text-sm">
+                Estudiantes Activos
+            </p>
+
+            <h2 class="text-4xl font-bold text-blue-700 mt-2">
+                {{ totalStudents }}
+            </h2>
+
+            <p class="text-green-600 text-sm mt-3">
+                Estudiantes registrados
+            </p>
         </div>
 
-      </div>
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+
+            <p class="text-slate-500 text-sm">
+                Docentes Activos
+            </p>
+
+            <h2 class="text-4xl font-bold text-blue-700 mt-2">
+                {{ totalDocentes }}
+            </h2>
+
+            <p class="text-green-600 text-sm mt-3">
+                Docentes activos
+            </p>
+
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+
+            <p class="text-slate-500 text-sm">
+                Ingresos del Mes
+            </p>
+
+            <h2 class="text-4xl font-bold text-emerald-600 mt-2">
+                Bs. {{ monthlyIncome | number }}
+            </h2>
+
+
+        </div>
     </div>
 
-    <!-- ACCESOS RAPIDOS -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <h3 class="font-semibold text-slate-700 mb-4">Pensiones Pendientes</h3>
-      <div class="space-y-3 text-sm">
-        <p class="flex justify-between"><span>Ingeniería Sistemas</span> <span>12</span></p>
-        <p class="flex justify-between"><span>Contaduría</span> <span>8</span></p>
-        <p class="flex justify-between"><span>Electrónica</span> <span>5</span></p>
-      </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border p-5">
+            <p class="text-slate-500 text-sm">
+                Carreras
+            </p>
+            <h2 class="text-3xl font-bold mt-2">
+                {{ totalCareers }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-5">
+            <p class="text-slate-500 text-sm">
+                Materias
+            </p>
+            <h2 class="text-3xl font-bold mt-2">
+                {{ totalSubjects }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-5">
+            <p class="text-slate-500 text-sm">
+                Paralelos
+            </p>
+            <h2 class="text-3xl font-bold mt-2">
+                {{ totalParallels }}
+            </h2>
+        </div>
     </div>
-  </div>
-  
-  <!-- SECCION INFERIOR -->
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <h3 class="font-semibold text-slate-700 mb-4">Asistencia General</h3>
-      <div class="h-40 flex items-center justify-center text-slate-400">
-        📊 Gráfico de asistencia
-      </div>
+
+    <!-- ================= GRAFICOS ================= -->
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+
+            <h3 class="font-semibold mb-6">
+                Ingresos del año
+            </h3>
+
+            <div class="h-72 w-full">
+                <app-chart
+                    [series]="chartSeries"
+                    [categories]="chartCategories"
+                    chartType="area"
+                    [colors]="['#2563eb']"
+                ></app-chart>
+            </div>
+
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+
+            <h3 class="font-semibold mb-6">
+                Mensualidades
+            </h3>
+
+            <div class="space-y-5">
+
+                <div class="flex justify-between">
+                    <span>Hoy</span>
+                    <strong>{{ paysToday }}</strong>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Esta semana</span>
+                    <strong>{{ paysThisWeek }}</strong>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Este mes</span>
+                    <strong>{{ paysThisMonth }}</strong>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-      <h3 class="font-semibold text-slate-700 mb-4">Rendimiento Promedio</h3>
-      <div class="h-40 flex items-center justify-center text-slate-400">
-        📈 Gráfico de notas
-      </div>
-    </div>
-
-
-
-  </div>
-
 </div>

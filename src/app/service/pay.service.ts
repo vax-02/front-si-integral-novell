@@ -26,6 +26,12 @@ export class PayService {
     });
   }
 
+  getDashboardData(): Observable<any> {
+    return this.http.get(this.apiUrl.dashboard, {
+      headers: this.getHeaders(),
+    });
+  }
+
   createPay(data: any): Observable<any> {
     return this.http.post(this.apiUrl.pays.store, data, {
       headers: this.getHeaders(),
