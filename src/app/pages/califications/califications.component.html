@@ -3,7 +3,7 @@
   <!-- HEADER -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
     <div>
-      <h1 class="text-2xl font-bold text-slate-800">Gestión de Calificaciones</h1>
+      <h1 class="text-2xl font-bold text-slate-800">Calificaciones</h1>
       <p class="text-sm text-slate-500">Consulta, edita y supervisa el rendimiento académico de los estudiantes.</p>
     </div>
 
@@ -31,221 +31,204 @@
     </div>
   </div>
 
-
-
-
-  <!-- FILTROS -->
-  <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
-    <div class="grid md:grid-cols-4 gap-4">
-
-      <input type="text" placeholder="Buscar..."
-        class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Carrera</option>
-        <option>Sistemas</option>
-        <option>Contaduría</option>
-        <option>Marketing</option>
-      </select>
-
-      <select class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
-        <option>Materia</option>
-        <option>Programación I</option>
-        <option>Base de Datos</option>
-        <option>Redes</option>
-      </select>
-
-      <app-button label="Filtrar" variant="secondary" [fullWidth]="true"></app-button>
-
-    </div>
-  </div>
-
-  <!-- TABLA  -->
+  <!--tabla-->
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-
-    <div class="flex justify-between items-center p-6 border-b border-slate-200">
-      <span class="font-semibold text-slate-700">Listado de Materias</span>
-      <span class="text-xs text-slate-400">1,338 materias registrados</span>
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-6 border-b border-slate-200">
+      <span class="font-semibold text-slate-700">Listado de Carreras</span>
+      <span class="text-xs text-slate-400">{{ data.total }} Carreras registradas</span>
     </div>
 
-    <table class="w-full text-sm">
-      <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-        <tr>
-          <th class="p-4 text-left">Materia</th>
-          <th class="p-4 text-center">Carrera</th>
-          <th class="p-4 text-center">Estudiantes</th>
-          <th class="p-4 text-center">Acciones</th>
-        </tr>
-      </thead>
+    <!-- Contenedor responsive -->
+    <div class="overflow-x-auto">
+      <table class="min-w-[900px] w-full text-sm">
 
-      <tbody class="divide-y divide-slate-100">
+        <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="p-4 text-left">Carrera</th>
 
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4">
-            <div class="font-semibold text-slate-700">Base de datos II</div>
-          </td>
-          <td class="p-4 text-center">Sistemas Informaticos</td>
-          <td class="p-4 text-center">20</td>
+            <th class="p-4 text-center">Duración</th>
 
-          <td class="p-4 text-center space-x-2">
-            <app-button icon="fa-solid fa-ellipsis" [variant]="'primary'" (click)="openNotas()"
-              title="Agregar calificaciones"></app-button>
-          </td>
+            <th class="p-4 text-center hidden md:table-cell">
+              Tipo
+            </th>
 
-        </tr>
-      </tbody>
-    </table>
+            <th class="p-4 text-center">
+              Estado
+            </th>
+
+            <th class="p-4 text-center">
+              Materias
+            </th>
+
+            <th class="p-4 text-center hidden lg:table-cell">
+              Estudiantes
+            </th>
+
+            <th class="p-4 text-center">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+
+          <tr *ngIf="loading">
+            <td colspan="7" class="p-6 text-center">
+              <div class="flex items-center justify-center gap-2 text-slate-600">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+                <span>Cargando carreras...</span>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && data.Careers.length === 0">
+            <td colspan="7" class="p-6 text-center text-slate-500">
+              No se encontraron carreras.
+            </td>
+          </tr>
+
+          <tr *ngFor="let career of data.Careers" class="hover:bg-slate-50 transition">
+
+            <td class="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">
+              {{ career.name }}
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                {{ career.duration }} año(s)
+              </span>
+            </td>
+
+            <td class="px-6 py-4 text-center hidden md:table-cell">
+              {{ career.type == 1? "Anual":"Semestral"}}
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="career.status
+              ? 'bg-emerald-100 text-emerald-600'
+              : 'bg-rose-100 text-rose-600'">
+                {{ career.status ? 'Habilitado' : 'Inhabilitado' }}
+              </span>
+              
+            </td>
+
+            <td class="px-6 py-4 text-center font-semibold text-blue-600">
+              {{ career.subjects_count }}
+            </td>
+
+            <td class="px-6 py-4 text-center font-semibold text-emerald-600 hidden lg:table-cell">
+              {{ career.active_students_count || 0 }}
+            </td>
+
+            <td class="p-3 sm:p-4 text-center">
+              <div class="flex justify-center gap-2">
+                <button (click)="openViewProgram(career.id)"
+                  class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
   </div>
 
+    <!--MODALS-->
+  <app-base-modal [isOpen]="modalViewProgram" title="Detalle de carrera" subtitle="Plan de estudios" size="xl"
+    confirmText="Aceptar" cancelText="Cerrar" (confirm)="closeViewProgram()" (cancel)="closeViewProgram()"
+    [loading]="loadingModalDetails">
 
 
-
-
-
-  <app-base-modal [isOpen]="modalNotas" title="Gestión de Calificaciones"
-    subtitle="Configuración avanzada por estudiante" size="xl" confirmText="Guardar" cancelText="Cancelar"
-     (cancel)="modalNotas = false">
-
-    <div class="space-y-6">
-
-      <!-- ===================== -->
-      <!-- CONFIGURACIÓN -->
-      <!-- ===================== -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
-
-        <h3 class="font-semibold text-slate-700 flex items-center gap-2 mb-4">
-          <i class="fa-solid fa-sliders text-blue-600"></i>
-          Configuración de Evaluaciones
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-5  px-10">
+      <!-- Información de la carrera -->
+      <div class="space-y-3">
+        <!-- Nombre -->
+        <h3 class="text-2xl md:text-3xl font-bold text-slate-800">
+          {{ careerSelected?.name }}
         </h3>
+        <!-- Duración y tipo -->
+        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500">
 
-        <!-- INPUT NUEVO -->
-        <div class="flex flex-wrap gap-3 items-center">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-clock text-slate-400"></i>
+            Duración: {{ careerSelected?.duration }} años
+          </span>
 
-          <input [(ngModel)]="nuevoCampo.nombre" placeholder="Ej: Parcial 1"
-            class="px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm">
-
-          <input [(ngModel)]="nuevoCampo.peso" type="number" placeholder="%"
-            class="w-24 px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm">
-
-          <button (click)="addCampo()"
-            class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow">
-            <i class="fa-solid fa-plus"></i>
-          </button>
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-slate-400"></i>
+            Tipo: {{ careerSelected?.type == 1 ? 'Anual' : 'Semestral' }}
+          </span>
 
         </div>
+      </div>
 
-        <!-- CHIPS -->
-        <div class="flex flex-wrap gap-3 mt-4">
 
-          <div *ngFor="let c of campos; let i = index"
-            class="group bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm hover:shadow-md transition">
+    </div>
 
-            <div>
-              <p class="text-sm font-semibold text-slate-700">{{ c.nombre }}</p>
-              <p class="text-xs text-blue-600">{{ c.peso }}%</p>
-            </div>
+    <div class="relative">
+      <div class="space-y-6">
+        <div *ngFor="let group of careerSelected?.subjects_by_level" class="mb-6">
 
-            <!-- editar peso -->
-            <input type="number" [(ngModel)]="c.peso"
-              class="w-16 text-xs px-2 py-1 border rounded-lg text-center focus:ring-1 focus:ring-blue-500">
-
-            <button (click)="removeCampo(i)" class="opacity-0 group-hover:opacity-100 text-red-500 transition">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-
+          <!-- HEADER LEVEL -->
+          <div
+            class="bg-slate-100 px-4 py-2 rounded-t-xl font-semibold text-slate-700 flex items-center justify-between">
+            <span> {{ toNumeral(group.level) }} {{ careerSelected.type == 1 ? 'Año' : 'Semestre' }} </span>
           </div>
 
-        </div>
-
-        <!-- TOTAL -->
-        <div class="mt-3">
-          <span class="text-sm font-medium">Total:</span>
-          <span class="ml-2 font-bold" [ngClass]="totalPeso() === 100 ? 'text-green-600' : 'text-red-500'">
-            {{ totalPeso() }}%
-          </span>
-        </div>
-
-      </div>
-
-      <!-- ===================== -->
-      <!-- TABLA MODERNA -->
-      <!-- ===================== -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
-        <div class="overflow-x-auto">
-
-          <table class="w-full text-sm">
-
-            <!-- HEAD -->
-            <thead class="bg-slate-100 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-4 py-3 text-left">Estudiante</th>
-
-                <th *ngFor="let c of campos" class="px-4 py-3 text-center">
-                  <div class="flex flex-col items-center">
-                    <span>{{ c.nombre }}</span>
-                    <span class="text-[10px] text-blue-600">({{ c.peso }}%)</span>
-                  </div>
-                </th>
-
-                <th class="px-4 py-3 text-center">Promedio</th>
-              </tr>
-            </thead>
-
-            <!-- BODY -->
-            <tbody class="divide-y">
-
-              <tr *ngFor="let est of estudiantes" class="hover:bg-slate-50 transition">
-
-                <!-- NOMBRE -->
-                <td class="px-4 py-3 font-medium flex items-center gap-3">
-                  <div
-                    class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
-                    {{ est.nombre.charAt(0) }}
-                  </div>
-                  {{ est.nombre }}
-                </td>
-
-                <!-- NOTAS -->
-                <td *ngFor="let c of campos; let i = index" class="px-3 py-3">
-
-                  <div class="flex flex-col items-center gap-1">
-
-                    <!-- NOTA -->
-                    <input type="number" [(ngModel)]="est.notas[i]"
-                      class="w-20 px-2 py-1 rounded-lg border border-slate-300 text-center focus:ring-2 focus:ring-blue-500">
-
-                    <!-- PESO INDIVIDUAL -->
-                    <input type="number" [(ngModel)]="est.pesos[i]" placeholder="%"
-                      class="w-16 text-xs px-2 py-1 border rounded-lg text-center text-slate-500 focus:ring-1 focus:ring-blue-400">
-
-                  </div>
-
-                </td>
-
-                <!-- PROMEDIO -->
-                <td class="px-4 py-3 text-center">
-
-                  <span class="px-3 py-1 rounded-full text-sm font-bold" [ngClass]="calcularPromedio(est) >= 51 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-red-100 text-red-600'">
-
-                    {{ calcularPromedio(est) | number:'1.1-2' }}
-
-                  </span>
-
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
-
+          <!-- TABLE -->
+          <div class="overflow-x-auto border border-slate-200 rounded-b-xl">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500 uppercase text-xs text-center">
+                <tr>
+                  <th class="px-4 py-3 text-center">Sigla</th>
+                  <th class="px-4 py-3 text-center">Materia</th>
+                  <th class="px-4 py-3 text-center">Prerrequisito</th>
+                  <th class="px-4 py-3 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <tr *ngFor="let subject of group.subjects" class="hover:bg-slate-50 text-center">
+                  <td class="px-4 py-3 font-medium text-slate-700">
+                    {{ subject.sigla }}
+                  </td>
+                  <!-- MATERIA -->
+                  <td class="px-4 py-3">
+                    {{ subject.name }}
+                  </td>
+                  <!-- PRERREQUISITO -->
+                  <td class="px-4 py-3 text-center">
+                    <span *ngIf="subject.subject_id; else none" class="text-blue-600 font-medium">
+                      {{ getSubjectName(subject.subject_id) }}
+                    </span>
+                    <ng-template #none>
+                      <span class="text-slate-400">—</span>
+                    </ng-template>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex justify-center gap-2">
+                      <button (click)="openModalQualification(subject)"
+                        class="px-2 py-2 rounded-lg bg-green-500 text-white text-xs hover:bg-green-600">
+                        <i class="fas fa-chart-line"></i> Calificaciones
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-
     </div>
+  </app-base-modal>
+
+  <app-base-modal [isOpen]="modalQualification"  title="Calificaciones de la materia"
+    size="lg" confirmText="Guardar" cancelText="Cancelar" (confirm)="modalQualification = false"
+    (cancel)="modalQualification = false">
 
   </app-base-modal>
 </div>

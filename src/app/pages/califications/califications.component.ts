@@ -3,6 +3,9 @@ import { ButtonComponent } from '../../shared/button/button.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
+import { CareersResponse } from '../../interfaces/career';
+import { CareerService } from '../../service/career.service';
+import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-califications',
   imports: [FormsModule,CommonModule, ButtonComponent, BaseModalComponent],
@@ -10,48 +13,101 @@ import { BaseModalComponent } from '../../shared/base-modal/base-modal.component
   styleUrl: './califications.component.css',
 })
 export class CalificationsComponent {
-  modalNotas: boolean = false;
-  campos: any[] = [];
-  estudiantes: any[] = [
-    { nombre: 'Juan Pérez', notas: [] },
-    { nombre: 'María López', notas: [] },
-  ];
-
-  nuevoCampo = {
-    nombre: '',
-    peso: 0,
+  data: CareersResponse = {
+     Careers: [],
+     total: 0,
+     totalSubjects: 0,
+     careersActivas: 0,
   };
-  openNotas(){
-    this.modalNotas = true;
-  }
-  addCampo() {
-    if (!this.nuevoCampo.nombre || !this.nuevoCampo.peso) return;
+  loading = false;
 
-    this.campos.push({ ...this.nuevoCampo });
+  modalViewProgram: boolean = false;
+  modalDetailSubjetcs: boolean = false;
 
-    // agregar espacio de nota a cada estudiante
-    this.estudiantes.forEach((e) => e.notas.push(0));
+  loadingModalDetails: boolean = false;
+  careerSelected: any = null;
+  activeCareerId: number | null = null;
+  
+  constructor(private careerService: CareerService, private toast : ToastService){}
 
-    this.nuevoCampo = { nombre: '', peso: 0 };
-  }
-
-  removeCampo(index: number) {
-    this.campos.splice(index, 1);
-
-    this.estudiantes.forEach((e) => e.notas.splice(index, 1));
+  ngOnInit() {
+    this.loadCareers();
   }
 
-  totalPeso() {
-    return this.campos.reduce((sum, c) => sum + Number(c.peso), 0);
-  }
+  loadCareers() {
+    this.loading = true;
+    this.careerService.getCareers().subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.data.Careers = response.careers;
+        this.data.total = response.total;
+        this.data.totalSubjects = response.totalSubjects;
+        this.data.careersActivas = response.careersActivas;
+        console.log(response)
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toast.error('Error al cargar las carreras');
+        console.log('error en la carga de carreras')
+        console.log(err)
 
-  calcularPromedio(est: any) {
-    let total = 0;
-
-    this.campos.forEach((c, i) => {
-      total += (est.notas[i] || 0) * (c.peso / 100);
+      },
     });
-
-    return total;
   }
+  openViewProgram(id: number) {
+    this.modalViewProgram = true;
+    this.loadingModalDetails = true;
+    this.careerSelected = null;
+    this.activeCareerId = id;
+
+    this.loadCareerDetails(id);
+  }
+  closeViewProgram() {
+    this.modalViewProgram = false;
+    this.loadingModalDetails = false;
+    this.careerSelected = null;
+  }
+
+  toNumeral(val: number) : string{
+    switch(val){
+      case 1: return 'Primer'
+      case 2: return 'Segundo'
+      case 3: return 'Tercer'
+      case 4: return 'Cuarto'
+      case 5: return 'Quinto'
+      case 6: return 'Sexto'
+      default : return ''
+    }
+  }
+
+  getSubjectName(id: number): string {
+    const allSubjects =
+      this.careerSelected?.subjects_by_level?.flatMap((g: any) => g.subjects) ||
+      [];
+
+    const subject = allSubjects.find((s: any) => s.id === id);
+
+    return subject ? subject.sigla : '—';
+  }
+
+  modalQualification : boolean = false
+  openModalQualification(subject : any){
+    this.modalQualification = true
+  }
+  private loadCareerDetails(id: number) {
+    this.careerService.getCareerById(id).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.loadingModalDetails = false;
+        this.careerSelected = response;
+        //console.log(this.careerSelected)
+      },
+      error: () => {
+        this.loading = false;
+        this.loadingModalDetails = false;
+        this.toast.error('Error al cargar los detalles de la carrera');
+      },
+    });
+  }
+
 }
