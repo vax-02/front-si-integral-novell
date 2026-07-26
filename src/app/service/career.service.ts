@@ -43,6 +43,16 @@ export class CareerService {
     });
   }
 
+  getMyGrades(sigla?: string): Observable<any> {
+    let url = this.apiUrl.studentGrades;
+    if (sigla) {
+      url += `?sigla=${sigla}`;
+    }
+    return this.http.get(url, {
+      headers: this.getHeaders(),
+    });
+  }
+
   getMySubjects(careerId?: number, level?: number): Observable<any> {
     let params = '';
     const queryParams: string[] = [];

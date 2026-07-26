@@ -81,7 +81,7 @@
         </div>
         <div class="text-center">
           <button class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:bg-green-700"
-            (click)="openDetail()">
+            (click)="openDetail(subject)">
             <i class="fas fa-chart-line"></i>
             Calificaciones
           </button>
@@ -98,122 +98,109 @@
   }
 
   <app-base-modal [isOpen]="modalDetail" title="Ver calificaciones" size="lg"
-    [showConfirm]="false" cancelText="Cerrar" (cancel)="modalDetail = false">
-    <div class="max-w-6xl mx-auto rounded-xl bg-white  border border-gray-200 overflow-hidden">
-    <!-- Información -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gray-50 ">
+    [showConfirm]="false" cancelText="Cerrar" (cancel)="cerrarModal()">
+    
+    @if (loadingGrades()) {
+    <div class="flex items-center justify-center py-12">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
+      <span class="ml-3 text-slate-500">Cargando calificaciones...</span>
+    </div>
+    }
 
+    @if (gradesError(); as errMsg) {
+    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+      <i class="fas fa-exclamation-circle text-yellow-400 text-3xl mb-2"></i>
+      <p class="text-sm text-yellow-700">{{ errMsg }}</p>
+    </div>
+    }
+
+    @if (!loadingGrades() && !gradesError() && selectedSubjectGrade(); as grade) {
+    <div class="max-w-6xl mx-auto rounded-xl bg-white border border-gray-200 overflow-hidden">
+      <!-- Información -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gray-50">
         <div>
-            <label class="text-xs uppercase tracking-wide text-gray-500">
-                Docente
-            </label>
-            <p class="mt-1 font-semibold text-gray-800">
-                Juan Pérez García
-            </p>
+          <label class="text-xs uppercase tracking-wide text-gray-500">Docente</label>
+          <p class="mt-1 font-semibold text-gray-800">{{ grade.docente }}</p>
         </div>
 
         <div>
-            <label class="text-xs uppercase tracking-wide text-gray-500">
-                Paralelo
-            </label>
-            <p class="mt-1 font-semibold text-gray-800">
-                A
-            </p>
+          <label class="text-xs uppercase tracking-wide text-gray-500">Paralelo</label>
+          <p class="mt-1 font-semibold text-gray-800">{{ grade.parallel_name }} ({{ grade.turno }})</p>
         </div>
 
         <div>
-            <label class="text-xs uppercase tracking-wide text-gray-500">
-                Materia
-            </label>
-            <p class="mt-1 font-semibold text-gray-800">
-                Programación II
-            </p>
+          <label class="text-xs uppercase tracking-wide text-gray-500">Materia</label>
+          <p class="mt-1 font-semibold text-gray-800">{{ grade.subject_name }}</p>
         </div>
 
         <div>
-            <label class="text-xs uppercase tracking-wide text-gray-500">
-                Estado
-            </label>
+          <label class="text-xs uppercase tracking-wide text-gray-500">Estado</label>
+          @if (grade.final_grade !== null && grade.final_grade !== undefined) {
+            @if (grade.final_grade >= 70) {
             <span class="inline-flex mt-2 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                En curso
+              Aprobado
             </span>
+            } @else {
+            <span class="inline-flex mt-2 rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700">
+              Reprobado
+            </span>
+            }
+          } @else {
+          <span class="inline-flex mt-2 rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-700">
+            En curso
+          </span>
+          }
         </div>
+      </div>
 
-    </div>
-
-    <!-- Tabla -->
-    <div class="overflow-x-auto">
-
+      <!-- Tabla -->
+      <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                Actividad
+              </th>
+              <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+                Ponderación
+              </th>
+              <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+                Calificación
+              </th>
+            </tr>
+          </thead>
 
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                        Actividad
-                    </th>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            @for (evalItem of grade.evaluations; track evalItem.name) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 font-medium text-gray-700">{{ evalItem.name }}</td>
+              <td class="px-6 py-4 text-center text-gray-500">{{ evalItem.weight_percent }}%</td>
+              <td class="px-6 py-4 text-center font-semibold"
+                [class.text-green-600]="evalItem.grade !== null && evalItem.grade >= 51"
+                [class.text-red-600]="evalItem.grade !== null && evalItem.grade < 51"
+                [class.text-gray-400]="evalItem.grade === null">
+                {{ evalItem.grade !== null ? evalItem.grade : '—' }}
+              </td>
+            </tr>
+            }
+          </tbody>
 
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                        Fecha
-                    </th>
-
-                    <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                        Ponderación
-                    </th>
-
-                    <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                        Calificación
-                    </th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-100 bg-white">
-
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4">Práctica 1</td>
-                    <td class="px-6 py-4">15/03/2026</td>
-                    <td class="px-6 py-4 text-center">20%</td>
-                    <td class="px-6 py-4 text-center font-semibold text-blue-700">
-                        18
-                    </td>
-                </tr>
-
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4">Laboratorio</td>
-                    <td class="px-6 py-4">25/03/2026</td>
-                    <td class="px-6 py-4 text-center">30%</td>
-                    <td class="px-6 py-4 text-center font-semibold text-blue-700">
-                        28
-                    </td>
-                </tr>
-
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4">Examen Parcial</td>
-                    <td class="px-6 py-4">10/04/2026</td>
-                    <td class="px-6 py-4 text-center">50%</td>
-                    <td class="px-6 py-4 text-center font-semibold text-blue-700">
-                        42
-                    </td>
-                </tr>
-
-            </tbody>
-
-            <tfoot class="bg-gray-50">
-                <tr>
-                    <td colspan="3" class="px-6 py-4 text-right font-bold text-gray-700">
-                        Calificación Final
-                    </td>
-
-                    <td class="px-6 py-4 text-center text-lg font-bold text-green-600">
-                        88
-                    </td>
-                </tr>
-            </tfoot>
-
+          <tfoot class="bg-gray-50">
+            <tr>
+              <td colspan="2" class="px-6 py-4 text-right font-bold text-gray-700">
+                Calificación Final
+              </td>
+              <td class="px-6 py-4 text-center text-lg font-bold"
+                [class.text-green-600]="grade.final_grade !== null && grade.final_grade >= 70"
+                [class.text-red-600]="grade.final_grade !== null && grade.final_grade < 70"
+                [class.text-gray-400]="grade.final_grade === null">
+                {{ grade.final_grade !== null ? grade.final_grade : '—' }}
+              </td>
+            </tr>
+          </tfoot>
         </table>
-
+      </div>
     </div>
-
-</div>
-
+    }
   </app-base-modal>
 </div>

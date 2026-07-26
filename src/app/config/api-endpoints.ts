@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
   studentPensum: `${API_BASE_URL}/student/my-pensum`,
   studentSchedule: `${API_BASE_URL}/student/my-schedule`,
   studentSubjects: `${API_BASE_URL}/student/my-subjects`,
+  studentGrades: `${API_BASE_URL}/student/my-grades`,
   studentCareers: {
     index: `${API_BASE_URL}/student-careers`,
     store: `${API_BASE_URL}/student-careers`,
@@ -71,6 +72,8 @@ export const API_ENDPOINTS = {
   grades: {
     students: (parallelId: number) => `${API_BASE_URL}/grades/students/${parallelId}`,
     save: `${API_BASE_URL}/grades/save`,
+    publish: `${API_BASE_URL}/grades/publish`,
+    unpublish: `${API_BASE_URL}/grades/unpublish`,
     columns: {
       store: `${API_BASE_URL}/grades/columns`,
       update: (id: number) => `${API_BASE_URL}/grades/columns/${id}`,

@@ -10,6 +10,7 @@ interface SubjectEntry {
   level: number;
   paralelo: string;
   docente: string;
+  subject_id?: number;
 }
 
 interface CareerLevel {
@@ -25,6 +26,25 @@ interface CareerInfo {
   levels: CareerLevel[];
 }
 
+interface Evaluation {
+  name: string;
+  weight: number;
+  weight_percent: number;
+  grade: number | null;
+}
+
+interface SubjectGrade {
+  subject_id: number;
+  subject_name: string;
+  subject_sigla: string;
+  parallel_name: string;
+  turno: string;
+  course_name: string;
+  docente: string;
+  evaluations: Evaluation[];
+  final_grade: number | null;
+}
+
 @Component({
   selector: 'app-my-subjects',
   imports: [CommonModule, FormsModule, BaseModalComponent],
@@ -38,7 +58,12 @@ export class MySubjectsComponent {
   readonly subjects = signal<SubjectEntry[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  modalDetail : boolean = false
+  modalDetail: boolean = false;
+
+  // Datos de calificaciones del modal
+  readonly selectedSubjectGrade = signal<SubjectGrade | null>(null);
+  readonly loadingGrades = signal(false);
+  readonly gradesError = signal<string | null>(null);
 
   readonly carreraActual = computed(() => {
     const id = this.carreraSeleccionadaId();
@@ -65,7 +90,6 @@ export class MySubjectsComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    // Primero cargar carreras, luego subjects
     this.careerService.getMySubjects().subscribe({
       next: (resp) => {
         this.loading.set(false);
@@ -85,7 +109,6 @@ export class MySubjectsComponent {
   }
 
   seleccionarCarrera(id: number) {
-    console.log('id de la carrera'+id)
     this.carreraSeleccionadaId.set(id);
     this.levelSeleccionado.set(null);
     this.loadSubjectsForCareer(id);
@@ -95,10 +118,37 @@ export class MySubjectsComponent {
     this.levelSeleccionado.set(level);
   }
 
-  openDetail(){
+  openDetail(subject: SubjectEntry) {
     this.modalDetail = true;
+    this.selectedSubjectGrade.set(null);
+    this.gradesError.set(null);
+    this.loadingGrades.set(true);
 
+    this.careerService.getMyGrades(subject.sigla).subscribe({
+      next: (resp) => {
+        this.loadingGrades.set(false);
+        const grades: SubjectGrade[] = resp.grades || [];
+        // Buscar la calificación que coincide con la sigla
+        const grade = grades.find((g) => g.subject_sigla === subject.sigla) || null;
+        this.selectedSubjectGrade.set(grade);
+        if (!grade) {
+          this.gradesError.set('No hay calificaciones publicadas para esta materia.');
+        }
+      },
+      error: (err) => {
+        this.loadingGrades.set(false);
+        this.gradesError.set('Error al cargar las calificaciones.');
+        console.error(err);
+      },
+    });
   }
+
+  cerrarModal() {
+    this.modalDetail = false;
+    this.selectedSubjectGrade.set(null);
+    this.gradesError.set(null);
+  }
+
   private loadSubjectsForCareer(careerId: number) {
     this.loading.set(true);
     this.careerService.getMySubjects(careerId).subscribe({

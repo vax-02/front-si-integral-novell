@@ -56,6 +56,10 @@ export class GradesComponent implements OnInit, OnDestroy {
   // Buscador de estudiantes
   searchStudent = '';
 
+  // Estado de publicación
+  isPublished = false;
+  publishing = false;
+
   constructor(
     private docenteService: DocenteService,
     private http: HttpClient,
@@ -156,6 +160,7 @@ export class GradesComponent implements OnInit, OnDestroy {
           this.students = resp.students || [];
           this.columns = (resp.columns || []).sort((a: any, b: any) => a.order - b.order);
           this.parallel = resp.parallel || null;
+          this.isPublished = resp.published || false;
         },
         error: (err) => {
           this.loadingGrades = false;
@@ -362,6 +367,48 @@ export class GradesComponent implements OnInit, OnDestroy {
         error: (err) => console.error('Error al reordenar columna', err),
       });
     }
+  }
+
+  /** Publicar notas */
+  publishGrades() {
+    if (!this.selectedSubject) return;
+    this.publishing = true;
+    const body = {
+      subject_id: this.selectedSubject.id,
+      parallel_id: this.selectedSubject.parallel_id || this.parallel?.id,
+    };
+    this.http.post<any>(API_ENDPOINTS.grades.publish, body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        this.publishing = false;
+        this.isPublished = true;
+        this.toast.success('Notas publicadas correctamente');
+      },
+      error: () => {
+        this.publishing = false;
+        this.toast.error('Error al publicar notas');
+      },
+    });
+  }
+
+  /** Despublicar notas */
+  unpublishGrades() {
+    if (!this.selectedSubject) return;
+    this.publishing = true;
+    const body = {
+      subject_id: this.selectedSubject.id,
+      parallel_id: this.selectedSubject.parallel_id || this.parallel?.id,
+    };
+    this.http.post<any>(API_ENDPOINTS.grades.unpublish, body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        this.publishing = false;
+        this.isPublished = false;
+        this.toast.success('Notas despublicadas correctamente');
+      },
+      error: () => {
+        this.publishing = false;
+        this.toast.error('Error al despublicar notas');
+      },
+    });
   }
 
   goBack() {
