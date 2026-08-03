@@ -26,6 +26,7 @@ import { TrainingComponent } from './pages/training/training.component';
 import { DocenteSubjectsComponent } from './docente-subjects/docente-subjects.component';
 import { GradesComponent } from './docente-subjects/grades/grades.component';
 import { RepositoryComponent } from './docente-subjects/repository/repository.component';
+import { ScheduleDocenteComponent } from './pages/schedule-docente/schedule-docente.component';
 
 export const routes: Routes = [
   // Ruta para el Home
@@ -56,6 +57,7 @@ export const routes: Routes = [
     { path: 'courses', component: CoursesComponent },
     { path: 'training', component: TrainingComponent },
 
+    { path: 'schedule-docente', component: ScheduleDocenteComponent },
 
     { path: 'subjects', component: SubjectsComponent },
     { path: 'users', component: UsersComponent },

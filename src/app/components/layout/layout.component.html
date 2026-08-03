@@ -214,6 +214,11 @@
         </div>
 
         <div *ngIf="(!collapsed || isMobile) && openAdmin" class="ml-6 space-y-1">
+          <a routerLink="/home/schedule-docente" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Horarios de docente
+          </a>
           <a routerLink="/home/attendance" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
