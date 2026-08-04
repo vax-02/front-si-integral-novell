@@ -14,6 +14,7 @@ import { CourseService } from '../../service/course.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
 import { ScheduleService } from '../../service/schedule.service';
+import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
 @Component({
   selector: 'app-courses',
@@ -24,6 +25,7 @@ import { ScheduleService } from '../../service/schedule.service';
     BaseModalComponent,
     ButtonComponent,
     BaseInputComponent,
+    BaseModalConfirmComponent
   ],
   templateUrl: './courses.component.html',
   styleUrl: './courses.component.css',
@@ -31,8 +33,17 @@ import { ScheduleService } from '../../service/schedule.service';
 export class CoursesComponent implements OnInit {
   formParallel!: FormGroup;
   private searchTimeout: any;
+
+  titleConfirm : string = '';
+  messageConfirm : string = '';
+  iconConfirm : string = '';
+
+  toggleLoading: boolean = false
+  modalConfirmToggleStatus : boolean = false
   courseIdSelect: number = 0;
   subtitleNewParallel: string = '';
+  parallelSelect : any;
+  openModalEdit: boolean = false
   search = '';
   currentPage = 1;
   perPage = 10;
@@ -40,7 +51,7 @@ export class CoursesComponent implements OnInit {
   totalCourses = 0;
   totalLimit: number = 0;
   totalStudentsForCareer: number = 0;
-  
+
   totalStudents: number = 0;
   totalCapacity: number = 0;
   courses: any[] = [];
@@ -187,7 +198,7 @@ export class CoursesComponent implements OnInit {
     this.openModalCreate = true;
   }
 
-  // ── Guardar paralelo ──
+  // ── Guardar paralelo (crear o editar) ──
   save(): void {
     this.formParallel.patchValue({
       course_id: this.courseIdSelect,
@@ -198,22 +209,62 @@ export class CoursesComponent implements OnInit {
       return;
     }
     this.loadingModal = true;
-    this.parallelService.createParallel(this.formParallel.value).subscribe({
-      next: (resp) => {
-        this.loadingModal = false;
-        this.toast.success('Paralelo registrado correctamente.');
-        this.loadCourses()
-        this.openModalCreate = false;
-      },
-      error: (err) => {
-        this.loadingModal = false;
-        this.toast.error('Ocurrió un error');
-      },
-    });
+
+    if (this.openModalEdit && this.parallelSelect) {
+      // Editar paralelo existente
+      this.parallelService.updateParallel(this.parallelSelect.id, this.formParallel.value).subscribe({
+        next: (resp) => {
+          this.loadingModal = false;
+          this.toast.success('Paralelo actualizado correctamente.');
+          this.loadCourses()
+
+          this.parallelService.getParallelsByCourse(this.courseIdSelect).subscribe({
+            next: (resp) => {
+              this.loadingModal = false;
+              this.totalStudents = resp.summary.total_students;
+              this.totalCapacity = resp.summary.total_capacity;
+              this.parallels = resp.parallels;
+            },
+            error: (err) => {
+              this.loadingModal = false;
+            },
+          });
+          this.openModalEdit = false;
+          this.parallelSelect = null;
+        },
+        error: (err) => {
+          this.loadingModal = false;
+          if (err?.status === 422) {
+            this.toast.info('No se puede reducir el cupo');
+            return;
+          }
+          this.toast.error('Ocurrió un error');
+        },
+      });
+    } else {
+      // Crear paralelo nuevo
+      this.parallelService.createParallel(this.formParallel.value).subscribe({
+        next: (resp) => {
+          this.loadingModal = false;
+          this.toast.success('Paralelo registrado correctamente.');
+          this.loadCourses()
+          this.openModalCreate = false;
+        },
+        error: (err) => {
+          this.loadingModal = false;
+          this.toast.error('Ocurrió un error');
+        },
+      });
+    }
   }
 
   cancel(): void {
     this.openModalCreate = false;
+  }
+
+  cancelEdit(): void {
+    this.openModalEdit = false;
+    this.parallelSelect = null;
   }
 
   cancelView() {
@@ -395,6 +446,52 @@ export class CoursesComponent implements OnInit {
     });
   }
 
+  openEditModal(parallel: any){
+    this.parallelSelect = parallel;
+    this.formParallel.patchValue({
+      course_id: this.courseIdSelect,
+      turno: parallel.turno,
+      parallel: parallel.paralelo,
+      limit: parallel.limit,
+    });
+    this.openModalEdit = true;
+  }
+
+  toggleStatus(parallel : any){
+    this.parallelSelect = parallel.id;
+    this.modalConfirmToggleStatus = true;
+    if(parallel.status == 1){
+      this.titleConfirm = "Inhabilitar paralelo"
+      this.messageConfirm = "¿Esta accion inhabilitara al paralelo?"
+      this.iconConfirm = "fa-solid fa-triangle-exclamation text-4xl text-red-600"
+    }else{
+      this.titleConfirm = "Habilitar paralelo"
+      this.messageConfirm = "¿Esta accion habilitara al paralelo?"
+      this.iconConfirm = "fa-solid fa-circle-check text-4xl text-green-600";
+    }
+  }
+  confirmToggleStatus(){
+    this.modalConfirmToggleStatus = false;
+    this.parallelService.toggleStatus(this.parallelSelect).subscribe({
+      next: (resp) =>{
+          this.toast.success('El paralelo se habilito')
+          const parallel = this.parallels.find(
+            p => p.id === this.parallelSelect
+          );
+          if (parallel) {
+            parallel.status = parallel.status ? 0 : 1;
+          }
+      },
+      error: (err) =>{
+        if(err.status = 422){
+          this.toast.info('El paralelo no puede inhabilitarse')
+          return
+        }
+        this.toast.error('Error al actualizar el paralelo')
+      }
+    })
+
+  }
   // ── Get day name in Spanish ──
   getDayName(day: string): string {
     const dayMap: { [key: string]: string } = {

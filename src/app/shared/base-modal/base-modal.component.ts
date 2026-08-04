@@ -23,6 +23,7 @@ export class BaseModalComponent {
   @Input() showConfirm = true;
   @Input() loading = false;
   @Input() confirmButtonClass = 'bg-blue-600 hover:bg-blue-700';
+  @Input() zIndex = 'z-50';
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -40,7 +41,7 @@ export class BaseModalComponent {
         return 'max-w-5xl';
       case '2xl':
         return 'max-w-7xl';
-      
+
       default:
         return 'max-w-xl';
     }

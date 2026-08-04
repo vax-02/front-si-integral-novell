@@ -15,6 +15,7 @@ export class BaseModalConfirmComponent {
   @Input() confirmText = 'Confirmar';
   @Input() cancelText = 'Cancelar';
   @Input() loading = false;
+  @Input() icon = 'fa-solid fa-triangle-exclamation text-4xl text-red-600';
   @Input() confirmClass = 'bg-red-600 hover:bg-red-700';
 
   @Output() confirm = new EventEmitter<void>();

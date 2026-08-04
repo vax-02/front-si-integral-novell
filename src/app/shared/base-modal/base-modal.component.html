@@ -1,4 +1,4 @@
-<div *ngIf="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div *ngIf="isOpen" class="fixed inset-0 flex items-center justify-center bg-black/40" [ngClass]="zIndex">
 
   <div class="bg-white w-full rounded-xl shadow-lg border border-blue-100 flex flex-col" [ngClass]="modalSize">
     <!-- HEADER -->

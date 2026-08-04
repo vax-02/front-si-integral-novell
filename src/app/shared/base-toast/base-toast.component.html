@@ -3,15 +3,13 @@
   <div class="bg-white shadow-xl border rounded-xl overflow-hidden min-w-[320px] animate-toast">
 
     <div class="flex items-center gap-2 p-2">
-
-      <i class="text-2xl" [ngClass]="{
-          'fas fa-solid fa-circle-check text-green-600': type === 'success',
-          'fas fa-solid fa-circle-xmark text-red-600': type === 'error',
-          'fas fa-solid fa-triangle-exclamation text-yellow-500': type === 'warning',
-          'fas fa-solid fa-circle-info text-blue-600': type === 'info'
-        }">
+      <i class="text-2xl"
+        [ngClass]="{
+        'fa-solid fa-circle-check text-green-600': type === 'success',
+        'fa-solid fa-circle-xmark text-red-600': type === 'error',
+        'fa-solid fa-triangle-exclamation text-yellow-500': type === 'warning',
+        'fa-solid fa-circle-info text-blue-600': type === 'info'}">
       </i>
-
       <div class="flex-1">
         <p class="font-semibold capitalize">
           @if(type=='success'){

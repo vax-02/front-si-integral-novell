@@ -38,6 +38,12 @@ export class ParallelService {
     });
   }
 
+  toggleStatus(id:number): Observable<any>{
+    return this.http.put<any>(`${this.apiUrl.parallels.index}/${id}/toggle-status`,{}, {
+      headers: this.getHeaders(),
+    });
+  }
+
   getParallelsForCareerForNewStudent(id:number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl.parallels.index}/${id}/first-course`, {
       headers: this.getHeaders(),
