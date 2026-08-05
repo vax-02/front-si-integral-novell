@@ -87,7 +87,7 @@
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
                 <app-button icon="fa-solid fa-eye" [variant]="'primary'"
                   title="Ver detalle" (click)="openDetail(student)">
-                </app-button> 
+                </app-button>
               </div>
             </td>
           </tr>
@@ -139,7 +139,7 @@
   </div>
 
   <app-base-modal [isOpen]="modalDetail" title="Historial de pago" subtitle="Historial de mensualidades" size="xl"
-    [loading]="loadingModalData" confirmText="Aceptar" (confirm)="modalDetail = false"
+    [loading]="loadingModalData" [showCancel]="false" confirmText="Aceptar" (confirm)="modalDetail = false"
     (cancel)="modalDetail = false">
     <div class="bg-white rounded-xl p-6 w-full">
   <!-- Información del estudiante -->
@@ -162,7 +162,7 @@
         </p>
 
         <div class="flex flex-wrap gap-2 mt-2">
-          <span 
+          <span
             *ngFor="let career of studentSelected.student_careers"
             class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
             {{ career.career.name }}
@@ -172,16 +172,22 @@
     </div>
 
     <!-- Botón a la derecha -->
-    <app-button 
-      icon="fa-solid fa-credit-card" 
+    <app-button
+      icon="fa-solid fa-credit-card"
       [variant]="'primary'"
-      title="Pagar" 
+      title="Pagar"
       (click)="openPay(studentSelected)">
     </app-button>
   </div>
 </div>
 
     <div class="space-y-6">
+      <!-- Mensaje cuando no hay pagos -->
+      <div *ngIf="pays.length === 0" class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">
+        <i class="fa-solid fa-receipt text-3xl text-slate-300 mb-3"></i>
+        <p class="font-medium">No hay pagos registrados</p>
+      </div>
+
       <div *ngFor="let group of pays" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="flex justify-between items-center px-5 py-3 border-b bg-slate-50">
@@ -224,14 +230,14 @@
                 <tr *ngFor="let pay of group.payments" class="border-t hover:bg-slate-50 transition">
                   <td class="px-4 py-3 text-xs text-center">
                     {{ pay.casher.name }}
-                    {{ pay.casher.first_lastname }}  
+                    {{ pay.casher.first_lastname }}
                     {{ pay.casher.second_lastname }}
                   </td>
                   <td class="px-4 py-3 font-medium text-center">
                     <span class="px-2 py-1 text-2xs rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
-  
+
                       {{ pay.concept.type }}
-  
+
                     </span>
                     <p>
                       {{ pay.description != null ? pay.description : '...' }}
@@ -429,7 +435,7 @@
       <h3 class="text-2xl font-bold text-emerald-600">
         Bs. {{ paymentForm.amount - paymentForm.discount }}
       </h3>
-      
+
     </div>
 
     <i class="fa-solid fa-file-invoice-dollar text-3xl text-emerald-500"></i>
@@ -596,7 +602,7 @@
     </div>
   </app-base-modal>
 
-  
+
   <app-base-modal-confirm
     [isOpen]="modalConfirm"
     title="Anular pago"

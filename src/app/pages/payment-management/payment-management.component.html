@@ -8,9 +8,12 @@
         Configura los conceptos de cobro por carrera
       </p>
     </div>
-    <div class="flex gap-3">
-      <app-button label="Agregar" icon="fas fa-plus" variant="primary" (click)="openRegisterModal()" />
+
+    <div class="self-start sm:self-auto">
+      <app-button icon="fas fa-plus px-2" type="primary" (click)="openRegisterModal()">
+      </app-button>
     </div>
+
   </div>
 
   <div class="grid md:grid-cols-3 gap-6">
@@ -149,11 +152,11 @@
             </select>
           </div>
         </div>
-        
+
         <div class="mt-7" *ngIf="configuracion.tipoConcepto == 'Otro'">
             <app-base-input type="number" text="Defina la descripción del cobro" [(ngModel)]="configuracion.descripcion" (input)="onMontoChange()">
             </app-base-input>
-        </div>   
+        </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -167,7 +170,7 @@
           <div class="mt-7">
             <app-base-input type="number" text="Monto (Bs.)*" [(ngModel)]="configuracion.monto" (input)="onMontoChange()">
             </app-base-input>
-          </div>   
+          </div>
         </div>
         <div *ngIf="configuracion.tipoConcepto === 'MATRICULA'"
           class="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -243,7 +246,7 @@
             <p class="text-slate-500 text-xs">Fecha Fin</p>
             <p class="font-semibold text-slate-800">{{ selectedConcept.end_date | date:'dd/MM/yyyy' }}</p>
           </div>
-     
+
           <div *ngIf="selectedConcept.type === 'MENSUALIDAD'">
             <p class="text-slate-500 text-xs">Semana de Pago</p>
             <p class="font-semibold text-slate-800">

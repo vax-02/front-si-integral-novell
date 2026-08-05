@@ -324,7 +324,7 @@ export class StudentsComponent {
     this.viewModalStudent = true;
   }
 
-  openModalEdit(student: Student) {
+  openModalEdit(student: any) {
     this.selectedStudent = student;
     this.enrollment = {
       name: student.user.name,
@@ -336,9 +336,9 @@ export class StudentsComponent {
       career_id: null,
       parallel_id: 0,
       gestion: new Date().getFullYear().toString(),
-      birth_certificate: false,
-      school_diploma: false,
-      carnet: false,
+      birth_certificate: student.birth_certificate,
+      school_diploma: student.school_diploma,
+      carnet: student.carnet,
     };
 
     this.editModalStudent = true;
