@@ -155,12 +155,12 @@ export class ProgramsComponent {
       next: (response) => {
         this.deletingCareer = false;
         career.status = response.status;
-        this.toast.success(response.message || 'Estado actualizado correctamente.');
+        this.toast.success( 'Estado actualizado correctamente.');
         this.loadCareers();
       },
       error: (error) => {
         this.deletingCareer = false;
-        this.toast.error(error?.error?.message || 'No se pudo cambiar el estado de la carrera.');
+        this.toast.error('No se pudo cambiar el estado de la carrera.');
       },
     });
   }
@@ -411,8 +411,7 @@ export class ProgramsComponent {
       },
       error: (error) => {
         this.importingFile = false;
-        this.toast.error(error?.error?.message || 'No se pudo validar el archivo.');
-        console.log('Error al validar el archivo:', error);
+        this.toast.error('No se pudo validar el archivo.');
       },
     });
   }
@@ -441,10 +440,7 @@ export class ProgramsComponent {
         this.validSubjects = error?.error?.preview?.rows?.filter((row: any) => row.valid).length || 0;
         this.errorSubjects = error?.error?.preview?.rows?.filter((row: any) => !row.valid).length || 0;
         this.importErrors = error?.error?.preview?.errors || [];
-        this.toast.error(error?.error?.message || 'No se pudo guardar el plan de estudios.');
-
-        console.log('---------------')
-        console.log(error)
+        this.toast.error('No se pudo guardar el plan de estudios.');
       },
     });
   }
@@ -457,7 +453,7 @@ export class ProgramsComponent {
     formData.append('file', this.selectedFile as File);
     return formData;
   }
-  
+
   toNumeral(val: number) : string{
     switch(val){
       case 1: return 'Primer'

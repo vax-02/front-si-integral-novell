@@ -124,7 +124,7 @@
               : 'bg-rose-100 text-rose-600'">
                 {{ career.status ? 'Habilitado' : 'Inhabilitado' }}
               </span>
-              
+
             </td>
 
             <td class="px-6 py-4 text-center font-semibold text-blue-600">
@@ -163,7 +163,7 @@
 
   <!--MODALS-->
   <app-base-modal [isOpen]="modalViewProgram" title="Detalle de carrera" subtitle="Plan de estudios" size="xl"
-    confirmText="Aceptar" cancelText="Cerrar" (confirm)="closeViewProgram()" (cancel)="closeViewProgram()"
+    confirmText="Aceptar" [showCancel]="false" (confirm)="closeViewProgram()" (cancel)="closeViewProgram()"
     [loading]="loadingModalDetails">
 
 
