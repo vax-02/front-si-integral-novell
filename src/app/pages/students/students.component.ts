@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ɵpatchComponentDefWithScope } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '../../shared/button/button.component';
@@ -10,6 +10,7 @@ import { CareerForSelect } from '../../interfaces/career';
 import { StudentService } from '../../service/student.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
+import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
 export interface Student {
   id: number;
@@ -40,6 +41,7 @@ interface Card {
     ButtonComponent,
     BaseModalComponent,
     BaseInputComponent,
+    BaseModalConfirmComponent
   ],
   templateUrl: './students.component.html',
   styleUrl: './students.component.css',
@@ -78,7 +80,7 @@ export class StudentsComponent {
     second_lastname: '',
     ci: '',
     email: '',
-    cellphone: '',
+    cellphone: 0,
     parallel_id: 0,
     career_id: null as number | null,
     gestion: new Date().getFullYear().toString(),
@@ -141,12 +143,10 @@ export class StudentsComponent {
           this.currentPage = response.students.current_page;
           this.lastPage = response.students.last_page;
           this.students = response.students.data;
-          console.log(this.students)
         },
         error: (err) => {
           this.loading = false;
           this.toast.error('Error al cargar estudiantes');
-          console.log(err);
         },
       });
   }
@@ -200,7 +200,7 @@ export class StudentsComponent {
       second_lastname: '',
       ci: '',
       email: '',
-      cellphone: '',
+      cellphone: 0,
       career_id: null,
       parallel_id : 0,
       gestion: new Date().getFullYear().toString(),
@@ -220,7 +220,6 @@ export class StudentsComponent {
     this.parallelService.getParallelsForCareerForNewStudent(this.enrollment.career_id).subscribe({
         next: (response) =>{
           this.parallels = response.parallels;
-          console.log(this.parallels);
         },
         error: (err) =>{
 
@@ -246,7 +245,7 @@ export class StudentsComponent {
   saveStudent() {
     if (!this.validarFormulario()) return;
     this.saving = true;
-  
+
     const data = {
       name: this.enrollment.name,
       first_lastname: this.enrollment.first_lastname,
@@ -286,7 +285,6 @@ export class StudentsComponent {
         error: (err) => {
           this.saving = false;
           this.toast.error('Error al inscribir estudiante');
-          console.log(err)
         },
       });
     }
@@ -295,7 +293,7 @@ export class StudentsComponent {
   updateStudent() {
     if (!this.validarFormularioUpdate()) return;
     this.saving = true;
-  
+
     const data = {
       name: this.enrollment.name,
       first_lastname: this.enrollment.first_lastname,
@@ -318,13 +316,11 @@ export class StudentsComponent {
       error: (err) => {
         this.saving = false;
         this.toast.error('Error al actualizar estudiante');
-        console.log(err)
       }
     });
   }
   openModalView(student: Student) {
     this.selectedStudent = student;
-    console.log(this.selectedStudent)
     this.viewModalStudent = true;
   }
 
@@ -336,7 +332,7 @@ export class StudentsComponent {
       second_lastname: student.user.second_lastname,
       ci: student.user.ci.toString(),
       email: student.user.email,
-      cellphone: '', // Si el backend no lo envía en la lista, se puede cargar con getStudent
+      cellphone: this.selectedStudent.user.cellphone,
       career_id: null,
       parallel_id: 0,
       gestion: new Date().getFullYear().toString(),
@@ -344,19 +340,6 @@ export class StudentsComponent {
       school_diploma: false,
       carnet: false,
     };
-    
-    // Cargar datos completos si es necesario
-    this.studentService.getStudent(student.id).subscribe({
-      next: (res) =>{
-        const s = res.student;
-        this.enrollment.cellphone = s.cellphone || '';
-        this.enrollment.birth_certificate = !!s.birth_certificate;
-        this.enrollment.school_diploma = !!s.school_diploma;
-        this.enrollment.carnet = !!s.carnet;
-      },error: (err) =>{
-        console.log(err)
-      }
-    });
 
     this.editModalStudent = true;
   }
@@ -367,7 +350,7 @@ export class StudentsComponent {
     this.optionTab = 'add-career';
     this.newCareer = {
       career_id: null,
-      parallel_id: null 
+      parallel_id: null
     };
     this.changeParallelCareerId = null;
     this.changeParallels = [];
@@ -379,8 +362,7 @@ export class StudentsComponent {
     });
   }
 
-  // ============ Pestaña 1: Adicionar Carrera ============
-
+  // ============ Paralelos de Adicionar Carrera ============
   onNewCareerCareerChange() {
     if (!this.newCareer.career_id) {
       this.newCareerParallels = [];
@@ -392,7 +374,7 @@ export class StudentsComponent {
         this.newCareerParallels = response.parallels;
         this.newCareer.parallel_id = null;
       },
-      error: () => {
+      error: (err) => {
         this.toast.error('Error al cargar paralelos');
       }
     });
@@ -406,6 +388,9 @@ export class StudentsComponent {
   }
 
   addCareer() {
+    if (this.saving) {
+      return;
+    }
     if (!this.newCareer.career_id ) {
       this.toast.error('Seleccione una carrera');
       return;
@@ -419,23 +404,31 @@ export class StudentsComponent {
     const data = {
       student_id: this.selectedStudent?.id,
       career_id: this.newCareer.career_id,
-      parallel_id: this.newCareer.parallel_id 
+      parallel_id: this.newCareer.parallel_id
     };
 
     this.studentService.addCareer(data).subscribe({
-      next: () => {
+      next: (resp) => {
         this.saving = false;
         this.toast.success('Carrera adicionada correctamente');
         this.loadStudents();
+
         // Recargar carreras del estudiante
-        this.studentService.getStudent(this.selectedStudent!.id).subscribe(res => {
-          this.studentCareers = res.student.student_careers || [];
+        this.studentService.getStudent(this.selectedStudent!.id).subscribe( {
+          next: (res) =>{
+            this.studentCareers = res.student.student_careers || [];
+          },error: (err) =>{
+            this.studentCareers = []
+          }
         });
       },
       error: (err) => {
         this.saving = false;
+        if(err.status === 409){
+          this.toast.info('El estudiante ya se encuentra inscrito en esa carrera')
+          return
+        }
         this.toast.error('Error al adicionar carrera');
-        console.log(err)
       }
     });
   }
@@ -468,7 +461,7 @@ export class StudentsComponent {
       return;
     }
     this.saving = true;
-    
+
     // Buscar el student_career_id correspondiente
     const careerEntry = this.studentCareers.find(
       (sc: any) => sc.career_id === this.changeParallelCareerId || sc.career?.id === this.changeParallelCareerId
@@ -485,16 +478,26 @@ export class StudentsComponent {
       },
       error: (err: any) => {
         this.saving = false;
-        this.toast.error(err.error?.error || 'Error al cambiar paralelo');
+        if(err.status == 409){
+          this.toast.info('Ya se encuentra en el paralelo');
+          return
+        }
+        this.toast.error('Error al cambiar paralelo');
       }
     });
   }
 
   // ============ Pestaña 3: Dar de Baja / Readmisión ============
+  modalConfirmBajaReadmision : boolean = false
+  careerSelectId: number = 0;
+  confirmWithdraw(careerId:number){
+    this.careerSelectId = careerId;
+    this.modalConfirmBajaReadmision = true
+  }
 
-  withdraw(careerId: number) {
-    if (!confirm('¿Está seguro de dar de baja al estudiante de esta carrera?')) return;
-    this.studentService.withdrawCareer(this.selectedStudent!.id, careerId).subscribe({
+  withdraw() {
+    this.saving = true
+    this.studentService.withdrawCareer(this.selectedStudent!.id, this.careerSelectId).subscribe({
       next: () => {
         this.toast.success('Baja procesada');
         this.loadStudents();
@@ -502,8 +505,14 @@ export class StudentsComponent {
         this.studentService.getStudent(this.selectedStudent!.id).subscribe(res => {
           this.studentCareers = res.student.student_careers || [];
         });
+      this.saving = false
+      this.modalConfirmBajaReadmision = false
+
       },
-      error: (err) => this.toast.error(err.error?.error || 'Error al procesar baja')
+      error: (err) => {
+      this.saving = false
+        this.toast.error('Error al procesar baja')
+      }
     });
   }
 
