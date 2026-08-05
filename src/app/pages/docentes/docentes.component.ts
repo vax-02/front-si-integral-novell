@@ -214,9 +214,10 @@ export class DocentesComponent implements OnInit {
         this.toast.success(res.message);
         this.loadingToggle = false;
       },
-      error: () => {
+      error: (e) => {
         this.toast.error('Error al cambiar el estado del docente');
         this.loadingToggle = false;
+        console.log(e)
       },
     });
   }
