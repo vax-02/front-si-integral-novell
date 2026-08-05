@@ -1,14 +1,14 @@
 <div class="space-y-8">
   <!-- HEADER -->
-  <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
     <div>
-      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">Gestión de Docentes</h1>
-      <p class="text-sm sm:text-base text-slate-500">Administra la información académica y laboral del personal docente.</p>
+      <h1 class="text-2xl font-bold text-slate-800">Gestión de Docentes</h1>
+      <p class="text-sm text-slate-500">Administra la información académica y laboral del personal docente.</p>
     </div>
-    <div class="w-full sm:w-auto">
-      <app-button icon="fas fa-plus px-2" variant="primary" [fullWidth]="true" (click)="openAddDocente()"></app-button>
-    </div>
+    <app-button icon="fas fa-plus px-2" variant="primary" [fullWidth]="true" (click)="openAddDocente()"></app-button>
   </div>
+
+
   <!-- TARJETAS RESUMEN -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
