@@ -28,7 +28,7 @@
 
   <!-- FILTROS -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-2 gap-4">
-    <select class="input" [(ngModel)]="carreraSeleccionadaId" (ngModelChange)="seleccionarCarrera($event)">
+    <select class="input p-2" [(ngModel)]="carreraSeleccionadaId" (ngModelChange)="seleccionarCarrera($event)">
       <option [ngValue]="null" disabled>Selecciona una carrera</option>
       @for (carrera of carreras(); track carrera.id) {
       <option [ngValue]="carrera.id">{{ carrera.nombre }}</option>

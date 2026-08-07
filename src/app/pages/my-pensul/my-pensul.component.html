@@ -11,12 +11,10 @@
 
   </div>
 
-  <!-- LOADING -->
-  @if (loading()) {
-  <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-12 text-center">
+
+  <div *ngIf="loading()" class="bg-white rounded-xl shadow-sm border border-blue-100 p-12 text-center">
     <p class="text-slate-500">Cargando plan de estudios...</p>
   </div>
-  }
 
   <!-- ERROR -->
   @if (error(); as errMsg) {
@@ -26,10 +24,9 @@
   }
 
   @if (!loading() && !error()) {
-
   <!-- SELECTOR DE CARRERA -->
   <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 grid md:grid-cols-4 gap-4">
-    <select class="input md:col-span-3 focus-blue-500" [(ngModel)]="carreraSeleccionadaId"
+    <select class="input p-2 md:col-span-3 focus-blue-500" [(ngModel)]="carreraSeleccionadaId"
       (ngModelChange)="seleccionarCarrera($event)">
       <option [ngValue]="null" disabled>Selecciona una carrera</option>
       @for (carrera of carreras(); track carrera.id) {
@@ -46,12 +43,12 @@
   <div class="grid md:grid-cols-3 gap-6">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Duración</p>
-      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ carrera.duration }}</h3>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ carrera.duration }} año(s)</h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Tipo de carrera</p>
-      <h3 class="text-2xl font-bold text-orange-600 mt-1">{{ carrera.type }}</h3>
+      <h3 class="text-2xl font-bold text-orange-600 mt-1">{{ carrera.type ? 'Anual':'Semestral'}}</h3>
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">

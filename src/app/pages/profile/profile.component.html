@@ -93,22 +93,6 @@
     </div>
   </div>
 
-  <!-- SOLO SI ES DOCENTE -->
-  <div *ngIf="Roles.DOCENTE.id === user.currentRole.id" class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
-
-    <h3 class="text-lg font-semibold text-slate-700 border-l-4 border-blue-500 pl-3">
-      Información Profesional
-    </h3>
-
-    <div class="grid md:grid-cols-1 gap-6 text-sm">
-
-      <div>
-        <p class="text-slate-500">Título</p>
-        <p class="font-semibold text-slate-800">Ingeniero en Sistemas</p>
-      </div>
-
-    </div>
-  </div>
   <!-- MODAL PARA EDITAR PERFIL -->
   <app-base-modal [isOpen]="editModalStudent" [loading]="loading" title="Editar Perfil" size="md"
     confirmText="Actualizar" cancelText="Cancelar" (confirm)="updateProfile()" (cancel)="cancelEdit()">
