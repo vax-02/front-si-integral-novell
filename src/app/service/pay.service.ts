@@ -48,12 +48,13 @@ export class PayService {
   getReceipt(payId:number): Observable<Blob> {
     return this.http.get(`${this.apiUrl.pays.index}/${payId}/receipt`, {
       responseType: 'blob',
-      headers: this.getHeaders()
+      headers: this.getHeaders(true)
     });
   }
-  private getHeaders() {
+  private getHeaders(pdf = false) {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
-      'Accept': 'application/pdf'
+      ...(pdf ? { 'Accept': 'application/pdf' } : {}),
     });
-  }}
+  }
+}

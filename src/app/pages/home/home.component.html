@@ -1,151 +1,338 @@
-<div class="space-y-8">
+<div>
 
-    <!-- ================= ENCABEZADO ================= -->
-    <div class="flex justify-between items-center">
+  <!-- ═══════════════ CARGA · SKELETON ═══════════════ -->
+  <div *ngIf="loading" class="space-y-8">
 
-        <div>
-            <h1 class="text-3xl font-bold text-slate-800">
-                Panel Administrativo
-            </h1>
-
-            <p class="text-slate-500 mt-1">
-                Resumen general del Instituto
-                <span class="font-bold text-blue-700">NOV</span><span class="font-bold text-red-700">ELL</span>
-            </p>
-        </div>
-
-        <div class="text-right">
-            <p class="text-sm text-slate-500">Gestión Académica</p>
-            <h3 class="font-bold text-blue-700 text-lg">
-                2026
-            </h3>
-        </div>
-
+    <!-- Encabezado -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div class="space-y-2">
+        <div class="h-8 w-64 bg-slate-200 rounded-lg animate-pulse"></div>
+        <div class="h-4 w-80 max-w-full bg-slate-200 rounded animate-pulse"></div>
+      </div>
+      <div class="space-y-2 text-right">
+        <div class="h-4 w-24 bg-slate-200 rounded animate-pulse ml-auto"></div>
+        <div class="h-6 w-14 bg-slate-200 rounded animate-pulse ml-auto"></div>
+      </div>
     </div>
 
+    <!-- Asiento principal -->
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-6 md:p-8">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+        <div class="space-y-3">
+          <div class="h-4 w-40 bg-slate-200 rounded animate-pulse"></div>
+          <div class="h-10 w-72 max-w-full bg-slate-200 rounded-lg animate-pulse"></div>
+          <div class="h-4 w-56 bg-slate-200 rounded animate-pulse"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-8 md:gap-12">
+          <div class="space-y-2">
+            <div class="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
+            <div class="h-7 w-28 bg-slate-200 rounded-lg animate-pulse"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
+            <div class="h-7 w-20 bg-slate-200 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- ================= KPIs ================= -->
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div *ngFor="let i of [1, 2, 3, 4]"
+        class="bg-white rounded-xl shadow-sm border p-6 space-y-3">
+        <div class="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
+        <div class="h-9 w-16 bg-slate-200 rounded-lg animate-pulse"></div>
+        <div class="h-3 w-32 bg-slate-200 rounded animate-pulse"></div>
+      </div>
+    </div>
 
+    <!-- Finanzas -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+      <div class="flex items-baseline justify-between mb-6">
+        <div class="h-5 w-40 bg-slate-200 rounded animate-pulse"></div>
+        <div class="h-3 w-20 bg-slate-200 rounded animate-pulse"></div>
+      </div>
+      <div class="h-72 bg-slate-100 rounded-xl animate-pulse"></div>
+    </div>
+
+    <!-- Académico -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <p class="text-slate-500 text-sm">
-                Estudiantes Activos
-            </p>
-
-            <h2 class="text-4xl font-bold text-blue-700 mt-2">
-                {{ totalStudents }}
-            </h2>
-
-            <p class="text-green-600 text-sm mt-3">
-                Estudiantes registrados
-            </p>
+      <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+        <div class="h-5 w-44 bg-slate-200 rounded animate-pulse mb-6"></div>
+        <div class="h-72 bg-slate-100 rounded-xl animate-pulse"></div>
+      </div>
+      <div class="xl:col-span-1 bg-white rounded-xl shadow-sm border border-rose-100 p-6">
+        <div class="h-5 w-48 bg-slate-200 rounded animate-pulse mb-6"></div>
+        <div class="space-y-4">
+          <div *ngFor="let i of [1, 2, 3, 4]" class="space-y-2">
+            <div class="flex justify-between gap-4">
+              <div class="h-3.5 w-32 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-3.5 w-20 bg-slate-200 rounded animate-pulse"></div>
+            </div>
+            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-2/3 bg-slate-200 rounded-full animate-pulse"></div>
+            </div>
+          </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-
-            <p class="text-slate-500 text-sm">
-                Docentes Activos
-            </p>
-
-            <h2 class="text-4xl font-bold text-blue-700 mt-2">
-                {{ totalDocentes }}
-            </h2>
-
-            <p class="text-green-600 text-sm mt-3">
-                Docentes activos
-            </p>
-
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-
-            <p class="text-slate-500 text-sm">
-                Ingresos del Mes
-            </p>
-
-            <h2 class="text-4xl font-bold text-emerald-600 mt-2">
-                Bs. {{ monthlyIncome | number }}
-            </h2>
-
-
-        </div>
+      </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl shadow-sm border p-5">
-            <p class="text-slate-500 text-sm">
-                Carreras
-            </p>
-            <h2 class="text-3xl font-bold mt-2">
-                {{ totalCareers }}
-            </h2>
+    <!-- Ocupación + Actividad -->
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+      <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+        <div class="h-5 w-44 bg-slate-200 rounded animate-pulse mb-6"></div>
+        <div class="space-y-4">
+          <div *ngFor="let i of [1, 2, 3]" class="space-y-2">
+            <div class="flex justify-between gap-4">
+              <div class="h-3.5 w-28 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-3.5 w-12 bg-slate-200 rounded animate-pulse"></div>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full w-1/2 bg-slate-200 rounded-full animate-pulse"></div>
+            </div>
+          </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-sm border p-5">
-            <p class="text-slate-500 text-sm">
-                Materias
-            </p>
-            <h2 class="text-3xl font-bold mt-2">
-                {{ totalSubjects }}
-            </h2>
+      </div>
+      <div class="xl:col-span-3 bg-white rounded-xl shadow-sm border p-6">
+        <div class="flex items-baseline justify-between mb-4">
+          <div class="h-5 w-44 bg-slate-200 rounded animate-pulse"></div>
+          <div class="h-3 w-40 bg-slate-200 rounded animate-pulse"></div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-sm border p-5">
-            <p class="text-slate-500 text-sm">
-                Paralelos
-            </p>
-            <h2 class="text-3xl font-bold mt-2">
-                {{ totalParallels }}
-            </h2>
+        <div class="divide-y divide-slate-100">
+          <div *ngFor="let i of [1, 2, 3, 4]" class="flex items-center gap-4 py-3">
+            <div class="w-10 h-10 rounded-full bg-slate-200 animate-pulse flex-shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-3.5 w-44 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-3 w-28 bg-slate-200 rounded animate-pulse"></div>
+            </div>
+            <div class="space-y-2 text-right">
+              <div class="h-3.5 w-20 bg-slate-200 rounded animate-pulse ml-auto"></div>
+              <div class="h-3 w-16 bg-slate-200 rounded animate-pulse ml-auto"></div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
+  </div>
 
-    <!-- ================= GRAFICOS ================= -->
+  <!-- ═══════════════ ERROR ═══════════════ -->
+  <div *ngIf="!loading && error"
+    class="bg-white rounded-xl shadow-sm border border-rose-200 p-12 text-center">
+    <p class="text-rose-600 font-semibold">No se pudo cargar el registro</p>
+    <p class="text-sm text-slate-500 mt-2">
+      Verifica que el servicio esté activo e inténtalo de nuevo.
+    </p>
+    <button (click)="loadDashboardData()"
+      class="mt-4 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors">
+      Reintentar
+    </button>
+  </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <!-- ═══════════════ CONTENIDO ═══════════════ -->
+  <ng-container *ngIf="!loading && !error">
+    <div class="space-y-8 fade-up">
+
+      <!-- ENCABEZADO -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h1 class="text-3xl font-bold text-slate-800">
+            Panel Administrativo
+          </h1>
+          <p class="text-slate-500 mt-1">
+            Resumen general del Instituto
+            <span class="font-bold text-blue-700">NOV</span><span class="font-bold text-red-700">ELL</span>
+            · {{ institution?.name || 'Instituto NOVELL' }}
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-slate-500">Gestión Académica</p>
+          <h3 class="font-bold text-blue-700 text-lg">
+            {{ gestion }}
+          </h3>
+        </div>
+      </div>
+
+      <!-- ASIENTO PRINCIPAL: INGRESOS DEL AÑO -->
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
+            <p class="text-sm text-slate-500">Ingresos del año · Neto</p>
+            <h2 class="text-4xl md:text-5xl font-bold text-blue-700 mt-2">
+              Bs. {{ incomeYear | number }}
+            </h2>
+            <p class="text-sm text-slate-400 mt-2">
+              Matrículas, mensualidades y otros conceptos · Gestión {{ gestion }}
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-8 md:gap-12">
+            <div>
+              <p class="text-sm text-slate-500">Ingresos del mes</p>
+              <p class="text-2xl font-bold text-emerald-600 mt-1">Bs. {{ incomeMonth | number }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Pagos del año</p>
+              <p class="text-2xl font-bold text-blue-700 mt-1">{{ paysYear | number }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <p class="text-slate-500 text-sm">Estudiantes Activos</p>
+          <h2 class="text-4xl font-bold text-blue-700 mt-2">{{ totalStudents }}</h2>
+          <p class="text-green-600 text-sm mt-3">{{ assignedStudents }} con cupo asignado</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <p class="text-slate-500 text-sm">Docentes Activos</p>
+          <h2 class="text-4xl font-bold text-blue-700 mt-2">{{ totalDocentes }}</h2>
+          <p class="text-green-600 text-sm mt-3">Planta académica</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <p class="text-slate-500 text-sm">Ocupación de Cupos</p>
+          <h2 class="text-4xl font-bold mt-2" [class.text-rose-600]="occupancyRate >= 100"
+            [class.text-blue-700]="occupancyRate < 100">
+            {{ occupancyRate }}<span class="text-xl">%</span>
+          </h2>
+          <p class="text-slate-500 text-sm mt-3">{{ assignedStudents }} / {{ totalCapacity }} cupos</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <p class="text-slate-500 text-sm">Ingresos del Mes</p>
+          <h2 class="text-4xl font-bold text-emerald-600 mt-2">Bs. {{ incomeMonth | number }}</h2>
+          <p class="text-slate-500 text-sm mt-3">hoy: Bs. {{ incomeToday | number }} · {{ paysToday }} pagos</p>
+        </div>
+      </div>
+
+      <!-- GRÁFICOS · FINANZAS -->
+      <div class="bg-white rounded-xl shadow-sm border p-6">
+        <div class="flex items-baseline justify-between mb-6">
+          <h3 class="font-semibold">Ingresos por mes</h3>
+          <span class="text-xs text-slate-400">Ene — {{ monthLabels[monthLabels.length - 1] }}</span>
+        </div>
+        <div class="h-72 w-full" *ngIf="monthLabels.length > 0">
+          <app-chart
+            [series]="incomeSeries"
+            [categories]="monthLabels"
+            chartType="area"
+            [colors]="['#2563eb']"
+            [light]="true"
+          ></app-chart>
+        </div>
+        <p *ngIf="monthLabels.length === 0" class="text-sm text-slate-400 text-center py-16">
+          Sin ingresos registrados.
+        </p>
+      </div>
+
+      <!-- GRÁFICOS · ACADÉMICO -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
         <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border p-6">
-
-            <h3 class="font-semibold mb-6">
-                Ingresos del año
-            </h3>
-
-            <div class="h-72 w-full">
-                <app-chart
-                    [series]="chartSeries"
-                    [categories]="chartCategories"
-                    chartType="area"
-                    [colors]="['#2563eb']"
-                ></app-chart>
-            </div>
-
+          <div class="flex items-baseline justify-between mb-6">
+            <h3 class="font-semibold">Estadísticas por carrera</h3>
+            <span class="text-xs text-slate-400">Activos vs. inactivos</span>
+          </div>
+          <div class="h-72 w-full" *ngIf="careerLabels.length > 0">
+            <app-chart
+              [series]="careerSeries"
+              [categories]="careerLabels"
+              chartType="bar"
+              [colors]="['#2563eb', '#dc2626']"
+              formatter="number"
+              [showLegend]="true"
+              [light]="true"
+            ></app-chart>
+          </div>
+          <p *ngIf="careerLabels.length === 0" class="text-sm text-slate-400 text-center py-16">
+            Sin matrículas registradas.
+          </p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-
-            <h3 class="font-semibold mb-6">
-                Mensualidades
-            </h3>
-
-            <div class="space-y-5">
-
-                <div class="flex justify-between">
-                    <span>Hoy</span>
-                    <strong>{{ paysToday }}</strong>
-                </div>
-
-                <div class="flex justify-between">
-                    <span>Esta semana</span>
-                    <strong>{{ paysThisWeek }}</strong>
-                </div>
-
-                <div class="flex justify-between">
-                    <span>Este mes</span>
-                    <strong>{{ paysThisMonth }}</strong>
-                </div>
+        <div class="xl:col-span-1 bg-white rounded-xl shadow-sm border border-rose-100 p-6">
+          <h3 class="font-semibold mb-6">Materias con mayor reprobación</h3>
+          <div class="space-y-5" *ngIf="subjectFailure.length > 0">
+            <div *ngFor="let s of subjectFailure">
+              <div class="flex justify-between items-center gap-4 mb-1.5">
+                <p class="text-sm font-medium text-slate-700 truncate">{{ s.name }}</p>
+                <p class="text-right flex-shrink-0">
+                  <span class="font-bold text-rose-600">{{ s.failure_rate }}%</span>
+                  <span class="text-xs text-slate-400 ml-2">{{ s.failed_students }}/{{ s.total_students }}</span>
+                </p>
+              </div>
+              <div class="h-1.5 bg-rose-100 rounded-full overflow-hidden">
+                <div class="h-full bg-rose-500" [style.width.%]="s.failure_rate"></div>
+              </div>
             </div>
+          </div>
+          <p *ngIf="subjectFailure.length === 0" class="text-sm text-slate-400 text-center py-16">
+            Sin calificaciones publicadas.
+          </p>
         </div>
+      </div>
+
+      <!-- OCUPACIÓN + ACTIVIDAD -->
+      <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+
+        <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+          <h3 class="font-semibold mb-6">Ocupación de paralelos</h3>
+          <div class="space-y-5" *ngIf="busiestParallels.length > 0">
+            <div *ngFor="let p of busiestParallels">
+              <div class="flex justify-between items-center gap-4 mb-1.5">
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide truncate">{{ p.career_name }}</p>
+                  <div class="flex items-center gap-2 min-w-0">
+                    <p class="text-sm font-medium text-slate-700 truncate">{{ p.course_name }}</p>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700 flex-shrink-0">
+                      {{ p.paralelo }}
+                    </span>
+                    <span class="text-xs text-slate-400 flex-shrink-0">{{ p.turno }}</span>
+                  </div>
+                </div>
+                <span class="text-xs font-semibold text-slate-600 flex-shrink-0">
+                  {{ p.students_count }}/{{ p.limit }}
+                </span>
+              </div>
+              <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-600" [class.bg-rose-500]="p.occupancy >= 100"
+                  [style.width.%]="p.occupancy"></div>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="busiestParallels.length === 0" class="text-sm text-slate-400 text-center py-16">
+            Sin paralelos registrados.
+          </p>
+        </div>
+
+        <div class="xl:col-span-3 bg-white rounded-xl shadow-sm border p-6">
+          <div class="flex items-baseline justify-between mb-4">
+            <h3 class="font-semibold">Actividad reciente de pagos</h3>
+            <span class="text-xs text-slate-400">hoy {{ paysToday }} · semana {{ paysWeek }} · mes {{ paysMonth }}</span>
+          </div>
+          <div class="divide-y divide-slate-100" *ngIf="recentPayActivity.length > 0">
+            <div class="flex items-center gap-4 py-3" *ngFor="let a of recentPayActivity">
+              <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold flex-shrink-0">
+                {{ initials(a.student) }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-slate-700 truncate">{{ a.student }}</p>
+                <p class="text-xs text-slate-400 truncate">{{ a.concept }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="text-sm font-bold text-emerald-600">Bs. {{ a.amount | number }}</p>
+                <p class="text-xs text-slate-400">{{ a.time }}</p>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="recentPayActivity.length === 0" class="text-sm text-slate-400 text-center py-16">
+            Aún no hay pagos registrados.
+          </p>
+        </div>
+      </div>
+
     </div>
+  </ng-container>
 </div>
