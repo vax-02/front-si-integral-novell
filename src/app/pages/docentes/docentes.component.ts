@@ -260,10 +260,8 @@ export class DocentesComponent implements OnInit {
       },
       error: (err) => {
         this.loadingModal = false;
-        const errors = err?.error?.errors;
-        if (errors?.ci) this.toast.error('Ese C.I. ya está registrado');
-        if (errors?.email) this.toast.error('Ese correo ya está registrado');
-        this.toast.error(
+        this.showValidationError(
+          err,
           isEdit
             ? 'Error al actualizar el docente'
             : 'Error al crear el docente',
@@ -276,6 +274,25 @@ export class DocentesComponent implements OnInit {
     this.modalAddDocente = false;
     this.editingDocenteId = null;
     this.resetForm();
+  }
+
+  private showValidationError(err: any, fallback: string): void {
+    const errors = err?.error?.errors;
+    if (errors) {
+      const messages: string[] = [];
+      if (errors.ci) messages.push(errors.ci[0] || 'El C.I. ya está registrado');
+      if (errors.email) messages.push(errors.email[0] || 'El correo electrónico ya está registrado');
+      if (messages.length) {
+        this.toast.error(messages.join('. '));
+        return;
+      }
+      const first = Object.values(errors)[0] as string[];
+      if (first?.[0]) {
+        this.toast.error(first[0]);
+        return;
+      }
+    }
+    this.toast.error(fallback);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

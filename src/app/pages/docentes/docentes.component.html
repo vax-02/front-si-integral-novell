@@ -112,14 +112,37 @@
           </tr>
 
           <!-- Loading -->
-          <tr *ngIf="loading">
-            <td colspan="5" class="p-6 text-center">
-              <div class="flex items-center justify-center gap-2 text-slate-600">
-                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
-                <span>Cargando docentes...</span>
-              </div>
-            </td>
-          </tr>
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
+            <tr *ngIf="loading">
+              <td class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse"></div>
+                  <div class="space-y-2">
+                    <div class="h-3.5 w-40 bg-slate-200 rounded animate-pulse"></div>
+                    <div class="h-3 w-32 bg-slate-100 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="h-3.5 w-16 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="h-3.5 w-20 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="flex justify-center">
+                  <div class="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex gap-2 justify-center">
+                  <div class="h-8 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                  <div class="h-8 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                  <div class="h-8 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
 
           <!-- Sin resultados -->
           <tr *ngIf="!loading && docentes.length === 0">
@@ -347,12 +370,37 @@
       <!-- Materias asignadas -->
       <div>
         <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">Materias asignadas</h3>
-        <div *ngIf="docenteSeleccionado.subjects?.length; else noSubjects" class="flex flex-wrap gap-2">
-          <span *ngFor="let s of docenteSeleccionado.subjects"
-            class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-            {{ s.name }} <span class="text-blue-400">({{ s.career?.name }})</span>
-          </span>
+
+        <div *ngIf="docenteSeleccionado.subjects?.length; else noSubjects" class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+              <tr>
+                <th class="p-3 text-left">Materia</th>
+                <th class="p-3 text-left">Carrera</th>
+                <th class="p-3 text-center">Curso</th>
+                <th class="p-3 text-center">Paralelo</th>
+                <th class="p-3 text-center">Turno</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr *ngFor="let s of docenteSeleccionado.subjects" class="hover:bg-slate-50 transition">
+                <td class="p-3 font-semibold text-slate-700">{{ s.name }}</td>
+                <td class="p-3 text-slate-600">{{ s.career?.name ?? s.parallel?.career_name ?? '—' }}</td>
+                <td class="p-3 text-center text-slate-600">
+                  {{ s.parallel?.course_name ?? '—' }}
+                  <span *ngIf="s.parallel?.course_level" class="text-xs text-slate-400">({{ s.parallel?.course_level }})</span>
+                </td>
+                <td class="p-3 text-center">
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                    {{ s.parallel?.paralelo ?? '—' }}
+                  </span>
+                </td>
+                <td class="p-3 text-center text-slate-600">{{ s.parallel?.turno ?? '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
         <ng-template #noSubjects>
           <p class="text-slate-400 text-sm">Sin materias asignadas.</p>
         </ng-template>
