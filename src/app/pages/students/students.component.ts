@@ -70,8 +70,13 @@ export class StudentsComponent {
   viewModalStudent = false;
   editModalStudent = false;
   optionModalStudent = false;
+  parallelHistoryModal = false;
+  subjectHistoryModal = false;
     careersForSelect: CareerForSelect[] = [];
   selectedStudent: any | null = null;
+  parallelHistory: any[] = [];
+  subjectHistory: any[] = [];
+  subjectHistoryGroups: any[] = [];
 
   // Propiedades del formulario de inscripción/edición
   enrollment = {
@@ -102,6 +107,7 @@ export class StudentsComponent {
   changeParallelCareerId: number | null = null;
   changeParallels: any[] = [];
   changeParallelId: number | null = null;
+  changeParallelCurrent: any = null;
   studentCareers: any[] = [];
 
   // Conceptos de pago cargados desde el backend (solo informativo)
@@ -271,7 +277,7 @@ export class StudentsComponent {
         },
         error: (err) => {
           this.saving = false;
-          this.toast.error('Error al actualizar estudiante');
+          this.showValidationError(err, 'Error al actualizar estudiante');
         }
       });
     } else {
@@ -284,10 +290,29 @@ export class StudentsComponent {
         },
         error: (err) => {
           this.saving = false;
-          this.toast.error('Error al inscribir estudiante');
+          this.showValidationError(err, 'Error al inscribir estudiante');
         },
       });
     }
+  }
+
+  private showValidationError(err: any, fallback: string): void {
+    const errors = err?.error?.errors;
+    if (errors) {
+      const messages: string[] = [];
+      if (errors.ci) messages.push(errors.ci[0] || 'El C.I. ya está registrado');
+      if (errors.email) messages.push(errors.email[0] || 'El correo electrónico ya está registrado');
+      if (messages.length) {
+        this.toast.error(messages.join('. '));
+        return;
+      }
+      const first = Object.values(errors)[0] as string[];
+      if (first?.[0]) {
+        this.toast.error(first[0]);
+        return;
+      }
+    }
+    this.toast.error(fallback);
   }
 
   updateStudent() {
@@ -315,13 +340,72 @@ export class StudentsComponent {
       },
       error: (err) => {
         this.saving = false;
-        this.toast.error('Error al actualizar estudiante');
+        this.showValidationError(err, 'Error al actualizar estudiante');
       }
     });
   }
   openModalView(student: Student) {
     this.selectedStudent = student;
+    this.parallelHistory = [];
+    this.subjectHistory = [];
     this.viewModalStudent = true;
+    this.studentService.getStudent(student.id).subscribe({
+      next: (res) => {
+        this.selectedStudent = res.student || student;
+        this.parallelHistory = (res.parallel_history || []).map((group: any) => ({
+          career_id: group.career_id,
+          career_name: group.career_name,
+          courses: (group.courses || []).map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            level: c.level,
+            changes: (group.changes || []).filter((ch: any) => Number(ch.level) === Number(c.level)),
+          })),
+        }));
+        this.subjectHistory = res.subject_history || [];
+
+        const careers = res.student?.student_careers || [];
+        this.subjectHistoryGroups = careers.map((sc: any) => {
+          const careerId = sc.career_id ?? sc.career?.id;
+          const subjects = (this.subjectHistory || []).filter((s: any) => s.career_id === careerId);
+          return {
+            career_id: careerId,
+            career_name: sc.career?.name || '',
+            subjects,
+            registered: subjects.filter((s: any) => s.status === 'Registrado').length,
+            approved: subjects.filter((s: any) => s.status === 'Aprobado').length,
+            missing: subjects.filter((s: any) => s.status === 'Falta').length,
+          };
+        });
+      },
+      error: () => {
+        this.toast.error('Error al cargar el detalle del estudiante');
+      }
+    });
+  }
+
+  ordinalLabel(n: number): string {
+    const ordinals = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo'];
+    return ordinals[n - 1] || `${n}º`;
+  }
+
+  get totalParallelChanges(): number {
+    return this.parallelHistory.reduce(
+      (acc: number, g: any) => acc + g.courses.reduce((a: number, c: any) => a + c.changes.length, 0),
+      0
+    );
+  }
+
+  get registeredSubjects(): number {
+    return this.subjectHistoryGroups.reduce((acc: number, g: any) => acc + g.registered, 0);
+  }
+
+  get approvedSubjects(): number {
+    return this.subjectHistoryGroups.reduce((acc: number, g: any) => acc + g.approved, 0);
+  }
+
+  get missingSubjects(): number {
+    return this.subjectHistoryGroups.reduce((acc: number, g: any) => acc + g.missing, 0);
   }
 
   openModalEdit(student: any) {
@@ -355,6 +439,7 @@ export class StudentsComponent {
     this.changeParallelCareerId = null;
     this.changeParallels = [];
     this.changeParallelId = null;
+    this.changeParallelCurrent = null;
 
     // Cargar las carreras del estudiante para el modal
     this.studentService.getStudent(student.id).subscribe(res => {
@@ -438,9 +523,15 @@ export class StudentsComponent {
   onCareerForParallelChange() {
     if (!this.changeParallelCareerId) {
       this.changeParallels = [];
+      this.changeParallelCurrent = null;
       return;
     }
-    this.parallelService.getParallelsForCareerForNewStudent(this.changeParallelCareerId).subscribe({
+    const careerEntry = this.studentCareers.find(
+      (sc: any) => (sc.career?.id || sc.career_id) === this.changeParallelCareerId
+    );
+    this.changeParallelCurrent = careerEntry?.current_parallel || null;
+    const level = this.changeParallelCurrent?.level || 1;
+    this.parallelService.getParallelsForCareerAtLevel(this.changeParallelCareerId, level).subscribe({
       next: (response) => {
         this.changeParallels = response.parallels;
         this.changeParallelId = null;

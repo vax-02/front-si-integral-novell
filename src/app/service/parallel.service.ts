@@ -49,6 +49,12 @@ export class ParallelService {
       headers: this.getHeaders(),
     });
   }
+
+  getParallelsForCareerAtLevel(id: number, level: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl.parallels.index}/${id}/first-course?level=${level}`, {
+      headers: this.getHeaders(),
+    });
+  }
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

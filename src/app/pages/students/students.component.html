@@ -77,7 +77,7 @@
             </td>
             <td class="p-4 text-center">{{ student.user.ci }}</td>
             <td class="p-4 text-center">
-              <span *ngFor="let career of student.student_careers" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
+              <span *ngFor="let career of student.student_careers" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600 uppercase">
                 {{ career.career.name }}
               </span>
             </td>
@@ -110,14 +110,39 @@
             </td>
           </tr>
 
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
           <tr *ngIf="loading">
-            <td colspan="5" class="p-4 text-center">
-              <div class="flex items-center justify-center gap-2 text-slate-600">
-                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
-                <span>Cargando estudiantes...</span>
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse"></div>
+                <div class="space-y-2">
+                  <div class="h-3.5 w-40 bg-slate-200 rounded animate-pulse"></div>
+                  <div class="h-3 w-32 bg-slate-100 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </td>
+            <td class="p-4">
+              <div class="h-3.5 w-16 bg-slate-200 rounded animate-pulse mx-auto"></div>
+            </td>
+            <td class="p-4">
+              <div class="flex justify-center">
+                <div class="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
+              </div>
+            </td>
+            <td class="p-4">
+              <div class="flex justify-center">
+                <div class="h-6 w-20 bg-slate-200 rounded-full animate-pulse"></div>
+              </div>
+            </td>
+            <td class="p-4">
+              <div class="flex gap-2 justify-center">
+                <div class="h-8 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                <div class="h-8 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                <div class="h-8 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
               </div>
             </td>
           </tr>
+          </ng-container>
 
           <tr *ngIf="!loading && students.length === 0">
             <td colspan="5" class="p-6 text-center text-slate-400 text-sm">
@@ -159,7 +184,7 @@
 
   <!-- MODAL: INSCRIBIR -->
   <app-base-modal [isOpen]="registerModalStudent" title="Inscribir estudiante" size="lg" confirmText="Registrar"
-    cancelText="Cancelar" (confirm)="saveStudent()" (cancel)="registerModalStudent = false">
+    cancelText="Cancelar" [loading]="saving" (confirm)="saveStudent()" (cancel)="registerModalStudent = false">
     <div class="space-y-6">
       <div>
         <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
@@ -195,7 +220,7 @@
             class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
             [(ngModel)]="enrollment.career_id" (change)="onCareerChange()">
             <option [ngValue]="null">Seleccionar Carrera</option>
-            <option *ngFor="let career of careersForSelect" [ngValue]="career.id">
+            <option *ngFor="let career of careersForSelect" [ngValue]="career.id" class="uppercase">
               {{ career.name }}
             </option>
           </select>
@@ -245,17 +270,31 @@
   <app-base-modal [isOpen]="viewModalStudent" title="Detalle de estudiante" subtitle="Informaci&oacute;n general" size="lg"
     confirmText="Aceptar" (confirm)="viewModalStudent = false" [showCancel]="false" >
     <div class="p-3 space-y-4" *ngIf="selectedStudent">
-      <div class="flex items-center gap-4">
-        <div
-          class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold uppercase">
-          {{ selectedStudent.user.name.charAt(0) }}{{ selectedStudent.user.first_lastname.charAt(0) }}
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold uppercase">
+            {{ selectedStudent.user.name.charAt(0) }}{{ selectedStudent.user.first_lastname.charAt(0) }}
+          </div>
+
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">{{ selectedStudent.user.name }} {{ selectedStudent.user.first_lastname }} {{ selectedStudent.user.second_lastname }}</h2>
+            <p class="text-sm text-slate-500">C.I. {{ selectedStudent.user.ci }}</p>
+          </div>
         </div>
 
-        <div>
-          <h2 class="text-xl font-bold text-slate-800">{{ selectedStudent.user.name }} {{ selectedStudent.user.first_lastname }} {{ selectedStudent.user.second_lastname }}</h2>
-          <p class="text-sm text-slate-500">C.I. {{ selectedStudent.user.ci }}</p>
+        <div class="flex flex-col gap-2">
+          <button (click)="parallelHistoryModal = true"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+            <i class="fas fa-arrows-alt-h"></i>
+            Cambios de paralelo
+          </button>
+          <button (click)="subjectHistoryModal = true"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition">
+            <i class="fas fa-book-open"></i>
+            Historial académico
+          </button>
         </div>
-
       </div>
 
       <div>
@@ -285,7 +324,7 @@
           <div *ngFor="let career of selectedStudent.student_careers" class="bg-slate-50 p-3 rounded-xl flex justify-between items-center">
             <div>
               <p class="text-slate-500">Carrera</p>
-              <p class="font-semibold text-slate-800">{{ career.career.name }}</p>
+              <p class="font-semibold text-slate-800 uppercase">{{ career.career.name }}</p>
             </div>
             <span class="px-2 py-1 rounded text-xs" [ngClass]="career.status === 'Activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
               {{ career.status }}
@@ -325,6 +364,134 @@
         </div>
       </div>
 
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: SEGUIMIENTO DE CAMBIOS DE PARALELO -->
+  <app-base-modal [isOpen]="parallelHistoryModal" title="Cambios de paralelo" subtitle="Seguimiento de cambios de paralelo por carrera y nivel"
+    size="lg" [showFooter]="false" (cancel)="parallelHistoryModal = false">
+    <div class="p-3">
+      <p class="text-sm text-slate-500 mb-4">El estudiante ha tenido {{ totalParallelChanges }}
+        {{ totalParallelChanges === 1 ? 'cambio de paralelo' : 'cambios de paralelo' }}
+        en {{ parallelHistory.length }}
+        {{ parallelHistory.length === 1 ? 'carrera' : 'carreras' }}.</p>
+
+      <div *ngIf="parallelHistory.length; else noHistory" class="space-y-6">
+        <div *ngFor="let group of parallelHistory">
+          <h4 class="font-bold text-slate-800 uppercase mb-4 flex items-center gap-2">
+            <i class="fas fa-graduation-cap text-blue-600"></i>
+            {{ group.career_name }}
+          </h4>
+
+          <div class="space-y-5">
+            <div *ngFor="let course of group.courses; let first = first; let last = last"
+              class="relative pl-8">
+              <span class="absolute left-[3px] top-1 bottom-[-20px] w-0.5 bg-blue-200"
+                [ngClass]="{ 'opacity-0': last }"></span>
+              <span class="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-blue-500 border-4 border-white shadow -translate-x-1/2"></span>
+
+              <div>
+                <p class="font-semibold text-slate-800 uppercase">
+                  {{ course.name }}
+                  <span class="text-xs font-normal text-slate-400">- Nivel {{ course.level }}</span>
+                </p>
+
+                <div class="mt-2 space-y-2">
+                  <div *ngFor="let ph of course.changes"
+                    class="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <div class="flex items-center gap-3">
+                      <div>
+                        <p class="font-semibold text-slate-800 uppercase">
+                          Paralelo {{ ph.paralelo }} <span class="text-slate-400 font-normal">- {{ ph.turno }}</span>
+                        </p>
+                        <p class="text-xs text-slate-400">{{ ph.changed_at }}</p>
+                      </div>
+                    </div>
+                    <span *ngIf="ph.active" class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700 shrink-0">
+                      Actual
+                    </span>
+                    <span *ngIf="!ph.active" class="px-2 py-1 rounded text-xs font-semibold bg-slate-200 text-slate-500 shrink-0">
+                      Anterior
+                    </span>
+                  </div>
+
+                  <p *ngIf="!course.changes.length" class="text-xs text-slate-400 italic pl-2">
+                    Sin cambios de paralelo en este nivel.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noHistory>
+        <p class="text-sm text-slate-400 text-center py-4">El estudiante no está inscrito en ninguna carrera.</p>
+      </ng-template>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: HISTORIAL ACADEMICO -->
+  <app-base-modal [isOpen]="subjectHistoryModal" title="Historial académico" subtitle="Materias del estudiante en todos sus estados"
+    size="lg" [showFooter]="false" (cancel)="subjectHistoryModal = false">
+    <div class="p-3">
+      <p class="text-sm text-slate-500 mb-4">Historial académico por carrera del estudiante.</p>
+
+      <div *ngIf="subjectHistoryGroups.length; else noSubjects" class="space-y-6">
+        <div *ngFor="let group of subjectHistoryGroups">
+          <h4 class="font-bold text-slate-800 uppercase mb-2 flex items-center gap-2">
+            <i class="fas fa-graduation-cap text-indigo-600"></i>
+            {{ group.career_name }}
+          </h4>
+
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+              Registradas: {{ group.registered }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+              Aprobadas: {{ group.approved }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+              Falta: {{ group.missing }}
+            </span>
+          </div>
+
+          <div *ngIf="group.subjects.length"
+            class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="grid grid-cols-[1fr_6rem_7rem] gap-3 px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
+              <span>Materia</span>
+              <span class="text-center">Calificación</span>
+              <span class="text-right">Estado</span>
+            </div>
+            <div class="divide-y divide-slate-100">
+              <div *ngFor="let sh of group.subjects" class="grid grid-cols-[1fr_6rem_7rem] gap-3 px-4 py-3 items-center">
+                <div>
+                  <p class="font-semibold text-slate-800 text-sm uppercase">{{ sh.sigla }} - {{ sh.name }}</p>
+                  <p class="text-xs text-slate-400 uppercase">Nivel {{ sh.level }}</p>
+                </div>
+                <div class="text-center text-sm text-slate-300"></div>
+                <div class="text-right">
+                  <span [ngClass]="{
+                      'bg-blue-100 text-blue-700': sh.status === 'Registrado',
+                      'bg-green-100 text-green-700': sh.status === 'Aprobado',
+                      'bg-amber-100 text-amber-700': sh.status === 'Falta'
+                    }" class="px-3 py-1 rounded-full text-xs font-semibold">
+                    {{ sh.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p *ngIf="!group.subjects.length" class="text-xs text-slate-400 italic">
+            Sin materias registradas en esta carrera.
+          </p>
+        </div>
+      </div>
+
+      <ng-template #noSubjects>
+        <p class="text-sm text-slate-400 text-center py-4">El estudiante no está inscrito en ninguna carrera.</p>
+      </ng-template>
     </div>
   </app-base-modal>
 
@@ -415,7 +582,8 @@
               <option
                 *ngFor="let career of careersForSelect"
                 [ngValue]="career.id"
-                [disabled]="isStudentInCareer(career.id)">
+                [disabled]="isStudentInCareer(career.id)"
+                class="uppercase">
 
                 {{ career.name }} {{ isStudentInCareer(career.id) ? '(Ya inscrito)' : '' }}
               </option>
@@ -453,6 +621,17 @@
           Seleccione una carrera del estudiante y luego el nuevo paralelo.
         </p>
 
+        <div *ngIf="changeParallelCurrent" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Paralelo actual</p>
+            <p class="font-semibold text-slate-800">
+              <span class="uppercase">{{ changeParallelCurrent.paralelo }}</span> - {{ changeParallelCurrent.turno }}
+              <span class="text-xs text-slate-400 font-normal">({{ changeParallelCurrent.course_name }})</span>
+            </p>
+          </div>
+          <i class="fas fa-user-check text-blue-600 text-xl"></i>
+        </div>
+
         <div class="grid md:grid-cols-3 gap-4 items-end justify-items-center">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Carrera</label>
@@ -460,7 +639,7 @@
               class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
               [(ngModel)]="changeParallelCareerId" (change)="onCareerForParallelChange()">
               <option [ngValue]="null">Seleccionar Carrera</option>
-              <option *ngFor="let sc of studentCareers" [ngValue]="sc.career?.id || sc.career_id">
+              <option *ngFor="let sc of studentCareers" [ngValue]="sc.career?.id || sc.career_id" class="uppercase">
                 {{ sc.career?.name || 'Carrera #' + (sc.career_id || sc.career?.id) }}
               </option>
             </select>
@@ -499,7 +678,7 @@
 
         <div *ngFor="let sc of studentCareers" class="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
-            <p class="font-semibold text-slate-800">{{ sc.career?.name || 'Carrera #' + (sc.career_id || sc.career?.id) }}</p>
+            <p class="font-semibold text-slate-800 uppercase">{{ sc.career?.name || 'Carrera #' + (sc.career_id || sc.career?.id) }}</p>
             <span class="px-2 py-0.5 rounded text-xs font-medium"
               [ngClass]="sc.status === 'Activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
               {{ sc.status || 'Activo' }}
