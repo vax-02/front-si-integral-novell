@@ -240,9 +240,14 @@
                 Turno: {{ parallel.turno }}
               </p>
             </div>
-            <button (click)="selectParallel(parallel)" class="text-blue-600 hover:text-blue-800 font-medium">
-              Ver horario
-            </button>
+            <div class="flex items-center gap-3">
+              <button (click)="selectParallel(parallel)" class="text-blue-600 hover:text-blue-800 font-medium">
+                Ver horario
+              </button>
+              <button (click)="openMaterials(parallel)" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                Ver materiales
+              </button>
+            </div>
           </div>
           <div class="mt-4">
             <div class="w-full flex items-center gap-4 mt-2">
@@ -427,6 +432,58 @@
           No hay horarios configurados para este paralelo. Haga clic en "Agregar Materia" para comenzar.
         </div>
       </ng-template>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL MATERIALES DEL PARALELO -->
+  <app-base-modal [isOpen]="modalMaterials" title="Materiales del paralelo" [subtitle]="materialsParallel ? ('Paralelo ' + materialsParallel.paralelo + ' - ' + subtitleNewParallel) : ''"
+    size="lg" confirmText="Aceptar" [loading]="loadingMaterials" (confirm)="cancelMaterials()" [showCancel]="false">
+
+    <div class="space-y-4">
+      <div *ngIf="loadingMaterials" class="flex items-center justify-center gap-2 py-10 text-slate-600">
+        <i class="fas fa-spinner fa-spin text-indigo-600 text-xl"></i>
+        <span>Cargando materiales...</span>
+      </div>
+
+      <div *ngIf="!loadingMaterials && parallelMaterials.length === 0"
+        class="text-center py-10 text-slate-400 text-sm">
+        No hay materiales enlazados a este paralelo.
+      </div>
+
+      <div *ngFor="let material of parallelMaterials"
+        class="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-indigo-300 transition">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-file-alt text-indigo-500"></i>
+            <span class="font-semibold text-slate-700 truncate">{{ material.title }}</span>
+            <span *ngIf="material.all_parallels"
+              class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 whitespace-nowrap">
+              Todos los paralelos
+            </span>
+          </div>
+          <p *ngIf="material.description" class="text-xs text-slate-500 mt-1 line-clamp-2">{{ material.description }}</p>
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-slate-500">
+            <span *ngIf="material.subject" class="font-medium text-slate-600">
+              {{ material.subject.sigla }} - {{ material.subject.name }}
+            </span>
+            <span *ngIf="material.docente?.user">
+              <i class="fas fa-user text-slate-400 mr-1"></i>
+              {{ material.docente.user.name }} {{ material.docente.user.first_lastname }} {{ material.docente.user.second_lastname }}
+            </span>
+            <span *ngIf="material.file_type"><i class="fas fa-cube text-slate-400 mr-1"></i>{{ material.file_type }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button (click)="viewMaterial(material.id)" title="Ver"
+            class="px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-xs hover:bg-indigo-600 transition">
+            <i class="fas fa-eye mr-1"></i>Ver
+          </button>
+          <button (click)="downloadMaterial(material.id)" title="Descargar"
+            class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 text-xs hover:bg-slate-100 transition">
+            <i class="fas fa-download mr-1"></i>Descargar
+          </button>
+        </div>
+      </div>
     </div>
   </app-base-modal>
 

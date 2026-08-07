@@ -14,6 +14,7 @@ import { CourseService } from '../../service/course.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
 import { ScheduleService } from '../../service/schedule.service';
+import { SubjectService } from '../../service/subject.service';
 import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
 @Component({
@@ -75,6 +76,12 @@ export class CoursesComponent implements OnInit {
   selectedParallel: any = null;
   modalSchedule: boolean = false;
 
+  // Materials by parallel
+  modalMaterials: boolean = false;
+  parallelMaterials: any[] = [];
+  loadingMaterials = false;
+  materialsParallel: any = null;
+
   // Form for adding/editing schedule items
   scheduleForm: FormGroup;
   editingScheduleId: number | null = null;
@@ -90,6 +97,7 @@ export class CoursesComponent implements OnInit {
     private courseService: CourseService,
     private parallelService: ParallelService,
     private scheduleService: ScheduleService,
+    private subjectService: SubjectService,
     private toast: ToastService,
   ) {
     this.formParallel = this.fb.group({
@@ -270,6 +278,70 @@ export class CoursesComponent implements OnInit {
   cancelView() {
     this.openModalView = false;
     this.selectedParallel = null;
+  }
+
+  // ── Ver materiales enlazados a un paralelo ──
+  openMaterials(parallel: any) {
+    this.materialsParallel = parallel;
+    this.parallelMaterials = [];
+    this.modalMaterials = true;
+    this.loadingMaterials = true;
+
+    this.subjectService.getMaterialsByParallel(parallel.id).subscribe({
+      next: (resp) => {
+        this.loadingMaterials = false;
+        this.parallelMaterials = resp.materials || [];
+      },
+      error: () => {
+        this.loadingMaterials = false;
+        this.parallelMaterials = [];
+        this.toast.error('Error al cargar los materiales del paralelo');
+      },
+    });
+  }
+
+  cancelMaterials() {
+    this.modalMaterials = false;
+    this.materialsParallel = null;
+    this.parallelMaterials = [];
+  }
+
+  viewMaterial(materialId: number) {
+    this.subjectService.dowloadFile(materialId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 1000);
+      },
+      error: () => {
+        this.toast.error('Error al abrir el archivo');
+      },
+    });
+  }
+
+  downloadMaterial(materialId: number) {
+    this.subjectService.dowloadFile(materialId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const newWindow = window.open(url, '_blank');
+        if (newWindow) {
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+          }, 1000);
+        } else {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `archivo_${materialId}`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }
+      },
+      error: () => {
+        this.toast.error('Error al descargar el archivo');
+      },
+    });
   }
 
   // ── Schedule / Horario CRUD ──

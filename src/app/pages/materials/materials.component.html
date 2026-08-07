@@ -1,0 +1,93 @@
+<div class="space-y-8">
+  <!-- HEADER -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">
+        Materiales de Estudio
+      </h1>
+      <p class="text-sm text-slate-500">
+        Materiales publicados por tus docentes
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="flex items-center gap-3 text-slate-500">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
+      <span class="text-sm">Cargando materiales...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!loading && error" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+    <i class="fas fa-exclamation-circle text-red-400 text-3xl mb-2"></i>
+    <p class="text-sm text-red-600">{{ error }}</p>
+    <button (click)="loadMaterials()" class="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Sin materiales -->
+  <div *ngIf="!loading && !error && groupedMaterials.length === 0" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 text-center">
+    <i class="fas fa-folder-open text-slate-300 text-5xl mb-4"></i>
+    <h3 class="text-lg font-semibold text-slate-600 mb-1">Sin materiales disponibles</h3>
+    <p class="text-sm text-slate-400">Tus docentes aún no han publicado materiales para tus materias.</p>
+  </div>
+
+  <!-- Lista agrupada por materia -->
+  <div *ngIf="!loading && !error && groupedMaterials.length > 0" class="space-y-6">
+    <div *ngFor="let group of groupedMaterials" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <!-- Cabecera de materia -->
+      <div class="px-5 py-4 bg-gradient-to-r from-blue-50 to-white border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+            <i class="fas fa-book"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800">{{ group.subject_name }}</h3>
+            <span class="text-xs text-slate-400 font-mono">{{ group.subject_sigla }}</span>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">
+          {{ group.items.length }} archivo{{ group.items.length !== 1 ? 's' : '' }}
+        </span>
+      </div>
+
+      <!-- Lista de materiales -->
+      <div class="divide-y divide-slate-100">
+        <div *ngFor="let material of group.items" class="p-4 hover:bg-slate-50 transition flex items-start gap-4">
+          <!-- Icono -->
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm"
+            [class]="getFileColor(material.file_type)">
+            <i class="fas" [class]="getFileIcon(material.file_type)"></i>
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-semibold text-slate-700 truncate">{{ material.title }}</h4>
+            <p *ngIf="material.description" class="text-xs text-slate-500 mt-0.5 line-clamp-2">{{ material.description }}</p>
+            <p class="text-xs text-slate-400 mt-1">
+              <i class="fas fa-user-tie mr-1"></i> {{ getDocenteName(material) }}
+            </p>
+            <p class="text-xs text-slate-300 mt-0.5">
+              {{ material.created_at | date:'dd/MM/yyyy' }} • {{ material.file_name }}
+            </p>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex gap-2 flex-shrink-0">
+            <button (click)="viewMaterial(material.id)" title="Ver archivo"
+              class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition flex items-center justify-center">
+              <i class="fas fa-eye text-xs"></i>
+            </button>
+            <button (click)="downloadMaterial(material.id)" title="Descargar"
+              class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition flex items-center justify-center">
+              <i class="fas fa-download text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

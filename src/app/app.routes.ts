@@ -17,6 +17,7 @@ import { ChangePasswordComponent } from './pages/change-password/change-password
 import { MySubjectsComponent } from './pages/my-subjects/my-subjects.component';
 import { MyPensulComponent } from './pages/my-pensul/my-pensul.component';
 import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
+import { MaterialsComponent } from './pages/materials/materials.component';
 import { SubjectsComponent } from './pages/subjects/subjects.component';
 import { authGuard } from './core/guards/auth.guard';
 import { CoursesComponent } from './pages/courses/courses.component';
@@ -38,11 +39,12 @@ export const routes: Routes = [
     { path: 'professor/grades', component: GradesComponent },
     { path: 'professor/repository', component: RepositoryComponent },
 
-    
+
     //estudiantes
     { path: 'my-subjects', component: MySubjectsComponent },
     { path: 'my-schedule', component:  MyScheduleComponent },
     { path: 'my-pensul', component: MyPensulComponent },
+    { path: 'materials', component: MaterialsComponent },
 
     //admin
     { path: 'dashboard', component: HomeComponent },
@@ -61,12 +63,12 @@ export const routes: Routes = [
 
     { path: 'subjects', component: SubjectsComponent },
     { path: 'users', component: UsersComponent },
-    
+
     { path: 'settings', component: SettingsComponent, children: [
       { path: 'general', component: RegistrationComponent },
     ]},
     { path: 'institution', component: InstitutionComponent  },
-    
+
     //general
     { path: 'profile', component: ProfileComponent  },
     { path: 'password', component: ChangePasswordComponent  },

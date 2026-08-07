@@ -68,6 +68,46 @@ export class SubjectService {
     );
   }
 
+  /** Listar materiales del docente (todas las materias o una en específico) */
+  getMaterials(subjectId: number | null = null): Observable<any> {
+    const params: any = {};
+    if (subjectId) {
+      params.subject_id = subjectId;
+    }
+    return this.http.get(this.apiUrl.materials.index, {
+      headers: this.getHeaders(),
+      params,
+    });
+  }
+
+  /** Listar materiales enlazados a un paralelo específico */
+  getMaterialsByParallel(parallelId: number): Observable<any> {
+    return this.http.get(this.apiUrl.parallels.materialsByParallel(parallelId), {
+      headers: this.getHeaders(),
+    });
+  }
+
+  /** Subir material (puede asignarse a una o varias materias) */
+  createMaterial(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl.materials.store, formData, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  /** Actualizar visibilidad de un material */
+  updateMaterial(id: number, payload: any): Observable<any> {
+    return this.http.put(this.apiUrl.materials.update(id), payload, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  /** Eliminar un material */
+  deleteMaterial(id: number): Observable<any> {
+    return this.http.delete(this.apiUrl.materials.delete(id), {
+      headers: this.getHeaders(),
+    });
+  }
+
   dowloadFile(materialId : number): Observable<any>{
     return this.http.get(this.apiUrl.materials.download(materialId),{
       headers: this.getHeaders(),

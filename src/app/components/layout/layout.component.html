@@ -75,6 +75,11 @@
             (click)="isMobile ? collapsed = true : null">
             Horario
           </a>
+          <a routerLink="/home/materials" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Materiales
+          </a>
         </div>
       </div>
       }
@@ -152,7 +157,7 @@
             (click)="isMobile ? collapsed = true : null">
             Carreras
           </a>
-          
+
           <a routerLink="/home/courses" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -191,7 +196,7 @@
           </a>
         </div>
 
-        
+
         <div *ngIf="(!collapsed || isMobile) && openFinanzas" class="ml-6">
           <a routerLink="/home/payments-manage" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
@@ -256,7 +261,7 @@
             Contraseña
           </a>
           @if (Roles.ADMIN.id ==  user.currentRole.id) {
-          <a routerLink="/home/institution" routerLinkActive="text-blue-600" 
+          <a routerLink="/home/institution" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
             Institución

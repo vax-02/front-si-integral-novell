@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
   },
   parallels: {
     index: `${API_BASE_URL}/parallels`,
+    materialsByParallel: (id: number) => `${API_BASE_URL}/parallels/${id}/materials`,
   },
   schedules: {
     byCareer: (careerId: number) => `${API_BASE_URL}/subjects/${careerId}/by-career`,
@@ -62,9 +63,11 @@ export const API_ENDPOINTS = {
   materials: {
     index: `${API_BASE_URL}/materials`,
     store: `${API_BASE_URL}/materials`,
+    update: (id: number) => `${API_BASE_URL}/materials/${id}`,
     delete: (id: number) => `${API_BASE_URL}/materials/${id}`,
     download: (id: number) => `${API_BASE_URL}/materials/${id}/download`,
   },
+  studentMaterials: `${API_BASE_URL}/student/materials`,
   pays: {
     index : `${API_BASE_URL}/pays`,
     store: `${API_BASE_URL}/pays`,

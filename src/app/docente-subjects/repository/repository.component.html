@@ -1,41 +1,56 @@
 <div class="space-y-8">
   <!-- HEADER -->
-  <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center"
+  >
     <div>
-      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">
+      <h1 class="text-2xl font-bold text-slate-800">
         Repositorio de Materiales
       </h1>
-      <p class="text-sm sm:text-base text-slate-500">
+      <p class="text-sm text-slate-500">
         Sube y gestiona materiales educativos para tus materias
       </p>
     </div>
-    <button (click)="showUploadForm = true"
-      class="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2">
+    <button
+      (click)="showUploadForm = true"
+      class="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2"
+    >
       <i class="fas fa-cloud-upload-alt"></i>
-      Subir material
+      Subir
     </button>
   </div>
 
   <!-- FILTRO POR MATERIA -->
   <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-      <label class="text-sm font-medium text-slate-600 whitespace-nowrap">Filtrar por materia:</label>
-      <select [(ngModel)]="selectedSubjectId" (ngModelChange)="onSubjectFilterChange()"
-        class="w-full sm:w-80 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <label class="text-sm font-medium text-slate-600 whitespace-nowrap"
+        >Filtrar por materia:</label
+      >
+      <select
+        [(ngModel)]="selectedSubjectId"
+        (ngModelChange)="onSubjectFilterChange()"
+        class="w-full sm:w-80 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
         <option [value]="null">Todas las materias</option>
         <option *ngFor="let subj of subjects" [value]="subj.id">
-          {{ subj.name }} ({{ subj.sigla }}) — {{ subj.course_name }} Paralelo {{ subj.parallel_name }}
+          {{ subj.name }} ({{ subj.sigla }}) — {{ subj.course_name }} Paralelo
+          {{ subj.parallel_name }}
         </option>
       </select>
     </div>
   </div>
 
-
   <!-- LISTA DE MATERIALES -->
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-    <div class="flex items-center justify-between p-5 border-b border-slate-200">
+  <div
+    class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+  >
+    <div
+      class="flex items-center justify-between p-5 border-b border-slate-200"
+    >
       <span class="font-semibold text-slate-700">Materiales subidos</span>
-      <span class="text-xs text-slate-400">{{ materials.length }} archivos</span>
+      <span class="text-xs text-slate-400"
+        >{{ materials.length }} archivos</span
+      >
     </div>
 
     <!-- Loading -->
@@ -45,30 +60,45 @@
     </div>
 
     <!-- Sin materiales -->
-    <div *ngIf="!loadingMaterials && materials.length === 0" class="p-10 text-center">
+    <div
+      *ngIf="!loadingMaterials && materials.length === 0"
+      class="p-10 text-center"
+    >
       <i class="fas fa-folder-open text-slate-300 text-5xl mb-3"></i>
       <p class="text-sm text-slate-400">No hay materiales subidos aún.</p>
     </div>
 
     <!-- Lista -->
-    <div *ngIf="!loadingMaterials && materials.length > 0" class="divide-y divide-slate-100">
-      <div *ngFor="let material of materials" class="p-4 hover:bg-slate-50 transition flex items-start gap-4">
+    <div
+      *ngIf="!loadingMaterials && materials.length > 0"
+      class="divide-y divide-slate-100"
+    >
+      <div
+        *ngFor="let material of materials"
+        class="p-4 hover:bg-slate-50 transition flex items-start gap-4"
+      >
         <!-- Icono según tipo -->
-        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm"
+        <div
+          class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-sm"
           [class.bg-red-400]="material.file_type?.includes('pdf')"
           [class.bg-blue-400]="material.file_type?.includes('image')"
           [class.bg-green-400]="material.file_type?.includes('video')"
-          [class.bg-slate-400]="!material.file_type">
-          <i class="fas"
+          [class.bg-slate-400]="!material.file_type"
+        >
+          <i
+            class="fas"
             [class.fa-file-pdf]="material.file_type?.includes('pdf')"
             [class.fa-file-image]="material.file_type?.includes('image')"
             [class.fa-file-video]="material.file_type?.includes('video')"
-            [class.fa-file]="!material.file_type"></i>
+            [class.fa-file]="!material.file_type"
+          ></i>
         </div>
 
         <!-- Info -->
         <div class="flex-1 min-w-0">
-          <h4 class="text-sm font-semibold text-slate-700 truncate">{{ material.title }}</h4>
+          <h4 class="text-sm font-semibold text-slate-700 truncate">
+            {{ material.title }}
+          </h4>
           <p class="text-xs text-slate-400 mt-0.5">
             {{ material.subject?.name }} ({{ material.subject?.sigla }})
           </p>
@@ -76,29 +106,52 @@
             <i class="fas fa-users mr-1"></i>
             <span *ngIf="material.all_parallels">Todos los paralelos</span>
             <span *ngIf="!material.all_parallels && material.parallels">
-              Paralelos: <span *ngFor="let p of material.parallels; let last = last">{{ p.paralelo }} ({{ p.turno }}){{ !last ? ', ' : '' }}</span>
+              Paralelos:
+              <span *ngFor="let p of material.parallels; let last = last"
+                >{{ p.paralelo }} ({{ p.turno }}){{ !last ? ", " : "" }}</span
+              >
             </span>
           </p>
           <p class="text-xs text-slate-300 mt-0.5">
-            {{ material.created_at | date:'dd/MM/yyyy' }} • {{ material.file_name }}
+            {{ material.created_at | date: "dd/MM/yyyy" }} •
+            {{ material.file_name }}
           </p>
         </div>
 
         <!-- Acciones -->
         <div class="flex gap-2 flex-shrink-0">
-          <button (click)="downloadMaterial(material.id)" title="Descargar"
-            class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition flex items-center justify-center">
+          <button
+            (click)="viewMaterial(material.id)"
+            title="Ver archivo"
+            class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition flex items-center justify-center"
+          >
+            <i class="fas fa-eye text-xs"></i>
+          </button>
+          <button
+            (click)="downloadMaterial(material.id)"
+            title="Descargar"
+            class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition flex items-center justify-center"
+          >
             <i class="fas fa-download text-xs"></i>
           </button>
-          <button (click)="confirmDelete(material.id)" title="Eliminar"
-            class="w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition flex items-center justify-center">
+          <button
+            (click)="openEditVisibility(material)"
+            title="Editar visibilidad"
+            class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 hover:bg-amber-200 transition flex items-center justify-center"
+          >
+            <i class="fas fa-users-cog text-xs"></i>
+          </button>
+          <button
+            (click)="confirmDelete(material.id)"
+            title="Eliminar"
+            class="w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition flex items-center justify-center"
+          >
             <i class="fas fa-trash text-xs"></i>
           </button>
         </div>
       </div>
     </div>
   </div>
-
 
   <app-base-modal-confirm
     [isOpen]="confirmDeleteOpen"
@@ -108,82 +161,290 @@
     cancelText="Cancelar"
     [loading]="deleting"
     (confirm)="deleteMaterial()"
-    (cancel)="cancelDelete()">
+    (cancel)="cancelDelete()"
+  >
   </app-base-modal-confirm>
 
-
-  <app-base-modal [isOpen]="showUploadForm" [loading]="uploading" title="Subir nuevo material" size="lg"
-    confirmText="Subir" cancelText="Cancelar" (confirm)="submitUpload()" (cancel)="resetUploadForm()">
-  
-  <div class="">
+  <app-base-modal
+    [isOpen]="showUploadForm"
+    [loading]="uploading"
+    title="Subir nuevo material"
+    size="lg"
+    confirmText="Subir"
+    cancelText="Cancelar"
+    (confirm)="submitUpload()"
+    (cancel)="resetUploadForm()"
+  >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <!-- Materia -->
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-slate-600">Materia <span class="text-red-500">*</span></label>
-        <select [(ngModel)]="uploadData.subject_id"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option [value]="null">Seleccione una materia</option>
-          <option *ngFor="let subj of subjects" [value]="subj.id">
-            {{ subj.name }} ({{ subj.sigla }}) — {{ subj.course_name }}
-          </option>
-        </select>
-      </div>
-
       <!-- Título -->
       <div class="space-y-1">
-        <label class="text-sm font-medium text-slate-600">Título <span class="text-red-500">*</span></label>
-        <input type="text" [(ngModel)]="uploadData.title" placeholder="Ej: Guía de ejercicios Tema 1"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="text-sm font-medium text-slate-600"
+          >Título <span class="text-red-500">*</span></label
+        >
+        <input
+          type="text"
+          [(ngModel)]="uploadData.title"
+          placeholder="Ej: Guía de ejercicios Tema 1"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Archivo -->
+      <div class="space-y-1">
+        <label class="text-sm font-medium text-slate-600"
+          >Archivo <span class="text-red-500">*</span></label
+        >
+        <input
+          type="file"
+          accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+          (change)="onFileSelected($event)"
+          class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+        <p class="text-[11px] text-slate-400">
+          Permitidos: JPG, PNG, PDF, Word, Excel, PowerPoint. Máx. 20 MB.
+        </p>
       </div>
 
       <!-- Descripción -->
       <div class="space-y-1 md:col-span-2">
         <label class="text-sm font-medium text-slate-600">Descripción</label>
-        <textarea [(ngModel)]="uploadData.description" rows="2" placeholder="Descripción opcional del material..."
-          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <textarea
+          [(ngModel)]="uploadData.description"
+          rows="2"
+          placeholder="Descripción opcional del material..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        ></textarea>
       </div>
 
-      <!-- Archivo -->
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-slate-600">Archivo <span class="text-red-500">*</span></label>
-        <input type="file" (change)="onFileSelected($event)"
-          class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-      </div>
+      <!-- Materias -->
+      <div class="space-y-3 md:col-span-2">
+        <label class="text-sm font-medium text-slate-600">
+          Materia(s) <span class="text-red-500">*</span>
+        </label>
 
-      <!-- Visibilidad -->
-      <div class="space-y-2">
-        <label class="text-sm font-medium text-slate-600">Visibilidad</label>
-        <div class="flex items-center gap-3">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" [(ngModel)]="uploadData.all_parallels" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-            <span class="text-sm text-slate-600">Visible para todos mis paralelos</span>
+        <!-- Todas -->
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
+          <label class="flex items-center justify-between cursor-pointer">
+            <div>
+              <p class="text-sm font-semibold text-blue-800">
+                Todas las materias y paralelos
+              </p>
+
+              <p class="text-xs text-blue-600">
+                El archivo estará disponible para todas tus materias y paralelos
+              </p>
+            </div>
+
+            <input
+              type="checkbox"
+              [ngModel]="uploadData.all_subjects"
+              (ngModelChange)="onToggleAllSubjects($event)"
+              class="h-5 w-5 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+            />
           </label>
         </div>
 
-        <!-- Selección de paralelos si no es "todos" -->
-        <div *ngIf="!uploadData.all_parallels && uploadData.subject_id" class="mt-2">
-          <p class="text-xs text-slate-400 mb-2">Selecciona los paralelos que verán este material:</p>
-          <div class="flex flex-wrap gap-2">
-            <ng-container *ngIf="getSubjectParallels(uploadData.subject_id) as parallelList">
-              <label *ngFor="let subj of parallelList" (click)="toggleParallel(subj.parallel_id)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border cursor-pointer text-xs transition"
-                [class.border-blue-400]="uploadData.parallel_ids.includes(subj.parallel_id)"
-                [class.bg-blue-50]="uploadData.parallel_ids.includes(subj.parallel_id)"
-                [class.border-slate-200]="!uploadData.parallel_ids.includes(subj.parallel_id)">
-                <input type="checkbox" [checked]="uploadData.parallel_ids.includes(subj.parallel_id)" class="hidden">
-                <i class="fas fa-check-circle text-[10px]" 
-                  [class.text-blue-500]="uploadData.parallel_ids.includes(subj.parallel_id)"
-                  [class.text-slate-300]="!uploadData.parallel_ids.includes(subj.parallel_id)"></i>
-                {{ subj.course_name }} - Paralelo {{ subj.parallel_name }} ({{ subj.turno }})
-              </label>
-              <div *ngIf="parallelList.length === 0" class="text-xs text-slate-400 p-2">
-                No hay paralelos disponibles para esta materia.
+        <!-- Encabezado -->
+        <div *ngIf="!uploadData.all_subjects">
+          <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-book text-blue-600"></i>
+
+              <h4 class="text-sm font-semibold text-slate-700">
+                Seleccionar materias
+              </h4>
+            </div>
+
+            <span
+              class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
+            >
+              {{ getSelectedCount() }} seleccionadas
+            </span>
+          </div>
+          <!-- Cards -->
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[420px] overflow-y-auto p-1"
+          >
+            <label
+              *ngFor="let subj of subjects"
+              class="group relative flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 cursor-pointer shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
+              [class.border-blue-500]="subj.selected"
+              [class.bg-blue-50]="subj.selected"
+            >
+              <input
+                type="checkbox"
+                [ngModel]="subj.selected"
+                (ngModelChange)="setSubjectSelected(subj, $event)"
+                class="mt-1 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between gap-2">
+                  <h5
+                    class="text-sm font-semibold text-slate-800 truncate group-hover:text-blue-700"
+                  >
+                    {{ subj.name }}
+                  </h5>
+
+                  <span
+                    class="shrink-0 rounded-md bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700"
+                  >
+                    {{ subj.sigla }}
+                  </span>
+                </div>
+
+                <div class="mt-3 space-y-1 text-xs text-slate-500">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-slate-400"></i>
+                    <span>{{ subj.course_name }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-users text-slate-400"></i>
+                    <span> Paralelo: {{ subj.parallel_name }} </span>
+                  </div>
+                </div>
               </div>
-            </ng-container>
+
+              <div
+                *ngIf="subj.selected"
+                class="absolute right-3 bottom-3 text-blue-600"
+              >
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </label>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </app-base-modal>
+
+  <!-- MODAL EDITAR VISIBILIDAD -->
+  <app-base-modal
+    [isOpen]="showEditVisibilityForm"
+    [loading]="editingVisibility"
+    title="Editar visibilidad del material"
+    size="lg"
+    confirmText="Guardar cambios"
+    cancelText="Cancelar"
+    (confirm)="submitEditVisibility()"
+    (cancel)="cancelEditVisibility()"
+  >
+    <div class="space-y-4">
+      <div
+        class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700"
+      >
+        <i class="fas fa-info-circle mr-1"></i>
+        Selecciona qué materias (y paralelos) podrán ver este material.
+      </div>
+
+      <!-- Materias -->
+      <div>
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-medium text-slate-600">
+            Materias que pueden ver este material
+          </p>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              [ngModel]="isAllEditSubjectsSelected()"
+              (ngModelChange)="toggleAllEditSubjects($event)"
+              class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span class="text-xs text-slate-500">Todas</span>
+          </label>
+        </div>
+
+        <div
+          class="flex flex-wrap gap-2 mt-2 max-h-40 overflow-y-auto p-1"
+        >
+          <label
+            *ngFor="let subj of getDistinctEditSubjects()"
+            (click)="toggleEditSubject(subj, !subj.editSelected, $event)"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border cursor-pointer text-xs transition"
+            [class.border-blue-400]="subj.editSelected"
+            [class.bg-blue-50]="subj.editSelected"
+            [class.border-slate-200]="!subj.editSelected"
+          >
+            <i
+              class="fas fa-check-circle text-[10px]"
+              [class.text-blue-500]="subj.editSelected"
+              [class.text-slate-300]="!subj.editSelected"
+            ></i>
+            {{ subj.name }} ({{ subj.sigla }})
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="editData.all_parallels"
+            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span class="text-sm text-slate-600"
+            >Visible para todos mis paralelos</span
+          >
+        </label>
+      </div>
+
+      <!-- Selección de paralelos si no es "todos" y solo hay una materia -->
+      <div
+        *ngIf="!editData.all_parallels && getEditSubjectId()"
+        class="mt-2"
+      >
+        <p class="text-xs text-slate-400 mb-2">
+          Selecciona los paralelos que verán este material:
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <ng-container
+            *ngIf="getSubjectParallels(getEditSubjectId()!) as parallelList"
+          >
+            <label
+              *ngFor="let subj of parallelList"
+              (click)="toggleEditParallel(subj.parallel_id, $event)"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border cursor-pointer text-xs transition"
+              [class.border-blue-400]="
+                editData.parallel_ids.includes(subj.parallel_id)
+              "
+              [class.bg-blue-50]="
+                editData.parallel_ids.includes(subj.parallel_id)
+              "
+              [class.border-slate-200]="
+                !editData.parallel_ids.includes(subj.parallel_id)
+              "
+            >
+              <i
+                class="fas fa-check-circle text-[10px]"
+                [class.text-blue-500]="
+                  editData.parallel_ids.includes(subj.parallel_id)
+                "
+                [class.text-slate-300]="
+                  !editData.parallel_ids.includes(subj.parallel_id)
+                "
+              ></i>
+              {{ subj.course_name }} - Paralelo {{ subj.parallel_name }} ({{
+                subj.turno
+              }})
+            </label>
+            <div
+              *ngIf="parallelList.length === 0"
+              class="text-xs text-slate-400 p-2"
+            >
+              No hay paralelos disponibles para esta materia.
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div
+        *ngIf="!editData.all_parallels && editData.subject_ids.length > 1"
+        class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3"
+      >
+        <i class="fas fa-info-circle mr-1"></i>
+        Para varias materias el material se muestra en todos sus paralelos.
+      </div>
+    </div>
   </app-base-modal>
 </div>
