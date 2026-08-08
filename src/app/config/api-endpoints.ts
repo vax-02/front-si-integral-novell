@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   docenteMySubjects: `${API_BASE_URL}/docente/my-subjects`,
   students: {
     index: `${API_BASE_URL}/students`,
+    advanceLevel: (id: number) => `${API_BASE_URL}/students/${id}/advance-level`,
   },
   carrers: {
     index: `${API_BASE_URL}/careers`,

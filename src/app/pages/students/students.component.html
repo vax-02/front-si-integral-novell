@@ -562,6 +562,11 @@
           (click)="optionTab = 'withdraw'">
           <i class="fas fa-user-minus mr-1"></i> Baja / Readmisi&oacute;n
         </button>
+        <button *ngIf="isAdmin" class="px-4 py-2 text-sm font-medium transition"
+          [ngClass]="optionTab === 'advance-level' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'"
+          (click)="optionTab = 'advance-level'">
+          <i class="fas fa-arrow-up mr-1"></i> Avanzar de Nivel
+        </button>
       </div>
 
       <!-- TAB 1: ADICIONAR CARRERA -->
@@ -699,6 +704,149 @@
         </div>
       </div>
 
+      <!-- TAB 4: AVANZAR DE NIVEL -->
+      <div *ngIf="optionTab === 'advance-level'" class="space-y-4">
+        <p class="text-sm text-slate-500 mb-2">
+          Avanza al estudiante <strong>{{ selectedStudent.user.name }} {{ selectedStudent.user.first_lastname }}</strong>
+          al siguiente nivel. Se evaluar&aacute;n las materias aprobadas, las que repite y los pre-requisitos.
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-4 items-end justify-items-center">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Carrera</label>
+            <select
+              class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+              [(ngModel)]="advanceCareerId" (change)="onCareerForAdvanceChange()">
+              <option [ngValue]="null">Seleccionar Carrera</option>
+              <option *ngFor="let sc of studentCareers" [ngValue]="sc.career?.id || sc.career_id" class="uppercase">
+                {{ sc.career?.name || 'Carrera #' + (sc.career_id || sc.career?.id) }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Nuevo Paralelo</label>
+            <select
+              class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+              [(ngModel)]="advanceParallelId" [disabled]="advanceParallelLoading">
+              <option [ngValue]="null">Seleccionar turno y paralelo</option>
+              <option *ngFor="let parallel of advanceParallels" [ngValue]="parallel.id">
+                Cupo: {{ parallel.available }} - {{ parallel.turno }} - {{ parallel.paralelo }}
+              </option>
+            </select>
+          </div>
+          <div class="flex justify-end pt-4">
+            <button class="bg-blue-500 hover:bg-blue:600 px-4 py-2 text-sm rounded-lg text-white"
+              [disabled]="advanceSaving" (click)="advanceLevel()">
+              <i class="fas fa-arrow-up" *ngIf="!advanceSaving"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="advanceSaving"></i>
+              {{ advanceSaving ? ' Procesando...' : ' Avanzar de Nivel' }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="advanceCurrentLevel" class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Avance de nivel</p>
+            <p class="font-semibold text-slate-800">
+              {{ ordinalLabel(advanceCurrentLevel) }} → {{ ordinalLabel(advanceNextLevel) }}
+            </p>
+          </div>
+          <i class="fas fa-arrow-right text-blue-600 text-xl"></i>
+        </div>
+
+        <p *ngIf="!advanceParallelLoading && advanceCurrentLevel && advanceParallels.length === 0"
+          class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl p-3">
+          No existen paralelos disponibles para el siguiente nivel. Cree uno desde la secci&oacute;n de Cursos y vuelva a intentar.
+        </p>
+      </div>
+
+    </div>
+  </app-base-modal>
+
+
+  <!-- MODAL: RESULTADO DE AVANCE DE NIVEL -->
+  <app-base-modal [isOpen]="advanceResultModal" title="Avance de nivel completado" size="lg"
+    [showCancel]="false" confirmText="Aceptar" (cancel)="advanceResultModal = false" (confirm)="advanceResultModal = false">
+    <div *ngIf="advanceResult">
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Nivel asignado</p>
+            <p class="font-semibold text-slate-800">
+              {{ ordinalLabel(advanceResult.current_level) }} → {{ ordinalLabel(advanceResult.new_level) }}
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Paralelo asignado</p>
+            <p class="font-semibold text-slate-800">
+              <span class="uppercase">{{ advanceResult.parallel.paralelo }}</span> - {{ advanceResult.parallel.turno }}
+              <span class="text-xs text-slate-400 font-normal">({{ advanceResult.parallel.course }})</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- Toma ahora -->
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-green-700 mb-2">
+            <i class="fas fa-check-circle mr-1"></i> Toma ahora ({{ advanceResult.assigned.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.assigned">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-green-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.assigned.length === 0" class="text-xs text-slate-400">Sin materias asignadas</li>
+          </ul>
+        </div>
+
+        <!-- Aprobó -->
+        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-sky-700 mb-2">
+            <i class="fas fa-graduation-cap mr-1"></i> Materias aprobadas ({{ advanceResult.approved.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.approved">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-sky-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.approved.length === 0" class="text-xs text-slate-400">Sin materias aprobadas</li>
+          </ul>
+        </div>
+
+        <!-- Repite -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-amber-700 mb-2">
+            <i class="fas fa-sync-alt mr-1"></i> Repite ({{ advanceResult.repeated.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.repeated">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.repeated.length === 0" class="text-xs text-slate-400">Sin materias reprobadas</li>
+          </ul>
+        </div>
+
+        <!-- No lleva por pre-requisito -->
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-700 mb-2">
+            <i class="fas fa-times-circle mr-1"></i> No lleva por pre-requisito ({{ advanceResult.missing_by_prerequisite.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.missing_by_prerequisite">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.missing_by_prerequisite.length === 0" class="text-xs text-slate-400">Sin materias pendientes</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-400 mt-4">
+        Verifique que las materias asignadas correspondan al nuevo nivel y que el paralelo sea el correcto.
+      </p>
     </div>
   </app-base-modal>
 

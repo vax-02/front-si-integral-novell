@@ -11,6 +11,8 @@ import { StudentService } from '../../service/student.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
 import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
+import { AuthService } from '../../core/services/auth.service';
+import { Roles } from '../../core/constants/roles.constants';
 
 export interface Student {
   id: number;
@@ -102,13 +104,24 @@ export class StudentsComponent {
   newCareerParallels: any[] = [];
 
   // Propiedades para el modal de opciones (3 tabs)
-  optionTab: string = 'add-career'; // 'add-career' | 'change-parallel' | 'withdraw'
+  optionTab: string = 'add-career'; // 'add-career' | 'change-parallel' | 'withdraw' | 'advance-level'
   // Para cambio de paralelo
   changeParallelCareerId: number | null = null;
   changeParallels: any[] = [];
   changeParallelId: number | null = null;
   changeParallelCurrent: any = null;
   studentCareers: any[] = [];
+
+  // Propiedades para avance de nivel
+  advanceCareerId: number | null = null;
+  advanceParallels: any[] = [];
+  advanceParallelId: number | null = null;
+  advanceCurrentLevel: number | null = null;
+  advanceNextLevel: number | null = null;
+  advanceParallelLoading = false;
+  advanceResultModal = false;
+  advanceResult: any = null;
+  advanceSaving = false;
 
   // Conceptos de pago cargados desde el backend (solo informativo)
   conceptosCarrera: any[] = [];
@@ -119,6 +132,7 @@ export class StudentsComponent {
     private studentService: StudentService,
     private parallelService: ParallelService,
     private toast: ToastService,
+    private authService: AuthService,
   ) {}
   ngOnInit() {
     this.loadCareersForSelect();
@@ -384,9 +398,9 @@ export class StudentsComponent {
     });
   }
 
-  ordinalLabel(n: number): string {
+  ordinalLabel(n: number | null): string {
     const ordinals = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo'];
-    return ordinals[n - 1] || `${n}º`;
+    return ordinals[(n ?? 0) - 1] || `${n ?? 0}º`;
   }
 
   get totalParallelChanges(): number {
@@ -440,6 +454,11 @@ export class StudentsComponent {
     this.changeParallels = [];
     this.changeParallelId = null;
     this.changeParallelCurrent = null;
+    this.advanceCareerId = null;
+    this.advanceParallels = [];
+    this.advanceParallelId = null;
+    this.advanceCurrentLevel = null;
+    this.advanceNextLevel = null;
 
     // Cargar las carreras del estudiante para el modal
     this.studentService.getStudent(student.id).subscribe(res => {
@@ -574,6 +593,90 @@ export class StudentsComponent {
           return
         }
         this.toast.error('Error al cambiar paralelo');
+      }
+    });
+  }
+
+  // ============ Pestaña 4: Avanzar de Nivel ============
+
+  get isAdmin(): boolean {
+    const user = this.authService.user;
+    if (user?.currentRole?.id == Roles.ADMIN.id) return true;
+    return Array.isArray(user?.roles) && user.roles.some((r: any) => r.id == Roles.ADMIN.id);
+  }
+
+  onCareerForAdvanceChange() {
+    this.advanceParallels = [];
+    this.advanceParallelId = null;
+    this.advanceCurrentLevel = null;
+    this.advanceNextLevel = null;
+    if (!this.advanceCareerId) return;
+
+    const careerEntry = this.studentCareers.find(
+      (sc: any) => (sc.career?.id || sc.career_id) === this.advanceCareerId
+    );
+    const currentParallel = careerEntry?.current_parallel || null;
+    if (!currentParallel?.level) {
+      this.toast.error('El estudiante no tiene un paralelo activo en esta carrera');
+      return;
+    }
+    this.advanceCurrentLevel = Number(currentParallel.level);
+    this.advanceNextLevel = this.advanceCurrentLevel + 1;
+    this.advanceParallelLoading = true;
+    this.parallelService.getParallelsForCareerAtLevel(this.advanceCareerId, this.advanceNextLevel).subscribe({
+      next: (response) => {
+        this.advanceParallelLoading = false;
+        this.advanceParallels = response.parallels || [];
+      },
+      error: () => {
+        this.advanceParallelLoading = false;
+        this.toast.error('Error al cargar paralelos del siguiente nivel');
+      }
+    });
+  }
+
+  advanceLevel() {
+    if (this.advanceSaving) return;
+    if (!this.advanceCareerId) {
+      this.toast.error('Seleccione una carrera');
+      return;
+    }
+    if (!this.advanceParallelId) {
+      this.toast.error('Seleccione un paralelo del siguiente nivel');
+      return;
+    }
+    this.advanceSaving = true;
+    this.studentService.advanceLevel(this.selectedStudent!.id, {
+      career_id: this.advanceCareerId,
+      parallel_id: this.advanceParallelId,
+    }).subscribe({
+      next: (res) => {
+        this.advanceSaving = false;
+        this.advanceResult = res;
+        this.advanceResultModal = true;
+        this.toast.success('Nivel avanzado correctamente');
+        this.loadStudents();
+        this.studentService.getStudent(this.selectedStudent!.id).subscribe({
+          next: (r) => {
+            this.studentCareers = r.student.student_careers || [];
+          },
+          error: () => {
+            this.studentCareers = [];
+          }
+        });
+      },
+      error: (err: any) => {
+        this.advanceSaving = false;
+        const message = err?.error?.message;
+        if (message) {
+          this.toast.info(message);
+          return;
+        }
+        if (err.status === 403) {
+          this.toast.error('Solo el administrador puede realizar esta acción');
+          return;
+        }
+        this.toast.error('Error al avanzar de nivel');
       }
     });
   }

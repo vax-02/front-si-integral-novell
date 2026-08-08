@@ -63,6 +63,12 @@ export class StudentService {
     });
   }
 
+  advanceLevel(studentId: number, data: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl.students.advanceLevel(studentId), data, {
+      headers: this.getHeaders(),
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
