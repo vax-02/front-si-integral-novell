@@ -165,8 +165,8 @@
     title="Configurar asistencia"
     subtitle="PIN biométrico, tolerancia y horarios del docente"
     size="lg"
-    confirmText="Cerrar"
-    cancelText="Aceptar"
+    confirmText="Aceptar"
+    [showCancel]="false"
     (confirm)="modalConfig = false"
     (cancel)="modalConfig = false">
 
