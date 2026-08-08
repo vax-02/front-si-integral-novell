@@ -77,21 +77,36 @@
             <td class="p-4 text-center font-semibold text-blue-700">Bs. {{ concept.amount }}</td>
             <td class="p-4">
               <div class="flex justify-center gap-2">
-                <app-button icon="fa-solid fa-trash" variant="tertiary" title="Eliminar"
-                  (click)="confirmDelete(concept)"></app-button>
+                <button (click)="confirmDelete(concept)" title="Eliminar"
+                  class="bg-rose-500 text-white px-2 py-1.5 rounded-lg hover:bg-rose-400 transition">
+                  <i class="text-sm fas fa-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
 
-
-          <tr *ngIf="loading" class="hover:bg-slate-50 transition">
-            <td colspan="6" class="p-4 text-center">
-              <div class="flex items-center justify-center gap-2 text-slate-600">
-                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
-                <span>Cargando datos...</span>
-              </div>
-            </td>
-          </tr>
+          <!-- Loading -->
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
+            <tr *ngIf="loading" class="hover:bg-slate-50 transition">
+              <td class="p-4">
+                <div class="h-4 w-24 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="h-4 w-40 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="h-4 w-32 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="h-4 w-20 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="flex justify-center">
+                  <div class="h-9 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>
