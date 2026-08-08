@@ -8,7 +8,6 @@ export interface DocenteSchedule {
   id?: number;
   day: string;
   entry_time: string;
-  departure_time: string;
   is_active?: boolean;
 }
 

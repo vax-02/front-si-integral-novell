@@ -53,7 +53,6 @@ export class ScheduleDocenteComponent {
 
   newScheduleDay = 'Lunes';
   newScheduleEntry = '08:00';
-  newScheduleDeparture = '12:00';
   savingSchedule = false;
 
   // ── Importación ───────────────────────────────────────────────────────────
@@ -206,7 +205,6 @@ export class ScheduleDocenteComponent {
     const schedule: DocenteSchedule = {
       day: this.newScheduleDay,
       entry_time: this.newScheduleEntry,
-      departure_time: this.newScheduleDeparture,
     };
     this.savingSchedule = true;
     this.attendanceService
@@ -217,7 +215,6 @@ export class ScheduleDocenteComponent {
           this.toast.success('Horario agregado');
           this.newScheduleDay = 'Lunes';
           this.newScheduleEntry = '08:00';
-          this.newScheduleDeparture = '12:00';
           this.loadSchedules();
         },
         error: (e) => {
