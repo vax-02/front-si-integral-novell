@@ -37,18 +37,10 @@ export class AttendanceService {
     });
   }
 
-  setBiometricPin(docenteId: number, pin: string): Observable<any> {
+  updateConfig(docenteId: number, pin: string, minutes: number): Observable<any> {
     return this.http.put(
-      API_ENDPOINTS.attendance.biometricPin(docenteId),
-      { pin },
-      { headers: this.getHeaders() },
-    );
-  }
-
-  setTolerance(docenteId: number, minutes: number): Observable<any> {
-    return this.http.put(
-      API_ENDPOINTS.attendance.tolerance(docenteId),
-      { minutes },
+      API_ENDPOINTS.attendance.config(docenteId),
+      { pin, minutes },
       { headers: this.getHeaders() },
     );
   }

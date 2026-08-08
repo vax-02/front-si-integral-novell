@@ -195,30 +195,7 @@ export class ScheduleDocenteComponent {
     });
   }
 
-  savePin(): void {
-    if (this.pin === '') {
-      this.toast.error('Ingrese el PIN biométrico');
-      return;
-    }
-    this.savingConfig = true;
-    this.attendanceService
-      .setBiometricPin(this.docenteSeleccionado.id, this.pin.trim())
-      .subscribe({
-        next: () => {
-          this.savingConfig = false;
-          this.docenteSeleccionado.biometric_pin = this.pin.trim();
-          this.toast.success('PIN biométrico guardado');
-          this.syncDocenteInList();
-        },
-        error: (e) => {
-          this.savingConfig = false;
-          const msg = e?.error?.message ?? 'Error al guardar el PIN';
-          this.toast.error(msg);
-        },
-      });
-  }
-
-  saveTolerance(): void {
+  saveConfig(): void {
     const val = Number(this.tolerance);
     if (Number.isNaN(val) || val < 0 || val > 60) {
       this.toast.error('La tolerancia debe estar entre 0 y 60 minutos');
@@ -226,17 +203,21 @@ export class ScheduleDocenteComponent {
     }
     this.savingConfig = true;
     this.attendanceService
-      .setTolerance(this.docenteSeleccionado.id, val)
+      .updateConfig(this.docenteSeleccionado.id, this.pin.trim(), val)
       .subscribe({
         next: () => {
           this.savingConfig = false;
+          this.docenteSeleccionado.biometric_pin = this.pin.trim() || null;
           this.docenteSeleccionado.tolerance_minutes = val;
-          this.toast.success('Tolerancia guardada');
+          this.toast.success('Configuración de asistencia guardada');
           this.syncDocenteInList();
         },
         error: (e) => {
           this.savingConfig = false;
-          const msg = e?.error?.message ?? 'Error al guardar la tolerancia';
+          const msg =
+            e?.error?.errors?.pin?.[0] ??
+            e?.error?.message ??
+            'Error al guardar la configuración';
           this.toast.error(msg);
         },
       });
