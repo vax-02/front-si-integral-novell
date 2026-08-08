@@ -74,6 +74,7 @@
               <th class="text-left py-3 px-4 font-semibold text-slate-600">Sigla</th>
               <th class="text-left py-3 px-4 font-semibold text-slate-600">Materia</th>
               <th class="text-left py-3 px-4 font-semibold text-slate-600">Prerrequisito</th>
+              <th class="text-center py-3 px-4 font-semibold text-slate-600">Calificación</th>
               <th class="text-left py-3 px-4 font-semibold text-slate-600">Estado</th>
             </tr>
           </thead>
@@ -84,6 +85,11 @@
               <td class="py-3 px-4 font-semibold text-slate-700">{{ materia.nombre }}</td>
               <td class="py-3 px-4 text-xs text-slate-400">
                 {{ materia.prerequisito || '—' }}
+              </td>
+              <td class="py-3 px-4 text-center text-sm"
+                [class.font-bold]="materia.status === 'Aprobado' || materia.status === 'Aprobada'"
+                [class.text-green-700]="materia.status === 'Aprobado' || materia.status === 'Aprobada'">
+                {{ (materia.status === 'Aprobado' || materia.status === 'Aprobada') ? (materia.calificacion ?? '—') : '—' }}
               </td>
               <td class="py-3 px-4">
                 @if (materia.status === 'Aprobado' || materia.status === 'Aprobada') {

@@ -9,6 +9,7 @@ interface MateriaPensum {
   nombre: string;
   prerequisito?: string;
   status?: string;
+  calificacion?: number | null;
 }
 
 interface LevelPensum {
@@ -70,6 +71,7 @@ export class MyPensulComponent {
               nombre: s.name,
               prerequisito: s.prerequisite_sigla,
               status: s.status,
+              calificacion: s.final_grade,
             })),
           })),
         }));
