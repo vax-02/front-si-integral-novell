@@ -61,6 +61,21 @@ export class UsersComponent {
   ngOnInit(): void {
     this.initForm();
     this.loadUsers();
+
+    this.form.get('ci')?.valueChanges.subscribe(() => {
+      const control = this.f['ci'];
+      if (control.errors?.['ciExists']) {
+        const { ciExists: _ciExists, ...rest } = control.errors;
+        control.setErrors(Object.keys(rest).length ? rest : null);
+      }
+    });
+    this.form.get('email')?.valueChanges.subscribe(() => {
+      const control = this.f['email'];
+      if (control.errors?.['emailExists']) {
+        const { emailExists: _emailExists, ...rest } = control.errors;
+        control.setErrors(Object.keys(rest).length ? rest : null);
+      }
+    });
   }
   initForm() {
     this.form = this.fb.group({
@@ -166,10 +181,10 @@ export class UsersComponent {
         );
         if (error.error && error.error.errors) {
           if (error.error.errors.ci) {
-            this.toast.error('Ese C.I. ya fue registrado');
+            this.f['ci'].setErrors({ ciExists: true });
           }
           if (error.error.errors.email) {
-            this.toast.error('Ese correo electrónico ya fue registrado');
+            this.f['email'].setErrors({ emailExists: true });
           }
         }
       },
@@ -267,8 +282,7 @@ export class UsersComponent {
     this.subtitleModalRoles =
       user.name + ' ' + user.first_lastname + ' ' + user.second_lastname;
     this.selectedUserId = user.id;
-    this.userRoles =  user.user_role ?? []
-    console.log(this.userRoles)
+    this.userRoles = (user.roles ?? []).map((role: any) => ({ role }));
   }
 
   hasRole(roleId: number): boolean {

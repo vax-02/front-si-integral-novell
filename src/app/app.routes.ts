@@ -1,76 +1,51 @@
 import { Routes } from '@angular/router';
-import { PresentationComponent } from './pages/presentation/presentation.component';
-import { LoginComponent } from './pages/login/login.component';
-import  {LayoutComponent} from './components/layout/layout.component';
-import { HomeComponent } from './pages/home/home.component';
-import { StudentsComponent } from './pages/students/students.component';
-import { DocentesComponent } from './pages/docentes/docentes.component';
-import { PaymentsComponent } from './pages/payments/payments.component';
-import { CalificationsComponent } from './pages/califications/califications.component';
-import { ProgramsComponent } from './pages/programs/programs.component';
-import { UsersComponent } from './pages/users/users.component';
-import { SettingsComponent } from './pages/settings/settings.component';
-import { RegistrationComponent } from './pages/registration/registration.component';
-import { ProfileComponent } from './pages/profile/profile.component';
-import { ChangePasswordComponent } from './pages/change-password/change-password.component';
-import { MySubjectsComponent } from './pages/my-subjects/my-subjects.component';
-import { MyPensulComponent } from './pages/my-pensul/my-pensul.component';
-import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
-import { MaterialsComponent } from './pages/materials/materials.component';
-import { SubjectsComponent } from './pages/subjects/subjects.component';
+import { LayoutComponent } from './components/layout/layout.component';
 import { authGuard } from './core/guards/auth.guard';
-import { CoursesComponent } from './pages/courses/courses.component';
-import { InstitutionComponent } from './pages/institution/institution.component';
-import { PaymentManagementComponent } from './pages/payment-management/payment-management.component';
-import { DocenteSubjectsComponent } from './docente-subjects/docente-subjects.component';
-import { GradesComponent } from './docente-subjects/grades/grades.component';
-import { RepositoryComponent } from './docente-subjects/repository/repository.component';
-import { ScheduleDocenteComponent } from './pages/schedule-docente/schedule-docente.component';
 
 export const routes: Routes = [
-  // Ruta para el Home
-  { path: '', component: PresentationComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'home', canActivate: [authGuard], component:  LayoutComponent, children: [
-    //docentes
-    { path: 'professor/subjets', component: DocenteSubjectsComponent },
-    { path: 'professor/grades', component: GradesComponent },
-    { path: 'professor/repository', component: RepositoryComponent },
+  // Rutas públicas (sin login): presentación y login independientes
+  { path: '', loadComponent: () => import('./pages/presentation/presentation.component').then(m => m.PresentationComponent) },
+  { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
 
+  // Área autenticada
+  { path: 'home', canActivate: [authGuard], component: LayoutComponent, children: [
+    //docentes
+    { path: 'professor/subjets', loadComponent: () => import('./docente-subjects/docente-subjects.component').then(m => m.DocenteSubjectsComponent) },
+    { path: 'professor/grades', loadComponent: () => import('./docente-subjects/grades/grades.component').then(m => m.GradesComponent) },
+    { path: 'professor/repository', loadComponent: () => import('./docente-subjects/repository/repository.component').then(m => m.RepositoryComponent) },
 
     //estudiantes
-    { path: 'my-subjects', component: MySubjectsComponent },
-    { path: 'my-schedule', component:  MyScheduleComponent },
-    { path: 'my-pensul', component: MyPensulComponent },
-    { path: 'materials', component: MaterialsComponent },
+    { path: 'my-subjects', loadComponent: () => import('./pages/my-subjects/my-subjects.component').then(m => m.MySubjectsComponent) },
+    { path: 'my-schedule', loadComponent: () => import('./pages/my-schedule/my-schedule.component').then(m => m.MyScheduleComponent) },
+    { path: 'my-pensul', loadComponent: () => import('./pages/my-pensul/my-pensul.component').then(m => m.MyPensulComponent) },
+    { path: 'materials', loadComponent: () => import('./pages/materials/materials.component').then(m => m.MaterialsComponent) },
 
     //admin
-    { path: 'dashboard', component: HomeComponent },
-    { path: 'students', component: StudentsComponent },
-    { path: 'docentes', component: DocentesComponent },
-    { path: 'payments', component: PaymentsComponent },
-    { path: 'payments-manage', component: PaymentManagementComponent },
+    { path: 'dashboard', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
+    { path: 'students', loadComponent: () => import('./pages/students/students.component').then(m => m.StudentsComponent) },
+    { path: 'docentes', loadComponent: () => import('./pages/docentes/docentes.component').then(m => m.DocentesComponent) },
+    { path: 'payments', loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent) },
+    { path: 'payments-manage', loadComponent: () => import('./pages/payment-management/payment-management.component').then(m => m.PaymentManagementComponent) },
 
-    { path: 'califications', component: CalificationsComponent },
-    { path: 'programs', component: ProgramsComponent },
-    { path: 'courses', component: CoursesComponent },
+    { path: 'califications', loadComponent: () => import('./pages/califications/califications.component').then(m => m.CalificationsComponent) },
+    { path: 'programs', loadComponent: () => import('./pages/programs/programs.component').then(m => m.ProgramsComponent) },
+    { path: 'courses', loadComponent: () => import('./pages/courses/courses.component').then(m => m.CoursesComponent) },
 
-    { path: 'schedule-docente', component: ScheduleDocenteComponent },
+    { path: 'schedule-docente', loadComponent: () => import('./pages/schedule-docente/schedule-docente.component').then(m => m.ScheduleDocenteComponent) },
 
-    { path: 'subjects', component: SubjectsComponent },
-    { path: 'users', component: UsersComponent },
+    { path: 'subjects', loadComponent: () => import('./pages/subjects/subjects.component').then(m => m.SubjectsComponent) },
+    { path: 'users', loadComponent: () => import('./pages/users/users.component').then(m => m.UsersComponent) },
 
-    { path: 'settings', component: SettingsComponent, children: [
-      { path: 'general', component: RegistrationComponent },
+    { path: 'settings', loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent), children: [
+      { path: 'general', loadComponent: () => import('./pages/registration/registration.component').then(m => m.RegistrationComponent) },
     ]},
-    { path: 'institution', component: InstitutionComponent  },
+    { path: 'institution', loadComponent: () => import('./pages/institution/institution.component').then(m => m.InstitutionComponent) },
 
     //general
-    { path: 'profile', component: ProfileComponent  },
-    { path: 'password', component: ChangePasswordComponent  },
+    { path: 'profile', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent) },
+    { path: 'password', loadComponent: () => import('./pages/change-password/change-password.component').then(m => m.ChangePasswordComponent) },
   ] },
-  // Redirección por defecto: si el usuario no escribe nada, va a /home
-  { path: '', redirectTo: '', pathMatch: 'full' },
+
   // Ruta comodín: si escriben cualquier cosa que no existe, va a /home
   { path: '**', redirectTo: 'home' },
 ];

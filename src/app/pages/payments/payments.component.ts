@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
-import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 import { StudentService } from '../../service/student.service';
 import { Student } from '../students/students.component';
 import { ToastService } from '../../shared/services/toast.service';
@@ -20,7 +19,6 @@ import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-
     CommonModule,
     ButtonComponent,
     BaseModalComponent,
-    BaseInputComponent,
     BaseModalConfirmComponent,
   ],
   templateUrl: './payments.component.html',
