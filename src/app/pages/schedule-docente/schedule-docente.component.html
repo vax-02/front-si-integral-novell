@@ -1,20 +1,31 @@
 <div class="space-y-6">
-    <!-- HEADER -->
-    <div class="flex justify-between items-center">
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
-        <h1 class="text-2xl font-bold text-slate-700">
-            Horarios docentes
-        </h1>
-        <p class="text-sm text-slate-500">Configuración de horarios para cálculo de puntualidad</p>
-
+      <h1 class="text-2xl font-bold text-slate-700">Horarios docentes</h1>
+      <p class="text-sm text-slate-500">
+        Configuración de PIN biométrico, tolerancia y horarios para el cálculo de puntualidad.
+      </p>
     </div>
-
-    <button class="bg-blue-600 text-white px-5 py-2 rounded-lg">
-        <i class="fas fa-plus"></i> Nuevo horario
-    </button>
-
-
-</div>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <label
+        class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold cursor-pointer hover:bg-blue-700 transition">
+        <i class="fas fa-upload" *ngIf="!importing"></i>
+        <i class="fas fa-spinner fa-spin" *ngIf="importing"></i>
+        {{ importing ? 'Importando...' : 'Importar asistencia' }}
+        <input
+          type="file"
+          accept=".dat,.txt"
+          class="hidden"
+          (change)="onFileSelected($event)" />
+      </label>
+      <app-button
+        label="Validar puntualidad"
+        icon="fas fa-clipboard-check px-2"
+        variant="secondary"
+        (click)="openValidate()"></app-button>
+    </div>
+  </div>
 
   <!-- FILTROS -->
   <div class="bg-white p-3 sm:p-6 rounded-2xl shadow-sm border border-slate-200
@@ -38,13 +49,13 @@
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[800px] text-sm">
+      <table class="w-full min-w-[900px] text-sm">
         <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
           <tr>
             <th class="p-4 text-left">Docente</th>
-            <th class="p-4 text-center">C.I.</th>
-            <th class="p-4 text-center">Celular</th>
-            <th class="p-4 text-center">Estado</th>
+            <th class="p-4 text-center">PIN biométrico</th>
+            <th class="p-4 text-center">Tolerancia</th>
+            <th class="p-4 text-center">Horarios</th>
             <th class="p-4 text-center">Acciones</th>
           </tr>
         </thead>
@@ -57,23 +68,31 @@
               </div>
               <div class="text-xs text-slate-400">{{ docente.user.email }}</div>
             </td>
-            <td class="p-4 text-center">{{ docente.user.ci }}</td>
-            <td class="p-4 text-center">{{ docente.user.cellphone || 'No definido' }}</td>
             <td class="p-4 text-center">
-              <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                [ngClass]="docente.user.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
-                {{ docente.user.status == 1 ? 'Activo' : 'Inactivo' }}
+              <span *ngIf="docente.biometric_pin" class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                {{ docente.biometric_pin }}
               </span>
+              <span *ngIf="!docente.biometric_pin" class="text-slate-300 text-xs">Sin PIN</span>
+            </td>
+            <td class="p-4 text-center">
+              <span *ngIf="docente.tolerance_minutes != null" class="text-slate-700">
+                {{ docente.tolerance_minutes }} min
+              </span>
+              <span *ngIf="docente.tolerance_minutes == null" class="text-slate-300 text-xs">Sin definir</span>
+            </td>
+            <td class="p-4 text-center">
+              <span class="text-slate-600">{{ docente.schedules?.length ?? 0 }} horarios</span>
             </td>
             <td class="p-4 text-center">
               <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-
-                <!-- Ver -->
-                <button (click)="openViewDocente(docente)" title="Ver detalle"
+                <button (click)="openConfig(docente)" title="Configurar PIN, tolerancia y horarios"
                   class="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-400 transition">
+                  <i class="text-sm fas fa-cog"></i>
+                </button>
+                <button (click)="openViewDocente(docente)" title="Ver detalle"
+                  class="bg-slate-500 text-white px-2 py-1 rounded-lg hover:bg-slate-400 transition">
                   <i class="text-sm fas fa-eye"></i>
                 </button>
-
               </div>
             </td>
           </tr>
@@ -118,7 +137,265 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL CONFIGURACIÓN DOCENTE (PIN / TOLERANCIA / HORARIOS)          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <app-base-modal
+    [isOpen]="modalConfig"
+    title="Configurar asistencia"
+    subtitle="PIN biométrico, tolerancia y horarios del docente"
+    size="lg"
+    confirmText="Cerrar"
+    cancelText="Aceptar"
+    (confirm)="modalConfig = false"
+    (cancel)="modalConfig = false">
 
+    <div class="space-y-6" *ngIf="docenteSeleccionado">
+
+      <!-- Identificación -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-lg font-bold">
+          {{ docenteSeleccionado.user?.name?.charAt(0) }}{{ docenteSeleccionado.user?.first_lastname?.charAt(0) }}
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">
+            {{ docenteSeleccionado.user?.name }} {{ docenteSeleccionado.user?.first_lastname }} {{ docenteSeleccionado.user?.second_lastname }}
+          </h2>
+          <p class="text-sm text-slate-500">C.I. {{ docenteSeleccionado.user?.ci }}</p>
+        </div>
+      </div>
+
+      <!-- PIN + Tolerancia -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">
+          Biometría
+        </h3>
+        <div class="grid md:grid-cols-2 gap-4 items-end">
+          <div class="space-y-1">
+            <app-base-input text="PIN biométrico" [(ngModel)]="pin" />
+            <p class="text-xs text-slate-400">PIN del reloj biométrico del docente.</p>
+          </div>
+          <div class="flex gap-2 items-end">
+            <div class="flex-1 space-y-1">
+              <app-base-input text="Tolerancia (minutos)" type_i="number" [(ngModel)]="tolerance" />
+              <p class="text-xs text-slate-400">Minutos de tolerancia antes de considerar retraso (0-60).</p>
+            </div>
+            <button (click)="saveTolerance()" [disabled]="savingConfig"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+              <i class="fas" [ngClass]="savingConfig ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+            </button>
+          </div>
+          <div class="md:col-span-2">
+            <button (click)="savePin()" [disabled]="savingConfig"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+              <i class="fas fa-fingerprint mr-2"></i>Guardar PIN
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Horarios -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">
+          Horarios de entrada/salida
+        </h3>
+
+        <div *ngIf="loadingSchedules" class="py-4 text-center text-slate-500">
+          <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+        </div>
+
+        <div *ngIf="!loadingSchedules && schedules.length === 0" class="bg-slate-50 rounded-xl p-4 text-sm text-slate-400 text-center">
+          Sin horarios configurados.
+        </div>
+
+        <div *ngIf="!loadingSchedules && schedules.length" class="overflow-x-auto rounded-xl border border-slate-200 mb-4">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+              <tr>
+                <th class="p-3 text-left">Día</th>
+                <th class="p-3 text-center">Entrada</th>
+                <th class="p-3 text-center">Salida</th>
+                <th class="p-3 text-center">Estado</th>
+                <th class="p-3 text-center"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr *ngFor="let s of schedules" class="hover:bg-slate-50 transition">
+                <td class="p-3 font-semibold text-slate-700">{{ s.day }}</td>
+                <td class="p-3 text-center text-slate-600">{{ s.entry_time }}</td>
+                <td class="p-3 text-center text-slate-600">{{ s.departure_time }}</td>
+                <td class="p-3 text-center">
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="s.is_active ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
+                    {{ s.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="p-3 text-center">
+                  <button (click)="removeSchedule(s.id)" title="Eliminar"
+                    class="bg-rose-500 text-white px-2 py-1 rounded-lg hover:bg-rose-400 transition">
+                    <i class="text-xs fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Agregar horario -->
+        <div class="grid md:grid-cols-4 gap-3 items-end bg-slate-50 p-4 rounded-xl">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-500">Día</label>
+            <select [(ngModel)]="newScheduleDay" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+              <option *ngFor="let d of DIAS" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-500">Hora entrada</label>
+            <input type="time" [(ngModel)]="newScheduleEntry" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-500">Hora salida</label>
+            <input type="time" [(ngModel)]="newScheduleDeparture" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <button (click)="addSchedule()" [disabled]="savingSchedule"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+            <i class="fas fa-plus mr-2" *ngIf="!savingSchedule"></i>
+            <i class="fas fa-spinner fa-spin mr-2" *ngIf="savingSchedule"></i>
+            Agregar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </app-base-modal>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL VALIDAR PUNTUALIDAD                                          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <app-base-modal
+    [isOpen]="modalValidate"
+    title="Validar puntualidad"
+    subtitle="Seleccione el rango de fechas a analizar"
+    size="md"
+    confirmText="Validar"
+    cancelText="Cancelar"
+    [loading]="validating"
+    (confirm)="runValidation()"
+    (cancel)="modalValidate = false">
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="space-y-1">
+        <label class="text-xs font-semibold text-slate-500">Fecha inicial</label>
+        <input type="date" [(ngModel)]="fromDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs font-semibold text-slate-500">Fecha final</label>
+        <input type="date" [(ngModel)]="toDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+    <p class="text-xs text-slate-400 mt-3">
+      Se compararán las entradas del reloj biométrico contra los horarios configurados de cada docente.
+    </p>
+  </app-base-modal>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL RESULTADO VALIDACIÓN                                         -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <app-base-modal
+    [isOpen]="modalValidateResult"
+    title="Resultado de puntualidad"
+    [subtitle]="fromDate + ' al ' + toDate"
+    size="lg"
+    confirmText="Cerrar"
+    [showCancel]="false"
+    (confirm)="modalValidateResult = false"
+    (cancel)="modalValidateResult = false">
+
+    <div class="space-y-6" *ngIf="validationResult">
+
+      <!-- Resumen -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+          <p class="text-2xl font-bold text-blue-700">{{ summaryDocentes }}</p>
+          <p class="text-xs text-slate-500">Docentes con datos</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+          <p class="text-2xl font-bold text-slate-700">{{ summaryDays }}</p>
+          <p class="text-xs text-slate-500">Días analizados</p>
+        </div>
+        <div class="bg-rose-50 border border-rose-100 rounded-xl p-4 text-center">
+          <p class="text-2xl font-bold text-rose-600">{{ summaryLate }}</p>
+          <p class="text-xs text-slate-500">Tardanzas</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
+          <p class="text-2xl font-bold text-amber-600">{{ summaryMinutes }}</p>
+          <p class="text-xs text-slate-500">Minutos de tardanza</p>
+        </div>
+      </div>
+
+      <!-- Detalle por docente -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">
+          Detalle por docente
+        </h3>
+
+        <div *ngIf="!validationResult.docentes?.length" class="text-sm text-slate-400 text-center py-4">
+          No hay docentes con horarios y registros en el rango seleccionado.
+        </div>
+
+        <div *ngFor="let d of validationResult.docentes" class="border border-slate-200 rounded-xl mb-4 overflow-hidden">
+          <div class="flex flex-wrap items-center gap-3 p-4 bg-slate-50 border-b border-slate-200">
+            <div class="flex-1 min-w-[200px]">
+              <p class="font-semibold text-slate-800">{{ d.name }}</p>
+              <p class="text-xs text-slate-400">
+                C.I. {{ d.ci }} · PIN: {{ d.biometric_pin ?? '—' }} · Tolerancia: {{ d.tolerance ?? 0 }} min
+              </p>
+            </div>
+            <div class="text-center">
+              <span class="px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700">
+                {{ docentePercent(d) }}%
+              </span>
+              <p class="text-[10px] text-slate-400 mt-1">puntualidad</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                <tr>
+                  <th class="p-3 text-left">Día</th>
+                  <th class="p-3 text-center">Ref. entrada</th>
+                  <th class="p-3 text-center">Entrada real</th>
+                  <th class="p-3 text-center">Estado</th>
+                  <th class="p-3 text-center">Tardanza</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr *ngFor="let row of d.days" class="hover:bg-slate-50 transition">
+                  <td class="p-3 font-medium text-slate-700">{{ row.day }} <span class="text-xs text-slate-400">{{ row.date }}</span></td>
+                  <td class="p-3 text-center text-slate-500">{{ row.reference_time }}</td>
+                  <td class="p-3 text-center text-slate-600">{{ row.first_clock ?? '—' }}</td>
+                  <td class="p-3 text-center">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="statusClass(row.status)">
+                      {{ statusLabel(row.status) }}
+                    </span>
+                  </td>
+                  <td class="p-3 text-center text-slate-600">
+                    {{ row.minutes_late ? row.minutes_late + ' min' : '—' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </app-base-modal>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL VER DETALLE DOCENTE                                          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
   <app-base-modal
     [isOpen]="modalViewDocente"
     title="Detalle del Docente"
@@ -130,8 +407,6 @@
     (cancel)="modalViewDocente = false">
 
     <div class="space-y-6" *ngIf="docenteSeleccionado">
-
-      <!-- Avatar + nombre -->
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-bold">
           {{ docenteSeleccionado.user?.name?.charAt(0) }}{{ docenteSeleccionado.user?.first_lastname?.charAt(0) }}
@@ -152,7 +427,6 @@
         </div>
       </div>
 
-      <!-- Contacto -->
       <div>
         <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">Contacto</h3>
         <div class="grid md:grid-cols-2 gap-3 text-sm">
@@ -167,7 +441,6 @@
         </div>
       </div>
 
-      <!-- Info profesional -->
       <div>
         <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">Información Profesional</h3>
         <div class="bg-slate-50 p-3 rounded-xl text-sm">
@@ -176,30 +449,6 @@
         </div>
       </div>
 
-      <!-- Documentos -->
-      <div>
-        <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">Documentos</h3>
-        <div class="grid md:grid-cols-2 gap-3 text-sm">
-          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-            <span>Hoja de Vida</span>
-            <i class="fas" [ngClass]="docenteSeleccionado.cv ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
-          </div>
-          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-            <span>Título Profesional</span>
-            <i class="fas" [ngClass]="docenteSeleccionado.professional_title ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
-          </div>
-          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-            <span>Fotocopia C.I.</span>
-            <i class="fas" [ngClass]="docenteSeleccionado.carnet ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
-          </div>
-          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-            <span>Certificados</span>
-            <i class="fas" [ngClass]="docenteSeleccionado.certificate ? 'fa-check text-green-500' : 'fa-xmark text-red-500'"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- Materias asignadas -->
       <div>
         <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">Materias asignadas</h3>
         <div *ngIf="docenteSeleccionado.subjects?.length; else noSubjects" class="flex flex-wrap gap-2">
@@ -212,39 +461,6 @@
           <p class="text-slate-400 text-sm">Sin materias asignadas.</p>
         </ng-template>
       </div>
-
     </div>
   </app-base-modal>
-
-
-  <!--modal crear horario de docente-->
-<div class="space-y-4">
-      <!-- DOCENTE -->
-    <div>
-        <label class="text-sm text-slate-500">Docente</label>
-        <select class="w-full border rounded-lg p-2">
-          <option>Carlos Mendoza</option>
-        </select>
-    </div>
-      
-    <div>
-        <label>Día</label>
-        <select class="w-full border rounded-lg p-2">
-            <option>Lunes</option>
-            <option>Martes</option>
-            <option>Miércoles</option>
-            <option>Jueves</option>
-            <option>Viernes</option>
-        </select>
-    </div>
-    
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label>Hora entrada</label>
-            <input type="time" value="08:00" class="w-full border rounded-lg p-2">
-        </div>
-    </div>
-
-    
-</div>
 </div>

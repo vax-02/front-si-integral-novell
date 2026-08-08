@@ -85,4 +85,12 @@ export const API_ENDPOINTS = {
       delete: (id: number) => `${API_BASE_URL}/grades/columns/${id}`,
     },
   },
+  attendance: {
+    import: `${API_BASE_URL}/attendance/import`,
+    validate: `${API_BASE_URL}/attendance/validate`,
+    biometricPin: (docenteId: number) => `${API_BASE_URL}/docentes/${docenteId}/biometric-pin`,
+    tolerance: (docenteId: number) => `${API_BASE_URL}/docentes/${docenteId}/tolerance`,
+    schedules: (docenteId: number) => `${API_BASE_URL}/docentes/${docenteId}/schedules`,
+    deleteSchedule: (scheduleId: number) => `${API_BASE_URL}/docente-schedules/${scheduleId}`,
+  },
 } as const;
