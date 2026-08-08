@@ -7,7 +7,6 @@ import { StudentsComponent } from './pages/students/students.component';
 import { DocentesComponent } from './pages/docentes/docentes.component';
 import { PaymentsComponent } from './pages/payments/payments.component';
 import { CalificationsComponent } from './pages/califications/califications.component';
-import { AttendanceComponent } from './pages/attendance/attendance.component';
 import { ProgramsComponent } from './pages/programs/programs.component';
 import { UsersComponent } from './pages/users/users.component';
 import { SettingsComponent } from './pages/settings/settings.component';
@@ -54,7 +53,6 @@ export const routes: Routes = [
     { path: 'payments-manage', component: PaymentManagementComponent },
 
     { path: 'califications', component: CalificationsComponent },
-    { path: 'attendance', component: AttendanceComponent },
     { path: 'programs', component: ProgramsComponent },
     { path: 'courses', component: CoursesComponent },
     { path: 'training', component: TrainingComponent },
