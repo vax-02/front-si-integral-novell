@@ -92,14 +92,37 @@
             </td>
           </tr>
 
-          <tr *ngIf="loading">
-            <td colspan="5" class="p-4 text-center">
-              <div class="flex items-center justify-center gap-2 text-slate-600">
-                <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
-                <span>Cargando estudiantes...</span>
-              </div>
-            </td>
-          </tr>
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
+            <tr *ngIf="loading">
+              <td class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse"></div>
+                  <div class="space-y-2">
+                    <div class="h-3.5 w-40 bg-slate-200 rounded animate-pulse"></div>
+                    <div class="h-3 w-32 bg-slate-100 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="h-3.5 w-16 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="flex justify-center">
+                  <div class="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex justify-center">
+                  <div class="h-6 w-20 bg-slate-200 rounded-full animate-pulse"></div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex gap-2 justify-center">
+                  <div class="h-9 w-9 bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
 
           <tr *ngIf="!loading && students.length === 0">
             <td colspan="5" class="p-6 text-center text-slate-400 text-sm">
