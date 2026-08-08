@@ -139,6 +139,20 @@ export class CareerService {
     );
   }
 
+  getCoursesByCareer(careerId: number): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl.courses.index}?career_id=${careerId}`,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  getGeneralGrades(parallelId: number): Observable<any> {
+    return this.http.get(
+      this.apiUrl.grades.generalByParallel(parallelId),
+      { headers: this.getHeaders() },
+    );
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

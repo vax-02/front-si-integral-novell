@@ -22,7 +22,6 @@ import { authGuard } from './core/guards/auth.guard';
 import { CoursesComponent } from './pages/courses/courses.component';
 import { InstitutionComponent } from './pages/institution/institution.component';
 import { PaymentManagementComponent } from './pages/payment-management/payment-management.component';
-import { TrainingComponent } from './pages/training/training.component';
 import { DocenteSubjectsComponent } from './docente-subjects/docente-subjects.component';
 import { GradesComponent } from './docente-subjects/grades/grades.component';
 import { RepositoryComponent } from './docente-subjects/repository/repository.component';
@@ -55,7 +54,6 @@ export const routes: Routes = [
     { path: 'califications', component: CalificationsComponent },
     { path: 'programs', component: ProgramsComponent },
     { path: 'courses', component: CoursesComponent },
-    { path: 'training', component: TrainingComponent },
 
     { path: 'schedule-docente', component: ScheduleDocenteComponent },
 
