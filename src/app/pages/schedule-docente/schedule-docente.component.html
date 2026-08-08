@@ -190,7 +190,7 @@
         <h3 class="text-sm font-semibold text-slate-700 mb-3 border-l-4 border-blue-500 pl-3">
           Biometría
         </h3>
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
           <div class="space-y-1">
             <app-base-input text="PIN biométrico" [(ngModel)]="pin" />
             <p class="text-xs text-slate-400">PIN del reloj biométrico (opcional y único por docente).</p>
@@ -199,12 +199,11 @@
             <app-base-input text="Tolerancia (minutos)" type_i="number" [(ngModel)]="tolerance" />
             <p class="text-xs text-slate-400">Minutos de tolerancia antes de considerar retraso (0-60).</p>
           </div>
+          <button (click)="saveConfig()" [disabled]="savingConfig" title="Guardar configuración"
+            class="flex items-center justify-center bg-blue-600 text-white w-11 h-11 rounded-xl hover:bg-blue-700 transition disabled:opacity-50">
+            <i class="fas" [ngClass]="savingConfig ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+          </button>
         </div>
-        <button (click)="saveConfig()" [disabled]="savingConfig"
-          class="mt-4 flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition disabled:opacity-50">
-          <i class="fas" [ngClass]="savingConfig ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-          Guardar configuración
-        </button>
       </div>
 
       <!-- Horarios -->
