@@ -30,8 +30,6 @@ export class ScheduleDocenteComponent {
   docenteSeleccionado: any = null;
   modalViewDocente = false;
   modalConfig = false;
-  modalValidate = false;
-  modalValidateResult = false;
 
   search = '';
   currentPage = 1;
@@ -58,18 +56,18 @@ export class ScheduleDocenteComponent {
   // ── Importación ───────────────────────────────────────────────────────────
   importing = false;
 
-  // ── Validación ────────────────────────────────────────────────────────────
-  validating = false;
-  fromDate = '';
-  toDate = '';
-  validationResult: any = null;
-
   // ── Detalle de ingreso por docente ────────────────────────────────────────
   detailFrom = '';
   detailTo = '';
   detailLoading = false;
   detailResult: any = null;
   readonly DIAS = DIAS;
+
+  // ── Calendario de ingreso ────────────────────────────────────────────────
+  calendarView: 'month' | 'week' = 'month';
+  cursorDate = new Date();
+  detailByDate = new Map<string, any>();
+  readonly DIAS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
   constructor(
     private docenteService: DocenteService,
@@ -105,10 +103,9 @@ export class ScheduleDocenteComponent {
   openViewDocente(docente: any): void {
     this.docenteSeleccionado = docente;
     this.detailResult = null;
-    const now = new Date();
-    const first = new Date(now.getFullYear(), now.getMonth(), 1);
-    this.detailFrom = this.toISODate(first);
-    this.detailTo = this.toISODate(now);
+    this.calendarView = 'month';
+    this.cursorDate = new Date();
+    this.setCalendarRange(this.cursorDate);
     this.modalViewDocente = true;
     this.loadDetail();
   }
@@ -134,12 +131,201 @@ export class ScheduleDocenteComponent {
         next: (res) => {
           this.detailLoading = false;
           this.detailResult = res.docentes?.[0] ?? null;
+          this.detailByDate = new Map<string, any>();
+          for (const row of this.detailResult?.days ?? []) {
+            this.detailByDate.set(row.date, row);
+          }
         },
         error: () => {
           this.detailLoading = false;
           this.toast.error('Error al cargar los registros de ingreso');
         },
       });
+  }
+
+  // ── Calendario de ingreso ────────────────────────────────────────────────
+  switchView(view: 'month' | 'week'): void {
+    if (this.calendarView === view) return;
+    this.calendarView = view;
+    this.setCalendarRange(this.cursorDate);
+    this.loadDetail();
+  }
+
+  changeCalendar(delta: number): void {
+    if (this.calendarView === 'month') {
+      this.cursorDate = new Date(
+        this.cursorDate.getFullYear(),
+        this.cursorDate.getMonth() + delta,
+        1,
+      );
+    } else {
+      this.cursorDate = this.addDays(this.mondayOf(this.cursorDate), delta * 7);
+    }
+    this.setCalendarRange(this.cursorDate);
+    this.loadDetail();
+  }
+
+  goToday(): void {
+    this.cursorDate = new Date();
+    this.setCalendarRange(this.cursorDate);
+    this.loadDetail();
+  }
+
+  get monthLabel(): string {
+    return this.monthYear(this.cursorDate);
+  }
+
+  get weekLabel(): string {
+    const monday = this.mondayOf(this.cursorDate);
+    const sunday = this.addDays(monday, 6);
+    const fmt = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`;
+    return `${fmt(monday)} – ${fmt(sunday)}`;
+  }
+
+  monthCells(): any[] {
+    const first = new Date(this.cursorDate.getFullYear(), this.cursorDate.getMonth(), 1);
+    const start = this.mondayOf(first);
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = this.addDays(start, i);
+      if (d.getMonth() !== this.cursorDate.getMonth()) return null;
+      const date = this.toISODate(d);
+      return { date, day: this.detailByDate.get(date) ?? null };
+    });
+  }
+
+  weekCells(): any[] {
+    const monday = this.mondayOf(this.cursorDate);
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = this.toISODate(this.addDays(monday, i));
+      return { date, dayName: DIAS[i], day: this.detailByDate.get(date) ?? null };
+    });
+  }
+
+  dayStatus(day: any): string | null {
+    const entries = day?.entries ?? [];
+    if (!entries.length) return null;
+    const order = ['retraso', 'puntual', 'falta'];
+    for (const s of order) {
+      if (entries.some((e: any) => e.status === s)) return s;
+    }
+    return null;
+  }
+
+  formatClock(entry: any): string {
+    const t = entry?.first_clock;
+    return t ? t.slice(0, 5) : '';
+  }
+
+  refTime(entry: any): string {
+    const t = entry?.reference_time;
+    return t ? t.slice(0, 5) : '';
+  }
+
+  // ── Tooltip de hover sobre las celdas del calendario ──────────────────────
+  tooltip: { x: number; y: number; day: any } | null = null;
+
+  showTooltip(event: MouseEvent, day: any): void {
+    if (!day?.entries?.length) {
+      this.tooltip = null;
+      return;
+    }
+    this.tooltip = { x: event.clientX, y: event.clientY, day };
+    this.moveTooltip(event);
+  }
+
+  moveTooltip(event: MouseEvent): void {
+    if (!this.tooltip) return;
+    const pad = 14;
+    this.tooltip = {
+      ...this.tooltip,
+      x: Math.max(8, Math.min(event.clientX + pad, window.innerWidth - 300)),
+      y: Math.max(8, Math.min(event.clientY + pad, window.innerHeight - 190)),
+    };
+  }
+
+  hideTooltip(): void {
+    this.tooltip = null;
+  }
+
+  formatTooltipDate(day: any): string {
+    const d = new Date(`${day.date}T00:00:00`);
+    const dayName = day.day ?? DIAS[(d.getDay() + 6) % 7];
+    return `${dayName} ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+  }
+
+  dayNum(date: string): number {
+    return Number(date.slice(8));
+  }
+
+  monthNum(date: string): number {
+    return Number(date.slice(5, 7));
+  }
+
+  isToday(date: string): boolean {
+    return date === this.toISODate(new Date());
+  }
+
+  private monthYear(date: Date): string {
+    const meses = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+    ];
+    return `${meses[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  cellClass(cell: any): string {
+    if (!cell) return 'border border-transparent bg-slate-50/60';
+    const today = this.isToday(cell.date) ? ' border-blue-400 ring-2 ring-blue-100' : '';
+    const s = this.dayStatus(cell.day);
+    if (s === 'puntual')
+      return 'border border-slate-200 border-l-4 border-l-emerald-500 bg-white hover:border-slate-300' + today;
+    if (s === 'retraso')
+      return 'border border-slate-200 border-l-4 border-l-rose-500 bg-white hover:border-slate-300' + today;
+    if (s === 'falta')
+      return 'border border-slate-200 border-l-4 border-l-slate-300 bg-slate-50 hover:border-slate-300' + today;
+    return 'border border-slate-200 border-l-4 border-l-slate-200 bg-white hover:border-slate-300' + today;
+  }
+
+  statusTint(status: string): string {
+    const map: Record<string, string> = {
+      puntual: 'text-emerald-500',
+      retraso: 'text-rose-500',
+      falta: 'text-slate-300',
+    };
+    return map[status] ?? 'text-slate-300';
+  }
+
+  statusText(status: string): string {
+    const map: Record<string, string> = {
+      puntual: 'text-emerald-600',
+      retraso: 'text-rose-600',
+      falta: 'text-slate-400',
+    };
+    return map[status] ?? 'text-slate-400';
+  }
+
+  private setCalendarRange(date: Date): void {
+    if (this.calendarView === 'month') {
+      this.detailFrom = this.toISODate(new Date(date.getFullYear(), date.getMonth(), 1));
+      this.detailTo = this.toISODate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+    } else {
+      const monday = this.mondayOf(date);
+      this.detailFrom = this.toISODate(monday);
+      this.detailTo = this.toISODate(this.addDays(monday, 6));
+    }
+  }
+
+  private addDays(date: Date, days: number): Date {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+
+  private mondayOf(date: Date): Date {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const offset = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - offset);
+    return d;
   }
 
   onSearchChange(): void {
@@ -285,72 +471,6 @@ export class ScheduleDocenteComponent {
         this.toast.error(msg);
       },
     });
-  }
-
-  // ── Validación de puntualidad ─────────────────────────────────────────────
-  openValidate(): void {
-    const now = new Date();
-    const first = new Date(now.getFullYear(), now.getMonth(), 1);
-    this.fromDate = this.toISODate(first);
-    this.toDate = this.toISODate(now);
-    this.validationResult = null;
-    this.modalValidate = true;
-  }
-
-  runValidation(): void {
-    if (!this.fromDate || !this.toDate) {
-      this.toast.error('Seleccione el rango de fechas');
-      return;
-    }
-    if (this.fromDate > this.toDate) {
-      this.toast.error('La fecha inicial debe ser anterior a la final');
-      return;
-    }
-    this.validating = true;
-    this.attendanceService.validateAttendance(this.fromDate, this.toDate).subscribe({
-      next: (res) => {
-        this.validating = false;
-        this.validationResult = res;
-        this.buildSummary();
-        this.modalValidate = false;
-        this.modalValidateResult = true;
-      },
-      error: (e) => {
-        this.validating = false;
-        const msg = e?.error?.message ?? 'Error al validar la asistencia';
-        this.toast.error(msg);
-      },
-    });
-  }
-
-  // ── Resumen calculado desde la respuesta del backend ──────────────────────
-  summaryDocentes = 0;
-  summaryDays = 0;
-  summaryLate = 0;
-  summaryMinutes = 0;
-
-  private buildSummary(): void {
-    const list: any[] = this.validationResult?.docentes ?? [];
-    this.summaryDocentes = list.length;
-    this.summaryDays = list.reduce(
-      (acc: number, d: any) => acc + (d.totals?.total_days ?? 0),
-      0,
-    );
-    this.summaryLate = list.reduce(
-      (acc: number, d: any) => acc + (d.totals?.late_count ?? 0),
-      0,
-    );
-    this.summaryMinutes = list.reduce(
-      (acc: number, d: any) => acc + (d.totals?.total_minutes_late ?? 0),
-      0,
-    );
-  }
-
-  docentePercent(d: any): number {
-    const total = d.totals?.total_days ?? 0;
-    if (!total) return 0;
-    const late = d.totals?.late_count ?? 0;
-    return Math.round(((total - late) / total) * 100);
   }
 
   statusLabel(status: string): string {
