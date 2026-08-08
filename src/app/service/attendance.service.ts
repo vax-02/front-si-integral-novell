@@ -28,9 +28,11 @@ export class AttendanceService {
     });
   }
 
-  validateAttendance(from: string, to: string): Observable<any> {
+  validateAttendance(from: string, to: string, docenteId?: number): Observable<any> {
+    const params: any = { from, to };
+    if (docenteId) params.docente_id = docenteId;
     return this.http.get(API_ENDPOINTS.attendance.validate, {
-      params: { from, to },
+      params,
       headers: this.getHeaders(),
     });
   }

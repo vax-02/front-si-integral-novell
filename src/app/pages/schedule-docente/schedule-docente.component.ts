@@ -63,6 +63,12 @@ export class ScheduleDocenteComponent {
   fromDate = '';
   toDate = '';
   validationResult: any = null;
+
+  // ── Detalle de ingreso por docente ────────────────────────────────────────
+  detailFrom = '';
+  detailTo = '';
+  detailLoading = false;
+  detailResult: any = null;
   readonly DIAS = DIAS;
 
   constructor(
@@ -98,7 +104,42 @@ export class ScheduleDocenteComponent {
 
   openViewDocente(docente: any): void {
     this.docenteSeleccionado = docente;
+    this.detailResult = null;
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+    this.detailFrom = this.toISODate(first);
+    this.detailTo = this.toISODate(now);
     this.modalViewDocente = true;
+    this.loadDetail();
+  }
+
+  loadDetail(): void {
+    if (!this.docenteSeleccionado) return;
+    if (!this.detailFrom || !this.detailTo) {
+      this.toast.error('Seleccione el rango de fechas');
+      return;
+    }
+    if (this.detailFrom > this.detailTo) {
+      this.toast.error('La fecha inicial debe ser anterior a la final');
+      return;
+    }
+    this.detailLoading = true;
+    this.attendanceService
+      .validateAttendance(
+        this.detailFrom,
+        this.detailTo,
+        this.docenteSeleccionado.id,
+      )
+      .subscribe({
+        next: (res) => {
+          this.detailLoading = false;
+          this.detailResult = res.docentes?.[0] ?? null;
+        },
+        error: () => {
+          this.detailLoading = false;
+          this.toast.error('Error al cargar los registros de ingreso');
+        },
+      });
   }
 
   onSearchChange(): void {
