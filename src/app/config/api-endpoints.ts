@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   parallels: {
     index: `${API_BASE_URL}/parallels`,
     materialsByParallel: (id: number) => `${API_BASE_URL}/parallels/${id}/materials`,
+    studentsByParallel: (id: number) => `${API_BASE_URL}/parallels/${id}/students`,
   },
   schedules: {
     byCareer: (careerId: number) => `${API_BASE_URL}/subjects/${careerId}/by-career`,

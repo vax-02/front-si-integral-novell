@@ -55,6 +55,12 @@ export class ParallelService {
       headers: this.getHeaders(),
     });
   }
+
+  getStudentsByParallel(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl.parallels.studentsByParallel(id)}`, {
+      headers: this.getHeaders(),
+    });
+  }
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

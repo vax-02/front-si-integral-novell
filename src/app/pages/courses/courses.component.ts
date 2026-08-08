@@ -82,6 +82,12 @@ export class CoursesComponent implements OnInit {
   loadingMaterials = false;
   materialsParallel: any = null;
 
+  // Students by parallel
+  modalStudents: boolean = false;
+  parallelStudents: any[] = [];
+  loadingStudents = false;
+  studentsParallel: any = null;
+
   // Form for adding/editing schedule items
   scheduleForm: FormGroup;
   editingScheduleId: number | null = null;
@@ -304,6 +310,32 @@ export class CoursesComponent implements OnInit {
     this.modalMaterials = false;
     this.materialsParallel = null;
     this.parallelMaterials = [];
+  }
+
+  // ── Ver estudiantes de un paralelo ──
+  openStudents(parallel: any) {
+    this.studentsParallel = parallel;
+    this.parallelStudents = [];
+    this.modalStudents = true;
+    this.loadingStudents = true;
+
+    this.parallelService.getStudentsByParallel(parallel.id).subscribe({
+      next: (resp) => {
+        this.loadingStudents = false;
+        this.parallelStudents = resp.students || [];
+      },
+      error: () => {
+        this.loadingStudents = false;
+        this.parallelStudents = [];
+        this.toast.error('Error al cargar los estudiantes del paralelo');
+      },
+    });
+  }
+
+  cancelStudents() {
+    this.modalStudents = false;
+    this.studentsParallel = null;
+    this.parallelStudents = [];
   }
 
   viewMaterial(materialId: number) {
