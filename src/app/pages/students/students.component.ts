@@ -11,6 +11,8 @@ import { StudentService } from '../../service/student.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
 import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
+import { AuthService } from '../../core/services/auth.service';
+import { Roles } from '../../core/constants/roles.constants';
 
 export interface Student {
   id: number;
@@ -119,7 +121,11 @@ export class StudentsComponent {
     private studentService: StudentService,
     private parallelService: ParallelService,
     private toast: ToastService,
+    private auth: AuthService,
   ) {}
+  get isSecretaria(): boolean {
+    return this.auth.user?.currentRole?.id === Roles.SECRETARIA.id;
+  }
   ngOnInit() {
     this.loadCareersForSelect();
     this.loadStudents();

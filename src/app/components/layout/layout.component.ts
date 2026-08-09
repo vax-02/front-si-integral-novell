@@ -19,6 +19,7 @@ export class LayoutComponent {
   openControl = false;
   openFinanzas = false;
   openAdmin = false;
+  openSecretaria = false;
   openConfig = false;
 
   isMobile = false;
@@ -56,20 +57,33 @@ export class LayoutComponent {
     }
   }
   toggleAcademico() {
-    this.openAcademico = !this.openAcademico;
+    this.toggleGroup('openAcademico');
   }
   toggleControl() {
-    this.openControl = !this.openControl;
+    this.toggleGroup('openControl');
   }
   toggleFinanzas() {
-    this.openFinanzas = !this.openFinanzas;
+    this.toggleGroup('openFinanzas');
   }
   toggleAdmin() {
-    this.openAdmin = !this.openAdmin;
+    this.toggleGroup('openAdmin');
   }
   infoProfile() {}
+  toggleSecretaria() {
+    this.toggleGroup('openSecretaria');
+  }
   toggleConfig() {
-    this.openConfig = !this.openConfig;
+    this.toggleGroup('openConfig');
+  }
+  private toggleGroup(key: 'openAcademico' | 'openControl' | 'openFinanzas' | 'openAdmin' | 'openSecretaria' | 'openConfig') {
+    const opening = !this[key];
+    this.openAcademico = false;
+    this.openControl = false;
+    this.openFinanzas = false;
+    this.openAdmin = false;
+    this.openSecretaria = false;
+    this.openConfig = false;
+    this[key] = opening;
   }
   logout() {
     localStorage.clear();

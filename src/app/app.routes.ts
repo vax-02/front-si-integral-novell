@@ -24,11 +24,13 @@ export const routes: Routes = [
     { path: 'my-pensul', canActivate: [roleGuard], data: { roles: [Roles.ESTUDIANTE.id] }, loadComponent: () => import('./pages/my-pensul/my-pensul.component').then(m => m.MyPensulComponent) },
     { path: 'materials', canActivate: [roleGuard], data: { roles: [Roles.ESTUDIANTE.id] }, loadComponent: () => import('./pages/materials/materials.component').then(m => m.MaterialsComponent) },
 
+    //secretaria
+    { path: 'payments', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id, Roles.SECRETARIA.id] }, loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent) },
+
     //admin
     { path: 'dashboard', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
-    { path: 'students', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/students/students.component').then(m => m.StudentsComponent) },
+    { path: 'students', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id, Roles.SECRETARIA.id] }, loadComponent: () => import('./pages/students/students.component').then(m => m.StudentsComponent) },
     { path: 'docentes', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/docentes/docentes.component').then(m => m.DocentesComponent) },
-    { path: 'payments', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent) },
     { path: 'payments-manage', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/payment-management/payment-management.component').then(m => m.PaymentManagementComponent) },
 
     { path: 'califications', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/califications/califications.component').then(m => m.CalificationsComponent) },

@@ -10,7 +10,7 @@
   </div>
 
   <!-- TARJETAS RESUMEN -->
-  <div class="grid md:grid-cols-2 gap-6">
+  <div class="grid md:grid-cols-2 gap-6" *ngIf="!isSecretaria">
     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
       <p class="text-sm text-slate-500">Ingresos del Mes</p>
       <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ totalPaysForMonth }}</h3>
@@ -287,7 +287,7 @@
                       <i class="fa-solid fa-print"></i>
                     </button>
 
-                    <button *ngIf="pay.status == 1" title="Anular recibo" (click)="confirmAnular(pay.id)" class="inline-flex items-center gap-2 ml-2 px-3 py-2 rounded-lg
+                    <button *ngIf="pay.status == 1 && !isSecretaria" title="Anular recibo" (click)="confirmAnular(pay.id)" class="inline-flex items-center gap-2 ml-2 px-3 py-2 rounded-lg
                        bg-red-600 hover:bg-red-700 text-white
                        transition-all duration-200 shadow-sm hover:shadow-md">
                       <i class="fa-solid fa-circle-xmark"></i>
@@ -627,6 +627,7 @@
 
 
   <app-base-modal-confirm
+    *ngIf="!isSecretaria"
     [isOpen]="modalConfirm"
     title="Anular pago"
     message="¿Estás seguro de anular el pago de este estudiante?"

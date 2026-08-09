@@ -12,7 +12,7 @@ export function getDefaultRoute(roleId: number): string {
     case Roles.ESTUDIANTE.id:
       return '/home/my-pensul';
     case Roles.SECRETARIA.id:
-      return '/home/profile';
+      return '/home/payments';
     default:
       return '/home/profile';
   }

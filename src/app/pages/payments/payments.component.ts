@@ -8,6 +8,8 @@ import { Student } from '../students/students.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { PayService } from '../../service/pay.service';
 import { ConceptService } from '../../service/concept.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Roles } from '../../core/constants/roles.constants';
 import { API_ENDPOINTS } from '../../config/api-endpoints';
 import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
@@ -97,7 +99,12 @@ paymentForm = {
     private payServie: PayService,
     private conceptService: ConceptService,
     private toast: ToastService,
+    private auth: AuthService,
   ) {}
+
+  get isSecretaria(): boolean {
+    return this.auth.user?.currentRole?.id === Roles.SECRETARIA.id;
+  }
 
   ngOnInit() {
     this.loadStudents();

@@ -1,0 +1,13 @@
+.submenu-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.submenu-grid.open {
+  grid-template-rows: 1fr;
+}
+
+.submenu-grid > div {
+  overflow: hidden;
+}

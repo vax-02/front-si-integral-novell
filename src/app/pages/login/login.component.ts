@@ -108,6 +108,9 @@ export class LoginComponent {
           case Roles.ESTUDIANTE.id:
             this.router.navigate(['/home/my-pensul']);
             break;
+          case Roles.SECRETARIA.id:
+            this.router.navigate(['/home/payments']);
+            break;
           default:
             this.router.navigate(['/home']);
         }

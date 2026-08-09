@@ -59,7 +59,9 @@
         </div>
 
         <!-- SUBMENU -->
-        <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openAcademico">
+        <div>
+        <div class="ml-6 space-y-1">
           <a routerLink="/home/my-pensul" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -81,6 +83,8 @@
             Materiales
           </a>
         </div>
+        </div>
+      </div>
       </div>
       }
 
@@ -98,7 +102,9 @@
         </div>
 
         <!-- SUBMENU -->
-        <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openAcademico">
+        <div>
+        <div class="ml-6 space-y-1">
           <a routerLink="/home/professor/subjets" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -112,6 +118,8 @@
           </a>
 
         </div>
+        </div>
+      </div>
       </div>
       }
       @if (Roles.ADMIN.id == user.currentRole.id) {
@@ -136,7 +144,9 @@
         </div>
 
         <!-- SUBMENU -->
-        <div *ngIf="(!collapsed || isMobile) && openAcademico" class="ml-6 space-y-1">
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openAcademico">
+        <div>
+        <div class="ml-6 space-y-1">
           <a routerLink="/home/students" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -170,6 +180,8 @@
             Materias
           </a>
         </div>
+        </div>
+      </div>
       </div>
 
       <!-- FINANZAS -->
@@ -183,22 +195,22 @@
           <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down" [class.rotate-180]="openFinanzas"></i>
         </div>
 
-        <div *ngIf="(!collapsed || isMobile) && openFinanzas" class="ml-6">
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openFinanzas">
+        <div>
+        <div class="ml-6 space-y-1">
           <a routerLink="/home/payments" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
             Cobros
           </a>
-        </div>
-
-
-        <div *ngIf="(!collapsed || isMobile) && openFinanzas" class="ml-6">
           <a routerLink="/home/payments-manage" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
             Gestion de Pagos
           </a>
         </div>
+        </div>
+      </div>
       </div>
 
       <!-- ADMIN -->
@@ -213,7 +225,9 @@
           <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down" [class.rotate-180]="openAdmin"></i>
         </div>
 
-        <div *ngIf="(!collapsed || isMobile) && openAdmin" class="ml-6 space-y-1">
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openAdmin">
+        <div>
+        <div class="ml-6 space-y-1">
           <a routerLink="/home/schedule-docente" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -225,6 +239,41 @@
             Usuarios
           </a>
         </div>
+        </div>
+      </div>
+      </div>
+      }
+
+      @if(Roles.SECRETARIA.id === user.currentRole.id) {
+      <!-- SECCION SECRETARIA -->
+      <div>
+        <div (click)="toggleSecretaria()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed && !isMobile ? 'justify-center' : 'justify-between'">
+          <div class="flex items-center" [ngClass]="collapsed && !isMobile ? '' : 'gap-4'">
+            <i class="fa-solid fa-user-tie text-slate-500 group-hover:text-blue-600 text-lg"></i>
+            <span *ngIf="!collapsed || isMobile" class="text-xs font-bold uppercase text-slate-400">Secretaría</span>
+          </div>
+          <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down transition-transform"
+            [class.rotate-180]="openSecretaria"></i>
+        </div>
+
+        <!-- SUBMENU -->
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openSecretaria">
+        <div>
+        <div class="ml-6 space-y-1">
+          <a routerLink="/home/students" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Estudiantes
+          </a>
+          <a routerLink="/home/payments" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Cobros
+          </a>
+        </div>
+        </div>
+      </div>
       </div>
       }
 
@@ -239,7 +288,9 @@
           <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down" [class.rotate-180]="openConfig"></i>
         </div>
 
-        <div *ngIf="(!collapsed || isMobile) && openConfig" class="ml-6 space-y-1">
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openConfig">
+        <div>
+        <div class="ml-6 space-y-1">
           <a routerLink="/home/profile" routerLinkActive="text-blue-600"
             class="block py-2 text-sm hover:text-blue-600 transition-colors"
             (click)="isMobile ? collapsed = true : null">
@@ -258,6 +309,8 @@
           </a>
           }
         </div>
+        </div>
+      </div>
       </div>
     </nav>
 
