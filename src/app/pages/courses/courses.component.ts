@@ -15,6 +15,9 @@ import { ToastService } from '../../shared/services/toast.service';
 import { ParallelService } from '../../service/parallel.service';
 import { ScheduleService } from '../../service/schedule.service';
 import { SubjectService } from '../../service/subject.service';
+import { StudentService } from '../../service/student.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Roles } from '../../core/constants/roles.constants';
 import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 
 @Component({
@@ -88,6 +91,34 @@ export class CoursesComponent implements OnInit {
   loadingStudents = false;
   studentsParallel: any = null;
 
+  // Advance level from a parallel's student
+  modalAdvance: boolean = false;
+  advanceStudent: any = null;
+  advancePreview: any = null;
+  advanceParallels: any[] = [];
+  advanceParallelId: number | null = null;
+  advanceCurrentLevel: number | null = null;
+  advanceNextLevel: number | null = null;
+  advanceTotalLevels: number | null = null;
+  advanceIsLastLevel = false;
+  advanceLoading = false;
+  advanceSaving = false;
+  advanceConfirmOpen = false;
+  advanceEgressConfirmOpen = false;
+  advanceResultModal = false;
+  advanceResult: any = null;
+
+  // Advance whole parallel
+  modalParallelAdvance = false;
+  parallelAdvancePreview: any = null;
+  parallelAdvanceParallels: any[] = [];
+  parallelAdvanceParallelId: number | null = null;
+  parallelAdvanceLoading = false;
+  parallelAdvanceSaving = false;
+  parallelAdvanceConfirmOpen = false;
+  parallelAdvanceResultModal = false;
+  parallelAdvanceResult: any = null;
+
   // Form for adding/editing schedule items
   scheduleForm: FormGroup;
   editingScheduleId: number | null = null;
@@ -104,7 +135,9 @@ export class CoursesComponent implements OnInit {
     private parallelService: ParallelService,
     private scheduleService: ScheduleService,
     private subjectService: SubjectService,
+    private studentService: StudentService,
     private toast: ToastService,
+    private authService: AuthService,
   ) {
     this.formParallel = this.fb.group({
       course_id: [null, Validators.required],
@@ -336,6 +369,238 @@ export class CoursesComponent implements OnInit {
     this.modalStudents = false;
     this.studentsParallel = null;
     this.parallelStudents = [];
+  }
+
+  // ── Avanzar de nivel desde un paralelo ──
+  get isAdmin(): boolean {
+    const user = this.authService.user;
+    if (user?.currentRole?.id == Roles.ADMIN.id) return true;
+    return Array.isArray(user?.roles) && user.roles.some((r: any) => r.id == Roles.ADMIN.id);
+  }
+
+  ordinalLabel(n: number | null): string {
+    const ordinals = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo'];
+    return ordinals[(n ?? 0) - 1] || `${n ?? 0}º`;
+  }
+
+  openAdvance(student: any) {
+    this.advanceStudent = student;
+    this.advancePreview = null;
+    this.advanceParallels = [];
+    this.advanceParallelId = null;
+    this.advanceCurrentLevel = null;
+    this.advanceNextLevel = null;
+    this.advanceTotalLevels = null;
+    this.advanceIsLastLevel = false;
+    this.modalAdvance = true;
+    this.loadAdvancePreview();
+  }
+
+  closeAdvance() {
+    this.modalAdvance = false;
+    this.advanceStudent = null;
+    this.advancePreview = null;
+    this.advanceParallels = [];
+    this.advanceParallelId = null;
+    this.advanceResult = null;
+    this.advanceResultModal = false;
+  }
+
+  loadAdvancePreview() {
+    if (!this.advanceStudent || !this.careerId) return;
+    this.advanceLoading = true;
+    this.studentService.previewAdvanceLevel(this.advanceStudent.id, this.careerId).subscribe({
+      next: (res) => {
+        this.advanceLoading = false;
+        this.advancePreview = res;
+        this.advanceCurrentLevel = res.current_level;
+        this.advanceNextLevel = res.new_level;
+        this.advanceTotalLevels = res.total_levels;
+        this.advanceIsLastLevel = res.is_last_level;
+        this.advanceParallels = res.available_parallels || [];
+      },
+      error: (err) => {
+        this.advanceLoading = false;
+        const message = err?.error?.message;
+        if (message) {
+          this.toast.info(message);
+          return;
+        }
+        this.toast.error('Error al obtener la vista previa del avance');
+      }
+    });
+  }
+
+  get advanceConfirmMessage(): string {
+    if (!this.advancePreview) {
+      return '¿Confirma el avance de nivel del estudiante?';
+    }
+    const parts = [
+      `Moverá al estudiante del nivel ${this.ordinalLabel(this.advanceCurrentLevel)} al ${this.ordinalLabel(this.advanceNextLevel)}.`,
+      `Toma ahora: ${(this.advancePreview.assigned || []).length}.`,
+      `Aprobadas: ${(this.advancePreview.approved || []).length}.`,
+      `Repite: ${(this.advancePreview.repeated || []).length}.`,
+      `Pendientes por pre-requisito: ${(this.advancePreview.missing_by_prerequisite || []).length}.`,
+    ];
+    return parts.join(' ');
+  }
+
+  confirmAdvance() {
+    if (this.advanceSaving) return;
+    if (!this.advanceStudent) return;
+    if (!this.advanceParallelId) {
+      this.toast.error('Seleccione un paralelo del siguiente nivel');
+      return;
+    }
+    this.advanceSaving = true;
+    this.advanceConfirmOpen = false;
+    this.studentService.advanceLevel(this.advanceStudent.id, {
+      career_id: this.careerId,
+      parallel_id: this.advanceParallelId,
+    }).subscribe({
+      next: (res) => {
+        this.advanceSaving = false;
+        this.advanceResult = res;
+        this.advanceResultModal = true;
+        this.toast.success('Nivel avanzado correctamente');
+        this.reloadParallelStudents();
+      },
+      error: (err: any) => {
+        this.advanceSaving = false;
+        const message = err?.error?.message;
+        if (message) {
+          this.toast.info(message);
+          return;
+        }
+        if (err.status === 403) {
+          this.toast.error('Solo el administrador puede realizar esta acción');
+          return;
+        }
+        this.toast.error('Error al avanzar de nivel');
+      }
+    });
+  }
+
+  confirmGraduate() {
+    if (this.advanceSaving) return;
+    if (!this.advanceStudent) return;
+    if (!this.careerId) return;
+    this.advanceSaving = true;
+    this.advanceEgressConfirmOpen = false;
+    this.studentService.graduate(this.advanceStudent.id, this.careerId).subscribe({
+      next: (res) => {
+        this.advanceSaving = false;
+        this.toast.success(res?.message || 'Estudiante egresado correctamente');
+        this.closeAdvance();
+        this.reloadParallelStudents();
+      },
+      error: (err: any) => {
+        this.advanceSaving = false;
+        const message = err?.error?.message;
+        if (message) {
+          this.toast.info(message);
+          return;
+        }
+        if (err.status === 403) {
+          this.toast.error('Solo el administrador puede realizar esta acción');
+          return;
+        }
+        this.toast.error('Error al egresar al estudiante');
+      }
+    });
+  }
+
+  reloadParallelStudents() {
+    if (this.studentsParallel) {
+      this.openStudents(this.studentsParallel);
+    }
+  }
+
+  // ── Avanzar de nivel a todo el paralelo ──
+  openParallelAdvance() {
+    if (!this.studentsParallel) return;
+    this.parallelAdvancePreview = null;
+    this.parallelAdvanceParallels = [];
+    this.parallelAdvanceParallelId = null;
+    this.parallelAdvanceResult = null;
+    this.parallelAdvanceResultModal = false;
+    this.modalParallelAdvance = true;
+    this.loadParallelAdvancePreview();
+  }
+
+  closeParallelAdvance() {
+    this.modalParallelAdvance = false;
+    this.parallelAdvancePreview = null;
+    this.parallelAdvanceParallels = [];
+    this.parallelAdvanceParallelId = null;
+    this.parallelAdvanceResult = null;
+    this.parallelAdvanceResultModal = false;
+  }
+
+  loadParallelAdvancePreview() {
+    if (!this.studentsParallel) return;
+    this.parallelAdvanceLoading = true;
+    this.parallelService.previewParallelAdvance(this.studentsParallel.id).subscribe({
+      next: (res) => {
+        this.parallelAdvanceLoading = false;
+        this.parallelAdvancePreview = res;
+        this.parallelAdvanceParallels = res.available_parallels || [];
+      },
+      error: (err) => {
+        this.parallelAdvanceLoading = false;
+        const message = err?.error?.message;
+        if (message) {
+          this.toast.info(message);
+          return;
+        }
+        this.toast.error('Error al obtener la vista previa del avance del paralelo');
+      },
+    });
+  }
+
+  get parallelAdvanceConfirmMessage(): string {
+    if (!this.parallelAdvancePreview) {
+      return '¿Confirma el avance de nivel de todos los estudiantes del paralelo?';
+    }
+    const s = this.parallelAdvancePreview.summary || {};
+    return `Se avanzarán ${s.advanceable ?? 0} estudiante(s) del nivel ${this.ordinalLabel(this.parallelAdvancePreview.current_level)} al ${this.ordinalLabel(this.parallelAdvancePreview.new_level)}. ${s.last_level ?? 0} se omiten por cursar el último nivel. Esta acción no se puede deshacer.`;
+  }
+
+  hasSufficientParallel(): boolean {
+    return (this.parallelAdvanceParallels || []).some((p) => p.sufficient);
+  }
+
+  confirmParallelAdvance() {
+    if (this.parallelAdvanceSaving) return;
+    if (!this.studentsParallel) return;
+    if (!this.parallelAdvanceParallelId) {
+      this.toast.error('Seleccione un paralelo del siguiente nivel');
+      return;
+    }
+    this.parallelAdvanceSaving = true;
+    this.parallelAdvanceConfirmOpen = false;
+    this.parallelService.advanceParallelLevel(this.studentsParallel.id, this.parallelAdvanceParallelId).subscribe({
+      next: (res) => {
+        this.parallelAdvanceSaving = false;
+        this.parallelAdvanceResult = res;
+        this.parallelAdvanceResultModal = true;
+        this.toast.success(res?.message || 'Paralelo avanzado de nivel correctamente');
+        this.reloadParallelStudents();
+      },
+      error: (err: any) => {
+        this.parallelAdvanceSaving = false;
+        const message = err?.error?.message;
+        if (message) {
+          this.toast.info(message);
+          return;
+        }
+        if (err.status === 403) {
+          this.toast.error('Solo el administrador puede realizar esta acción');
+          return;
+        }
+        this.toast.error('Error al avanzar de nivel el paralelo');
+      },
+    });
   }
 
   viewMaterial(materialId: number) {

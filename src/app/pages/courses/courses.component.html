@@ -512,6 +512,15 @@
     size="lg" confirmText="Aceptar" [loading]="loadingStudents" (confirm)="cancelStudents()" [showCancel]="false">
 
     <div class="space-y-4">
+      <div *ngIf="!loadingStudents && parallelStudents.length > 0 && isAdmin"
+        class="flex justify-end">
+        <button
+          class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+          (click)="openParallelAdvance()">
+          <i class="fas fa-arrow-up"></i> Avanzar todo el paralelo
+        </button>
+      </div>
+
       <div *ngIf="loadingStudents" class="flex items-center justify-center gap-2 py-10 text-slate-600">
         <i class="fas fa-spinner fa-spin text-emerald-600 text-xl"></i>
         <span>Cargando estudiantes...</span>
@@ -532,6 +541,7 @@
               <th class="p-3 text-left hidden sm:table-cell">Email</th>
               <th class="p-3 text-center hidden md:table-cell">Celular</th>
               <th class="p-3 text-center">Estado</th>
+              <th class="p-3 text-center" *ngIf="isAdmin">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -547,6 +557,13 @@
                   {{ student.status ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
+              <td class="p-3 text-center" *ngIf="isAdmin">
+                <button
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                  (click)="openAdvance(student)">
+                  <i class="fas fa-arrow-up"></i> Avanzar de Nivel
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -558,6 +575,436 @@
       </div>
     </div>
   </app-base-modal>
+
+  <!-- MODAL AVANZAR DE NIVEL -->
+
+  <!-- MODAL: AVANZAR TODO EL PARALELO -->
+  <app-base-modal [isOpen]="modalParallelAdvance" title="Avanzar de nivel - todo el paralelo"
+    [subtitle]="studentsParallel ? ('Paralelo ' + studentsParallel.paralelo + ' - ' + subtitleNewParallel) : ''"
+    size="lg" [showFooter]="false" (cancel)="closeParallelAdvance()">
+
+    <div class="space-y-4">
+      <div *ngIf="parallelAdvanceLoading" class="flex items-center justify-center gap-2 py-10 text-slate-600">
+        <i class="fas fa-spinner fa-spin text-emerald-600 text-xl"></i>
+        <span>Obteniendo vista previa...</span>
+      </div>
+
+      <div *ngIf="!parallelAdvanceLoading && parallelAdvancePreview" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Paralelo actual</p>
+            <p class="font-semibold text-slate-800">
+              <span class="uppercase">{{ parallelAdvancePreview.parallel.paralelo }}</span> - {{ parallelAdvancePreview.parallel.turno }}
+              <span class="text-xs text-slate-400 font-normal">({{ parallelAdvancePreview.parallel.course }})</span>
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Avance</p>
+            <p class="font-semibold text-slate-800">
+              {{ ordinalLabel(parallelAdvancePreview.current_level) }} &rarr; {{ ordinalLabel(parallelAdvancePreview.new_level) }}
+              <span class="text-xs text-slate-400 font-normal">({{ ordinalLabel(parallelAdvancePreview.current_level) }} de {{ ordinalLabel(parallelAdvancePreview.total_levels) }})</span>
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="parallelAdvancePreview.is_last_level"
+          class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+          <p class="text-sm font-semibold text-emerald-700">
+            <i class="fas fa-graduation-cap mr-1"></i>
+            Este paralelo corresponde al &uacute;ltimo nivel de la carrera. No hay nivel siguiente al que avanzar.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-slate-800">{{ parallelAdvancePreview.summary.total }}</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wide">Estudiantes</p>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-blue-600">{{ parallelAdvancePreview.summary.advanceable }}</p>
+            <p class="text-xs text-blue-500 uppercase tracking-wide">Avanzar&aacute;n</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-amber-600">{{ parallelAdvancePreview.summary.last_level }}</p>
+            <p class="text-xs text-amber-500 uppercase tracking-wide">&Uacute;ltimo nivel</p>
+          </div>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-red-600">{{ parallelAdvancePreview.summary.with_alerts }}</p>
+            <p class="text-xs text-red-500 uppercase tracking-wide">Con alertas</p>
+          </div>
+        </div>
+
+        <div *ngIf="parallelAdvancePreview.students.length > 0"
+          class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+              <tr>
+                <th class="p-3 text-left">Estudiante</th>
+                <th class="p-3 text-center">C.I.</th>
+                <th class="p-3 text-center">Avanza</th>
+                <th class="p-3 text-center">Toma / Repite / Alertas</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr *ngFor="let student of parallelAdvancePreview.students" class="hover:bg-slate-50 transition">
+                <td class="p-3 font-semibold text-slate-700">{{ student.name }}</td>
+                <td class="p-3 text-center text-slate-600">{{ student.ci }}</td>
+                <td class="p-3 text-center">
+                  <span *ngIf="student.is_last_level"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-600">
+                    No - &uacute;ltimo nivel
+                  </span>
+                  <span *ngIf="!student.is_last_level"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
+                    S&iacute;
+                  </span>
+                </td>
+                <td class="p-3 text-center text-xs text-slate-500">
+                  <span class="text-emerald-600 font-medium">{{ (student.assigned || []).length }}</span> /
+                  <span class="text-amber-600 font-medium">{{ (student.repeated || []).length }}</span> /
+                  <span class="text-red-600 font-medium">{{ (student.prerequisite_alerts || []).length }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="parallelAdvancePreview.students.length === 0"
+          class="text-center py-6 text-slate-400 text-sm">
+          No hay estudiantes activos en este paralelo.
+        </div>
+
+        <div *ngIf="!parallelAdvancePreview.is_last_level" class="grid md:grid-cols-2 gap-4 items-end">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Nuevo Paralelo</label>
+            <select
+              class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+              [(ngModel)]="parallelAdvanceParallelId">
+              <option [ngValue]="null">Seleccionar turno y paralelo</option>
+              <option *ngFor="let parallel of parallelAdvanceParallels" [ngValue]="parallel.id"
+                [disabled]="!parallel.sufficient">
+                Cupo: {{ parallel.available }} - {{ parallel.turno }} - {{ parallel.paralelo }}
+                <span *ngIf="!parallel.sufficient">(cupo insuficiente)</span>
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <p *ngIf="!parallelAdvancePreview.is_last_level && parallelAdvanceParallels.length > 0 && !hasSufficientParallel()"
+          class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">
+          Ninguno de los paralelos del siguiente nivel tiene cupo suficiente para los {{ parallelAdvancePreview.summary.advanceable }} estudiante(s) que avanzar&aacute;n. Libere cupos o cree un paralelo nuevo.
+        </p>
+
+        <p *ngIf="!parallelAdvancePreview.is_last_level && parallelAdvanceParallels.length === 0"
+          class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl p-3">
+          No existen paralelos disponibles para el siguiente nivel. Cree uno desde esta secci&oacute;n y vuelva a intentar.
+        </p>
+
+        <div class="flex justify-end pt-2">
+          <button class="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition mr-2"
+            (click)="closeParallelAdvance()">
+            Cerrar
+          </button>
+          <button *ngIf="!parallelAdvancePreview.is_last_level"
+            class="bg-blue-500 hover:bg-blue-600 px-4 py-2 text-sm rounded-lg text-white"
+            [disabled]="parallelAdvanceSaving || !hasSufficientParallel()" (click)="parallelAdvanceConfirmOpen = true">
+            <i class="fas fa-arrow-up mr-1"></i> Avanzar todos
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: RESULTADO AVANCE DEL PARALELO -->
+  <app-base-modal [isOpen]="parallelAdvanceResultModal" title="Avance de nivel completado" size="lg"
+    [showCancel]="false" confirmText="Aceptar"
+    (cancel)="parallelAdvanceResultModal = false" (confirm)="parallelAdvanceResultModal = false">
+    <div *ngIf="parallelAdvanceResult">
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Nivel asignado</p>
+            <p class="font-semibold text-slate-800">
+              {{ ordinalLabel(parallelAdvanceResult.current_level) }} &rarr; {{ ordinalLabel(parallelAdvanceResult.new_level) }}
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Paralelo asignado</p>
+            <p class="font-semibold text-slate-800">
+              <span class="uppercase">{{ parallelAdvanceResult.parallel.paralelo }}</span> - {{ parallelAdvanceResult.parallel.turno }}
+              <span class="text-xs text-slate-400 font-normal">({{ parallelAdvanceResult.parallel.course }})</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+          <p class="text-2xl font-bold text-slate-800">{{ parallelAdvanceResult.summary.advanced }}</p>
+          <p class="text-xs text-slate-500 uppercase tracking-wide">Avanzaron</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+          <p class="text-2xl font-bold text-amber-600">{{ parallelAdvanceResult.summary.skipped_last_level }}</p>
+          <p class="text-xs text-amber-500 uppercase tracking-wide">&Uacute;ltimo nivel</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+          <p class="text-2xl font-bold text-red-600">{{ parallelAdvanceResult.summary.with_alerts }}</p>
+          <p class="text-xs text-red-500 uppercase tracking-wide">Con alertas</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+          <p class="text-2xl font-bold text-slate-800">{{ parallelAdvanceResult.summary.skipped_no_active }}</p>
+          <p class="text-xs text-slate-500 uppercase tracking-wide">Sin activo</p>
+        </div>
+      </div>
+
+      <div *ngIf="parallelAdvanceResult.skipped_last_level.length > 0"
+        class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-amber-700 mb-2">
+          <i class="fas fa-graduation-cap mr-1"></i> No avanzaron (&uacute;ltimo nivel):
+        </p>
+        <ul class="text-sm text-slate-700 space-y-1">
+          <li *ngFor="let s of parallelAdvanceResult.skipped_last_level">{{ s.name }}</li>
+        </ul>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <app-base-modal-confirm
+    [isOpen]="parallelAdvanceConfirmOpen"
+    title="¿Confirmar avance de todo el paralelo?"
+    [message]="parallelAdvanceConfirmMessage"
+    confirmText="Sí, avanzar"
+    cancelText="Cancelar"
+    [loading]="parallelAdvanceSaving"
+    (confirm)="confirmParallelAdvance()"
+    (cancel)="parallelAdvanceConfirmOpen = false">
+  </app-base-modal-confirm>
+  <app-base-modal [isOpen]="modalAdvance" title="Avanzar de nivel"
+    [subtitle]="advanceStudent ? (advanceStudent.name + ' - ' + subtitleNewParallel) : ''"
+    size="lg" [showFooter]="false" (cancel)="closeAdvance()">
+
+    <div class="space-y-4">
+      <div *ngIf="advanceLoading" class="flex items-center justify-center gap-2 py-10 text-slate-600">
+        <i class="fas fa-spinner fa-spin text-emerald-600 text-xl"></i>
+        <span>Obteniendo vista previa...</span>
+      </div>
+
+      <div *ngIf="!advanceLoading && advancePreview" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Estado actual</p>
+            <p class="font-semibold text-slate-800">
+              <span class="uppercase">{{ advancePreview.current_parallel.paralelo }}</span> - {{ advancePreview.current_parallel.turno }}
+              <span class="text-xs text-slate-400 font-normal">({{ advancePreview.current_parallel.course }})</span>
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Avance</p>
+            <p class="font-semibold text-slate-800">
+              {{ ordinalLabel(advanceCurrentLevel) }} &rarr; {{ ordinalLabel(advanceNextLevel) }}
+              <span class="text-xs text-slate-400 font-normal">({{ ordinalLabel(advanceCurrentLevel) }} de {{ ordinalLabel(advanceTotalLevels) }})</span>
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="advanceIsLastLevel" class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+          <p class="text-sm font-semibold text-emerald-700 mb-3">
+            <i class="fas fa-graduation-cap mr-1"></i>
+            El estudiante cursa el &uacute;ltimo nivel de la carrera.
+          </p>
+          <button class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 text-sm rounded-lg text-white"
+            [disabled]="advanceSaving" (click)="advanceEgressConfirmOpen = true">
+            <i class="fas fa-user-graduate mr-1"></i> Egresar estudiante
+          </button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+            <p class="text-sm font-semibold text-green-700 mb-2">
+              <i class="fas fa-check-circle mr-1"></i> Toma ahora ({{ (advancePreview.assigned || []).length }})
+            </p>
+            <ul class="text-sm text-slate-700 space-y-1">
+              <li *ngFor="let s of advancePreview.assigned">
+                <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-green-200">{{ s.sigla }}</span>
+                {{ s.name }}
+              </li>
+              <li *ngIf="(advancePreview.assigned || []).length === 0" class="text-xs text-slate-400">Sin materias asignadas</li>
+            </ul>
+          </div>
+
+          <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+            <p class="text-sm font-semibold text-sky-700 mb-2">
+              <i class="fas fa-graduation-cap mr-1"></i> Materias aprobadas ({{ (advancePreview.approved || []).length }})
+            </p>
+            <ul class="text-sm text-slate-700 space-y-1">
+              <li *ngFor="let s of advancePreview.approved">
+                <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-sky-200">{{ s.sigla }}</span>
+                {{ s.name }}
+              </li>
+              <li *ngIf="(advancePreview.approved || []).length === 0" class="text-xs text-slate-400">Sin materias aprobadas</li>
+            </ul>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p class="text-sm font-semibold text-amber-700 mb-2">
+              <i class="fas fa-sync-alt mr-1"></i> Repite ({{ (advancePreview.repeated || []).length }})
+            </p>
+            <ul class="text-sm text-slate-700 space-y-1">
+              <li *ngFor="let s of advancePreview.repeated">
+                <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">{{ s.sigla }}</span>
+                {{ s.name }}
+              </li>
+              <li *ngIf="(advancePreview.repeated || []).length === 0" class="text-xs text-slate-400">Sin materias reprobadas</li>
+            </ul>
+          </div>
+
+          <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+            <p class="text-sm font-semibold text-red-700 mb-2">
+              <i class="fas fa-times-circle mr-1"></i> No lleva por pre-requisito ({{ (advancePreview.missing_by_prerequisite || []).length }})
+            </p>
+            <ul class="text-sm text-slate-700 space-y-1">
+              <li *ngFor="let s of advancePreview.missing_by_prerequisite">
+                <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200">{{ s.sigla }}</span>
+                {{ s.name }}
+              </li>
+              <li *ngIf="(advancePreview.missing_by_prerequisite || []).length === 0" class="text-xs text-slate-400">Sin materias pendientes</li>
+            </ul>
+          </div>
+        </div>
+
+        <div *ngIf="!advanceIsLastLevel" class="grid md:grid-cols-2 gap-4 items-end">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Nuevo Paralelo</label>
+            <select
+              class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+              [(ngModel)]="advanceParallelId">
+              <option [ngValue]="null">Seleccionar turno y paralelo</option>
+              <option *ngFor="let parallel of advanceParallels" [ngValue]="parallel.id">
+                Cupo: {{ parallel.available }} - {{ parallel.turno }} - {{ parallel.paralelo }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <p *ngIf="!advanceIsLastLevel && advanceParallels.length === 0"
+          class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl p-3">
+          No existen paralelos disponibles para el siguiente nivel. Cree uno desde esta secci&oacute;n y vuelva a intentar.
+        </p>
+
+        <div class="flex justify-end pt-2">
+          <button class="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition mr-2"
+            (click)="closeAdvance()">
+            Cerrar
+          </button>
+          <button *ngIf="!advanceIsLastLevel"
+            class="bg-blue-500 hover:bg-blue-600 px-4 py-2 text-sm rounded-lg text-white"
+            [disabled]="advanceSaving" (click)="advanceConfirmOpen = true">
+            <i class="fas fa-arrow-up mr-1"></i> Avanzar de Nivel
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: RESULTADO DE AVANCE DE NIVEL -->
+  <app-base-modal [isOpen]="advanceResultModal" title="Avance de nivel completado" size="lg"
+    [showCancel]="false" confirmText="Aceptar" (cancel)="advanceResultModal = false" (confirm)="advanceResultModal = false">
+    <div *ngIf="advanceResult">
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Nivel asignado</p>
+            <p class="font-semibold text-slate-800">
+              {{ ordinalLabel(advanceResult.current_level) }} &rarr; {{ ordinalLabel(advanceResult.new_level) }}
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Paralelo asignado</p>
+            <p class="font-semibold text-slate-800">
+              <span class="uppercase">{{ advanceResult.parallel.paralelo }}</span> - {{ advanceResult.parallel.turno }}
+              <span class="text-xs text-slate-400 font-normal">({{ advanceResult.parallel.course }})</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-green-700 mb-2">
+            <i class="fas fa-check-circle mr-1"></i> Toma ahora ({{ advanceResult.assigned.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.assigned">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-green-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.assigned.length === 0" class="text-xs text-slate-400">Sin materias asignadas</li>
+          </ul>
+        </div>
+
+        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-sky-700 mb-2">
+            <i class="fas fa-graduation-cap mr-1"></i> Materias aprobadas ({{ advanceResult.approved.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.approved">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-sky-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.approved.length === 0" class="text-xs text-slate-400">Sin materias aprobadas</li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-amber-700 mb-2">
+            <i class="fas fa-sync-alt mr-1"></i> Repite ({{ advanceResult.repeated.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.repeated">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.repeated.length === 0" class="text-xs text-slate-400">Sin materias reprobadas</li>
+          </ul>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-700 mb-2">
+            <i class="fas fa-times-circle mr-1"></i> No lleva por pre-requisito ({{ advanceResult.missing_by_prerequisite.length }})
+          </p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let s of advanceResult.missing_by_prerequisite">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </li>
+            <li *ngIf="advanceResult.missing_by_prerequisite.length === 0" class="text-xs text-slate-400">Sin materias pendientes</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <app-base-modal-confirm
+    [isOpen]="advanceConfirmOpen"
+    title="¿Confirmar avance de nivel?"
+    [message]="advanceConfirmMessage"
+    confirmText="Sí, avanzar"
+    cancelText="Cancelar"
+    [loading]="advanceSaving"
+    (confirm)="confirmAdvance()"
+    (cancel)="advanceConfirmOpen = false">
+  </app-base-modal-confirm>
+
+  <app-base-modal-confirm
+    [isOpen]="advanceEgressConfirmOpen"
+    title="¿Egresar al estudiante?"
+    message="Se marcará la carrera como Egresado y se liberará el cupo del paralelo. Esta acción no se puede deshacer."
+    confirmText="Sí, egresar"
+    cancelText="Cancelar"
+    [loading]="advanceSaving"
+    (confirm)="confirmGraduate()"
+    (cancel)="advanceEgressConfirmOpen = false">
+  </app-base-modal-confirm>
 
   <app-base-modal-confirm
     [isOpen]="confirmDeleteScheduleOpen"

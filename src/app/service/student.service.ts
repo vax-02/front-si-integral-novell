@@ -69,6 +69,18 @@ export class StudentService {
     });
   }
 
+  previewAdvanceLevel(studentId: number, careerId: number): Observable<any> {
+    return this.http.post<any>(this.apiUrl.students.advancePreview(studentId), { career_id: careerId }, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  graduate(studentId: number, careerId: number): Observable<any> {
+    return this.http.post<any>(this.apiUrl.students.graduate(studentId), { career_id: careerId }, {
+      headers: this.getHeaders(),
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
   students: {
     index: `${API_BASE_URL}/students`,
     advanceLevel: (id: number) => `${API_BASE_URL}/students/${id}/advance-level`,
+    advancePreview: (id: number) => `${API_BASE_URL}/students/${id}/preview-advance`,
+    graduate: (id: number) => `${API_BASE_URL}/students/${id}/graduate`,
   },
   carrers: {
     index: `${API_BASE_URL}/careers`,
@@ -27,6 +29,8 @@ export const API_ENDPOINTS = {
     index: `${API_BASE_URL}/parallels`,
     materialsByParallel: (id: number) => `${API_BASE_URL}/parallels/${id}/materials`,
     studentsByParallel: (id: number) => `${API_BASE_URL}/parallels/${id}/students`,
+    previewAdvance: (id: number) => `${API_BASE_URL}/parallels/${id}/preview-advance`,
+    advanceLevel: (id: number) => `${API_BASE_URL}/parallels/${id}/advance-level`,
   },
   schedules: {
     byCareer: (careerId: number) => `${API_BASE_URL}/subjects/${careerId}/by-career`,

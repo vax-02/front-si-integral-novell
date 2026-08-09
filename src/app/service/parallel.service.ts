@@ -61,6 +61,18 @@ export class ParallelService {
       headers: this.getHeaders(),
     });
   }
+
+  previewParallelAdvance(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.parallels.previewAdvance(id)}`, {}, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  advanceParallelLevel(id: number, destParallelId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.parallels.advanceLevel(id)}`, { parallel_id: destParallelId }, {
+      headers: this.getHeaders(),
+    });
+  }
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
