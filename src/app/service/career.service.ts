@@ -146,11 +146,18 @@ export class CareerService {
     );
   }
 
-  getGeneralGrades(parallelId: number): Observable<any> {
-    return this.http.get(
-      this.apiUrl.grades.generalByParallel(parallelId),
-      { headers: this.getHeaders() },
-    );
+  getGeneralGrades(parallelId: number, year?: number): Observable<any> {
+    let url = this.apiUrl.grades.generalByParallel(parallelId);
+    if (year) {
+      url += `?year=${year}`;
+    }
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getGradeYears(): Observable<any> {
+    return this.http.get(this.apiUrl.grades.years, {
+      headers: this.getHeaders(),
+    });
   }
 
   private getHeaders() {

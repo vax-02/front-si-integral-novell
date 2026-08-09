@@ -19,6 +19,8 @@ export class CalificationsComponent implements OnInit {
   careerId: number | null = null;
   courseId: number | null = null;
   parallelId: number | null = null;
+  year: number | null = null;
+  years: number[] = [];
 
   selectedCareer: any = null;
   selectedCourse: any = null;
@@ -46,6 +48,29 @@ export class CalificationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCareers();
+    this.loadYears();
+  }
+
+  loadYears() {
+    this.careerService.getGradeYears().subscribe({
+      next: (resp) => {
+        this.years = Array.isArray(resp?.years)
+          ? resp.years.map((y: any) => Number(y))
+          : [];
+        if (this.years.length > 0) {
+          this.year = this.years[0];
+        }
+      },
+      error: () => {
+        this.toast.error('Error al cargar las gestiones');
+      },
+    });
+  }
+
+  onYearChange() {
+    if (this.parallelId) {
+      this.loadGeneralGrades();
+    }
   }
 
   get filteredStudents(): any[] {
@@ -147,15 +172,30 @@ export class CalificationsComponent implements OnInit {
   loadGeneralGrades() {
     this.loadingGrades = true;
     this.searchStudent = '';
-    this.careerService.getGeneralGrades(this.parallelId!).subscribe({
+    this.careerService.getGeneralGrades(this.parallelId!, this.year ?? undefined).subscribe({
       next: (resp) => {
-        this.loadingGrades = false;
         this.subjects = Array.isArray(resp?.subjects) ? resp.subjects : [];
         this.students = Array.isArray(resp?.students) ? resp.students : [];
         this.summary = resp.summary || null;
         this.careerInfo = resp.career || null;
         this.courseInfo = resp.course || null;
         this.parallelInfo = resp.parallel || null;
+
+        const available = Array.isArray(resp?.available_years)
+          ? resp.available_years.map((y: any) => Number(y))
+          : [];
+        this.years = available;
+
+        if (available.length > 0 && !available.includes(this.year)) {
+          const previousYear = this.year;
+          this.year = available[0];
+          if (previousYear !== this.year) {
+            this.loadGeneralGrades();
+            return;
+          }
+        }
+
+        this.loadingGrades = false;
       },
       error: () => {
         this.loadingGrades = false;

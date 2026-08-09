@@ -77,6 +77,7 @@ export const API_ENDPOINTS = {
   },
   grades: {
     students: (parallelId: number) => `${API_BASE_URL}/grades/students/${parallelId}`,
+    years: `${API_BASE_URL}/grades/years`,
     generalByParallel: (parallelId: number) => `${API_BASE_URL}/grades/parallel/${parallelId}/general`,
     save: `${API_BASE_URL}/grades/save`,
     publish: `${API_BASE_URL}/grades/publish`,
