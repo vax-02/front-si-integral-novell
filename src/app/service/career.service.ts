@@ -160,6 +160,13 @@ export class CareerService {
     });
   }
 
+  exportGrades(parallelId: number, year: number): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl.grades.export}?parallel_id=${parallelId}&year=${year}&_=${Date.now()}`,
+      { headers: this.getHeaders(), responseType: 'blob' },
+    );
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

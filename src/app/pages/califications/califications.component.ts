@@ -30,6 +30,7 @@ export class CalificationsComponent implements OnInit {
   loadingCourses = false;
   loadingParallels = false;
   loadingGrades = false;
+  exporting = false;
 
   subjects: any[] = [];
   students: any[] = [];
@@ -71,6 +72,32 @@ export class CalificationsComponent implements OnInit {
     if (this.parallelId) {
       this.loadGeneralGrades();
     }
+  }
+
+  exportExcel() {
+    if (!this.parallelId || !this.year) {
+      this.toast.warning('Seleccione un paralelo y una gestión para exportar');
+      return;
+    }
+    this.exporting = true;
+    this.careerService.exportGrades(this.parallelId, this.year).subscribe({
+      next: (blob) => {
+        this.exporting = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const course = this.courseInfo?.name ?? 'curso';
+        const parallel = this.parallelInfo?.paralelo ?? '';
+        a.download = `Calificaciones_${course}_${parallel}_${this.year}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.toast.success('Calificaciones exportadas correctamente');
+      },
+      error: () => {
+        this.exporting = false;
+        this.toast.error('Error al exportar las calificaciones');
+      },
+    });
   }
 
   get filteredStudents(): any[] {
