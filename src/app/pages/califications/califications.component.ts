@@ -237,7 +237,7 @@ export class CalificationsComponent implements OnInit {
   }
 
   isApproved(grade: number | null): boolean {
-    return grade !== null && grade >= 51;
+    return grade !== null && grade >= 61;
   }
 
   trackSubject(_index: number, subject: any): number {
