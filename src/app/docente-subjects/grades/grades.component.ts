@@ -168,7 +168,6 @@ export class GradesComponent implements OnInit, OnDestroy {
           this.students = [];
           this.columns = [];
           this.parallel = null;
-          console.log(err)
         },
       });
   }
@@ -265,7 +264,6 @@ export class GradesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.savingColumn = false;
-        console.error('Error al crear columna', err);
       },
     });
   }
@@ -308,7 +306,6 @@ export class GradesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.savingEditColumn = false;
-        //console.error('Error al actualizar columna', err);
         this.toast.error('Error al editar la columna')
       },
     });
@@ -364,7 +361,7 @@ export class GradesComponent implements OnInit, OnDestroy {
         weight: col.weight,
         order: col.order,
       }, { headers: this.getHeaders() }).subscribe({
-        error: (err) => console.error('Error al reordenar columna', err),
+        error: () => {},
       });
     }
   }

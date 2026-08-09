@@ -152,7 +152,6 @@ paymentForm = {
       error: (err) => {
         this.savingPay = false;
         this.toast.error('Error al registrar el pago');
-        console.log(err);
       }
     });
   }
@@ -168,7 +167,6 @@ paymentForm = {
         const newWindow = window.open(url, '_blank');
       },
       error: (err) => {
-        console.log('asd----------'+err)
       }
     })
   }
@@ -184,12 +182,10 @@ paymentForm = {
           this.currentPage = response.students.current_page;
           this.lastPage = response.students.last_page;
           this.students = response.students.data;
-          console.log(this.students);
         },
         error: (err) => {
           this.loading = false;
           this.toast.error('Error al cargar estudiantes');
-          console.log(err);
         },
       });
   }
@@ -199,15 +195,12 @@ paymentForm = {
     this.loadingModalData = true
     this.payServie.getPays(student.id).subscribe({
       next: (response) => {
-        console.log(response);
         this.pays = response.pays
         
         this.loadingModalData = false
       },
       error: (err) => {
         this.loadingModalData = false
-        console.log(err);
-
       },
     });
   }
@@ -247,7 +240,6 @@ paymentForm = {
       },
       error: (err) => {
         this.toast.error('Error al cargar conceptos');
-        console.log(err);
       }
     });
   }

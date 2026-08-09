@@ -103,7 +103,6 @@ export class MyScheduleComponent {
         }
       },
       error: (err) => {
-        console.error('Error al cargar carreras', err);
       },
     });
   }
@@ -119,7 +118,6 @@ export class MyScheduleComponent {
       error: (err) => {
         this.loading.set(false);
         this.error.set('Error al cargar el horario.');
-        console.error(err);
       },
     });
   }

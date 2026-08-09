@@ -49,11 +49,9 @@ export class InstitutionComponent {
           cellphone: resp.cellphone,
           email: resp.email,
         });
-        console.log(resp)
       },
       error: () => {
         this.toast.error('Error al cargar los datos');
-        console.log('dad')
       },
     });
   }

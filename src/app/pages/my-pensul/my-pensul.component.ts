@@ -79,12 +79,10 @@ export class MyPensulComponent {
         if (careers.length > 0) {
           this.carreraSeleccionadaId.set(careers[0].id);
         }
-        console.log(careers)
       },
       error: (err) => {
         this.loading.set(false);
         this.error.set('Error al cargar el plan de estudios.');
-        console.error(err);
       }
     });
   }

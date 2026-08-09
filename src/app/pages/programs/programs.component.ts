@@ -97,14 +97,10 @@ export class ProgramsComponent {
         this.data.total = response.total;
         this.data.totalSubjects = response.totalSubjects;
         this.data.careersActivas = response.careersActivas;
-        console.log(response)
       },
       error: (err) => {
         this.loading = false;
         this.toast.error('Error al cargar las carreras');
-        console.log('error en la carga de carreras')
-        console.log(err)
-
       },
     });
   }
@@ -124,7 +120,6 @@ export class ProgramsComponent {
         this.loading = false;
         this.loadingModalDetails = false;
         this.careerSelected = response;
-        //console.log(this.careerSelected)
       },
       error: () => {
         this.loading = false;

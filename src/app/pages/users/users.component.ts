@@ -124,12 +124,10 @@ export class UsersComponent {
           this.currentPage = response.users.current_page;
           this.lastPage = response.users.last_page;
           this.users = response.users.data;
-          console.log(response.users.data);
         },
         error: (error) => {
           this.loading = false;
           this.toast.error('Error al cargar los usuarios');
-          console.log(error);
         },
       });
   }
@@ -314,7 +312,6 @@ export class UsersComponent {
       error: (error) => {
         this.loadingModal = false;
         this.toast.error('Error al actualizar los roles');
-        console.log(error);
       },
     });
   }
@@ -343,7 +340,6 @@ export class UsersComponent {
       error: (error) => {
         this.resetLoading = false;
         this.toast.error('Error al reestablecer la contraseña');
-        console.log(error);
       },
     });
   }

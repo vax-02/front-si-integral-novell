@@ -82,7 +82,6 @@ export class RepositoryComponent implements OnInit {
     this.loadingSubjects = true;
     this.docenteService.getMySubjects().subscribe({
       next: (resp) => {
-        console.log(resp.subjects)
         this.loadingSubjects = false;
         this.subjects = resp.subjects || [];
       },
@@ -231,7 +230,6 @@ export class RepositoryComponent implements OnInit {
       error: (ee) => {
         this.uploading = false;
         this.toast.error(ee.error?.error || 'Error al subir el material');
-        console.log(ee);
       },
     });
   }
@@ -345,7 +343,6 @@ export class RepositoryComponent implements OnInit {
       error: (ee) => {
         this.editingVisibility = false;
         this.toast.error('Error al actualizar la visibilidad');
-        console.log(ee);
       },
     });
   }
@@ -368,7 +365,6 @@ export class RepositoryComponent implements OnInit {
       },
       error: (err) => {
         this.toast.error('Error al abrir el archivo');
-        console.log(err);
       }
     });
   }
@@ -424,7 +420,6 @@ export class RepositoryComponent implements OnInit {
       },
       error:(err) =>{
         this.toast.error('Error al descargar');
-        console.log(err)
       }
     })
   }

@@ -44,7 +44,6 @@ export class MaterialsComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.error = 'Error al cargar los materiales.';
-        console.error(err);
       },
     });
   }
@@ -80,7 +79,6 @@ export class MaterialsComponent implements OnInit {
       },
       error: (err) => {
         this.toast.error('Error al descargar');
-        console.error(err);
       },
     });
   }
@@ -96,7 +94,6 @@ export class MaterialsComponent implements OnInit {
       },
       error: (err) => {
         this.toast.error('Error al abrir el archivo');
-        console.error(err);
       },
     });
   }

@@ -103,7 +103,6 @@ export class MySubjectsComponent {
       error: (err) => {
         this.loading.set(false);
         this.error.set('Error al cargar las materias.');
-        console.error(err);
       },
     });
   }
@@ -138,7 +137,6 @@ export class MySubjectsComponent {
       error: (err) => {
         this.loadingGrades.set(false);
         this.gradesError.set('Error al cargar las calificaciones.');
-        console.error(err);
       },
     });
   }
@@ -159,7 +157,6 @@ export class MySubjectsComponent {
       error: (err) => {
         this.loading.set(false);
         this.error.set('Error al cargar las materias.');
-        console.error(err);
       },
     });
   }
