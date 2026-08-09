@@ -5,6 +5,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 import { UserService } from '../../service/user.service';
@@ -12,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { ToastService } from '../../shared/services/toast.service';
 import { AuthService, User } from '../../core/services/auth.service';
 import { Roles } from '../../core/constants/roles.constants';
+import { getDefaultRoute } from '../../core/guards/role.guard';
 @Component({
   selector: 'app-profile',
   imports: [
@@ -34,6 +36,7 @@ export class ProfileComponent {
     private fb: FormBuilder,
     private toast: ToastService,
     private auth: AuthService,
+    private router: Router,
   ) {
     this.user = this.auth.user!;
   }
@@ -113,6 +116,6 @@ export class ProfileComponent {
     this.auth.updateCurrentRole(role);
     this.user.currentRole = role;
     this.showRoles = false;
-    console.log(this.auth.user)
+    this.router.navigate([getDefaultRoute(role.id)]);
   }
 }
