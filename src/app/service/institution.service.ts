@@ -19,6 +19,11 @@ export class InstitutionService {
       headers: this.getHeaders(),
     });
   }
+
+  getPublicInstitution(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl.institution}`);
+  }
+
   updateInstitution(id: number = 1, data: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl.institution}/${id}`, data, {
       headers: this.getHeaders(),
