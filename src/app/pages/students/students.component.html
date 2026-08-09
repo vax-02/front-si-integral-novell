@@ -102,6 +102,14 @@
                   <i class="text-lg fas fa-edit"></i>
                 </button>
 
+                <button (click)="toggleStatus(student)"
+                  [title]="student.user.status ? 'Bloquear acceso' : 'Activar acceso'"
+                  [class]="student.user.status
+                    ? 'bg-rose-500 text-white px-2 rounded-lg hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition'
+                    : 'bg-emerald-500 text-white px-2 rounded-lg hover:bg-emerald-300 hover:border-3 hover:border-emerald-500 transition'">
+                  <i class="text-lg fas" [class.fa-user-lock]="student.user.status" [class.fa-user-check]="!student.user.status"></i>
+                </button>
+
                 <button (click)="openModalOption(student)" title="Bajas/readmisi&oacute;n"
                   class="bg-gray-500 text-white px-2 rounded-lg hover:bg-gray-300 hover:border-3 hover:border-gray-500 transition">
                   <i class="text-lg fa-solid fa-ellipsis"></i>

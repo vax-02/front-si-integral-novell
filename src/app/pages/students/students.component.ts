@@ -624,4 +624,22 @@ export class StudentsComponent {
       // estado = CONGELADO
     }
   }
+
+  // ── Toggle status (bloquear/activar acceso al sistema) ───────────────────
+  toggleStatus(student: any): void {
+    const action = student.user.status ? 'bloquear' : 'activar';
+    if (!confirm(`¿Desea ${action} el acceso de ${student.user.name} ${student.user.first_lastname}?`)) {
+      return;
+    }
+
+    this.studentService.toggleStatus(student.id).subscribe({
+      next: (res) => {
+        student.user.status = res.status;
+        this.toast.success(res.message);
+      },
+      error: (e) => {
+        this.toast.error(e.error?.message || 'Error al cambiar el estado del estudiante');
+      },
+    });
+  }
 }

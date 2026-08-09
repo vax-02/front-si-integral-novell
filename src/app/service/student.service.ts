@@ -63,6 +63,12 @@ export class StudentService {
     });
   }
 
+  toggleStatus(studentId: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl.students.index}/${studentId}/toggle-status`, {}, {
+      headers: this.getHeaders(),
+    });
+  }
+
   advanceLevel(studentId: number, data: any): Observable<any> {
     return this.http.post<any>(this.apiUrl.students.advanceLevel(studentId), data, {
       headers: this.getHeaders(),
