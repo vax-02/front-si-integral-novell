@@ -51,6 +51,12 @@ export class PayService {
       headers: this.getHeaders(true)
     });
   }
+
+  getMyPays(): Observable<any> {
+    return this.http.get(`${this.apiUrl.pays.myPays}`, {
+      headers: this.getHeaders(),
+    });
+  }
   private getHeaders(pdf = false) {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
