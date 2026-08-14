@@ -78,6 +78,7 @@ export const API_ENDPOINTS = {
     index : `${API_BASE_URL}/pays`,
     store: `${API_BASE_URL}/pays`,
     receipt: (id: number) => `${API_BASE_URL}/pays/${id}/receipt`,
+    myPays: `${API_BASE_URL}/student/my-pays`,
   },
   grades: {
     students: (parallelId: number) => `${API_BASE_URL}/grades/students/${parallelId}`,

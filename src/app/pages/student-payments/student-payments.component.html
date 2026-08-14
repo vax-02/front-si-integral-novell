@@ -1,0 +1,110 @@
+<div class="space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Mis Pagos</h1>
+      <p class="text-sm text-slate-500">Historial de tus pagos registrados</p>
+    </div>
+  </div>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Total Pagado</p>
+      <h3 class="text-2xl font-bold text-emerald-600 mt-1">Bs. {{ totalPaid() }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+      <p class="text-sm text-slate-500">Pagos Registrados</p>
+      <h3 class="text-2xl font-bold text-blue-700 mt-1">{{ totalPayments() }}</h3>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading()" class="space-y-4">
+    <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-xl border border-slate-200 p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-5 w-48 bg-slate-200 rounded animate-pulse"></div>
+      </div>
+      <div class="space-y-3">
+        <div class="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
+        <div class="h-4 w-3/4 bg-slate-100 rounded animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="error()" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+    <i class="fa-solid fa-circle-exclamation text-3xl text-red-400 mb-3"></i>
+    <p class="text-red-600 font-medium">{{ error() }}</p>
+  </div>
+
+  <!-- SIN PAGOS -->
+  <div *ngIf="!loading() && !error() && groups().length === 0"
+    class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">
+    <i class="fa-solid fa-receipt text-3xl text-slate-300 mb-3"></i>
+    <p class="font-medium">No hay pagos registrados</p>
+  </div>
+
+  <!-- GRUPOS POR CARRERA -->
+  <div *ngFor="let group of groups()" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="flex justify-between items-center px-5 py-3 border-b bg-slate-50">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-graduation-cap text-blue-600 text-lg"></i>
+        <div>
+          <h3 class="font-semibold text-slate-700">{{ group.career_name }}</h3>
+          <small class="text-slate-500">{{ group.payments.length }} pago(s) registrado(s)</small>
+        </div>
+      </div>
+      <span class="text-sm font-bold text-emerald-600">Bs. {{ group.total }}</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+          <tr>
+            <th class="px-4 py-3 text-left">Concepto</th>
+            <th class="px-4 py-3 text-left">Descripción</th>
+            <th class="px-4 py-3 text-center">Gestión</th>
+            <th class="px-4 py-3 text-center">Semestre</th>
+            <th class="px-4 py-3 text-center">Monto</th>
+            <th class="px-4 py-3 text-center">Estado</th>
+            <th class="px-4 py-3 text-center">Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pay of group.payments" class="border-t hover:bg-slate-50 transition">
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-2xs rounded-full text-[11px] font-semibold"
+                [ngClass]="{
+                  'bg-blue-100 text-blue-700': pay.concept.type === 'Matricula',
+                  'bg-emerald-100 text-emerald-700': pay.concept.type === 'Mensualidad',
+                  'bg-purple-100 text-purple-700': pay.concept.type === 'Otro'
+                }">
+                {{ pay.concept.type }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-xs text-slate-500">
+              {{ pay.description || '—' }}
+            </td>
+            <td class="px-4 py-3 text-center text-xs">{{ pay.concept.gestion }}</td>
+            <td class="px-4 py-3 text-center text-xs">{{ pay.concept.semestre || '—' }}</td>
+            <td class="px-4 py-3 text-center font-semibold text-emerald-600">
+              Bs. {{ pay.amount }}
+              <p class="text-xs text-slate-400" *ngIf="pay.discount > 0">Dto. Bs. {{ pay.discount }}</p>
+            </td>
+            <td class="px-4 py-3 text-center text-xs"
+              [ngClass]="pay.status == 1 ? 'text-green-500' : 'text-red-500'">
+              {{ pay.status == 1 ? 'Pagado' : 'Anulado' }}
+            </td>
+            <td class="px-4 py-3 text-center text-xs">
+              {{ pay.created_at | date:'dd/MM/yyyy' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
