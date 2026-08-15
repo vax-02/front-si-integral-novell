@@ -188,11 +188,9 @@
         <div class="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
           <div class="space-y-1">
             <app-base-input text="PIN biométrico" [(ngModel)]="pin" />
-            <p class="text-xs text-slate-400">PIN del reloj biométrico (opcional y único por docente).</p>
           </div>
           <div class="space-y-1">
             <app-base-input text="Tolerancia (minutos)" type_i="number" [(ngModel)]="tolerance" />
-            <p class="text-xs text-slate-400">Minutos de tolerancia antes de considerar retraso (0-60).</p>
           </div>
           <button (click)="saveConfig()" [disabled]="savingConfig" title="Guardar configuración"
             class="flex items-center justify-center bg-blue-600 text-white w-11 h-11 rounded-xl hover:bg-blue-700 transition disabled:opacity-50">

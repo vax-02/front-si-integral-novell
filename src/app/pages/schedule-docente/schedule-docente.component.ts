@@ -11,7 +11,7 @@ import {
   DocenteSchedule,
 } from '../../service/attendance.service';
 
-export const DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+export const DIAS = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sábado','Domingo'];
 
 @Component({
   selector: 'app-schedule-docente',
@@ -418,12 +418,15 @@ export class ScheduleDocenteComponent {
     this.attendanceService
       .storeSchedule(this.docenteSeleccionado.id, schedule)
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.savingSchedule = false;
           this.toast.success('Horario agregado');
           this.newScheduleDay = 'Lunes';
           this.newScheduleEntry = '08:00';
           this.loadSchedules();
+          if (res?.schedule) {
+            this.pushScheduleToDocente(res.schedule);
+          }
         },
         error: (e) => {
           this.savingSchedule = false;
@@ -438,6 +441,7 @@ export class ScheduleDocenteComponent {
       next: () => {
         this.toast.success('Horario eliminado');
         this.loadSchedules();
+        this.removeScheduleFromDocente(scheduleId);
       },
       error: () => {
         this.toast.error('Error al eliminar el horario');
@@ -496,6 +500,32 @@ export class ScheduleDocenteComponent {
       falta: 'bg-slate-100 text-slate-600',
     };
     return map[status] ?? 'bg-slate-100 text-slate-600';
+  }
+
+  private pushScheduleToDocente(schedule: DocenteSchedule): void {
+    const idx = this.docentes.findIndex(
+      (d) => d.id === this.docenteSeleccionado?.id,
+    );
+    if (idx !== -1) {
+      const current = this.docentes[idx].schedules ?? [];
+      this.docentes[idx] = {
+        ...this.docentes[idx],
+        schedules: [...current, schedule],
+      };
+    }
+  }
+
+  private removeScheduleFromDocente(scheduleId: number): void {
+    const idx = this.docentes.findIndex(
+      (d) => d.id === this.docenteSeleccionado?.id,
+    );
+    if (idx !== -1) {
+      const current = this.docentes[idx].schedules ?? [];
+      this.docentes[idx] = {
+        ...this.docentes[idx],
+        schedules: current.filter((s: any) => s.id !== scheduleId),
+      };
+    }
   }
 
   private syncDocenteInList(): void {
