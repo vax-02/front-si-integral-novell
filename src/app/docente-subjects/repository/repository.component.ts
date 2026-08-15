@@ -243,11 +243,7 @@ export class RepositoryComponent implements OnInit {
 
   // ── Editar visibilidad ──
   openEditVisibility(material: any) {
-    // Materias que actualmente ven este material (comparten el mismo archivo físico)
-    const siblings = this.materials.filter(m => m.file_path === material.file_path);
-    const subjectIds = siblings.length
-      ? [...new Set(siblings.map(m => m.subject_id))]
-      : [material.subject_id];
+    const subjectIds = material.subjects ? material.subjects.map((s: any) => s.id) : [];
 
     this.editMaterialId = material.id;
     this.editData = {

@@ -100,15 +100,17 @@
             {{ material.title }}
           </h4>
           <p class="text-xs text-slate-400 mt-0.5">
-            {{ material.subject?.name }} ({{ material.subject?.sigla }})
+            <span *ngFor="let sub of material.subjects; let last = last">
+              {{ sub.name }} ({{ sub.sigla }}){{ !last ? ', ' : '' }}
+            </span>
           </p>
           <p class="text-xs text-slate-400">
             <i class="fas fa-users mr-1"></i>
             <span *ngIf="material.all_parallels">Todos los paralelos</span>
-            <span *ngIf="!material.all_parallels && material.parallels">
+            <span *ngIf="!material.all_parallels && material.parallels?.length">
               Paralelos:
               <span *ngFor="let p of material.parallels; let last = last"
-                >{{ p.paralelo }} ({{ p.turno }}){{ !last ? ", " : "" }}</span
+                >{{ p.paralelo }} ({{ p.turno }}){{ !last ? ', ' : '' }}</span
               >
             </span>
           </p>
