@@ -70,7 +70,6 @@ export class CoursesComponent implements OnInit {
   // Schedule properties
   subjects: any[] = [];
   days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'];
-  timeBlocks: { start: string; end: string }[] = [];
   careerId: number | null = null;
   savingSchedule = false;
 
@@ -150,7 +149,7 @@ export class CoursesComponent implements OnInit {
       subject_id: [null, Validators.required],
       day: ['', Validators.required],
       start_time: ['', Validators.required],
-      end_time: [''],
+      end_time: ['', Validators.required],
     });
   }
 
@@ -655,9 +654,6 @@ export class CoursesComponent implements OnInit {
     this.confirmDeleteScheduleId = null;
     this.confirmDeleteScheduleOpen = false;
 
-    // Establecer bloques horarios según el turno del paralelo
-    this.setTimeBlocksByTurno(parallel.turno);
-
     // Cargar materias de la carrera filtradas por el nivel del curso
     if (this.careerId && this.selectedCourseLevel) {
       this.scheduleService.getSubjectsByCareer(this.careerId, this.selectedCourseLevel).subscribe({
@@ -672,31 +668,6 @@ export class CoursesComponent implements OnInit {
 
     // Cargar horario existente
     this.loadSchedules();
-  }
-
-  /** Define los bloques horarios según el turno del paralelo */
-  private setTimeBlocksByTurno(turno: string): void {
-    const blocks: Record<string, { start: string; end: string }[]> = {
-      'Mañana': [
-        { start: '09:00', end: '10:00' },
-        { start: '10:00', end: '11:00' },
-        { start: '11:00', end: '12:00' },
-        { start: '12:00', end: '13:00' },
-      ],
-      'Tarde': [
-        { start: '14:00', end: '15:00' },
-        { start: '15:00', end: '16:00' },
-        { start: '16:00', end: '17:00' },
-        { start: '17:00', end: '18:00' },
-      ],
-      'Noche': [
-        { start: '18:00', end: '19:00' },
-        { start: '19:00', end: '20:00' },
-        { start: '20:00', end: '21:00' },
-        { start: '21:00', end: '22:00' },
-      ],
-    };
-    this.timeBlocks = blocks[turno] || [];
   }
 
   loadSchedules() {
@@ -729,8 +700,8 @@ export class CoursesComponent implements OnInit {
     this.scheduleForm.patchValue({
       subject_id: schedule.subject_id,
       day: schedule.day,
-      start_time: schedule.start_time,
-      end_time: schedule.end_time,
+      start_time: this.normalizeTime(schedule.start_time),
+      end_time: this.normalizeTime(schedule.end_time),
     });
     this.showScheduleForm = true;
   }
@@ -748,11 +719,18 @@ export class CoursesComponent implements OnInit {
       return;
     }
 
-    this.savingScheduleItem = true;
     const formValue = this.scheduleForm.value;
+    if (formValue.start_time >= formValue.end_time) {
+      this.toast.info('La hora de fin debe ser mayor a la hora de inicio.');
+      return;
+    }
+
+    this.savingScheduleItem = true;
     const data = {
-      ...formValue,
-      end_time: this.getEndTimeByStart(formValue.start_time),
+      subject_id: formValue.subject_id,
+      day: formValue.day,
+      start_time: formValue.start_time,
+      end_time: formValue.end_time,
       parallel_id: this.selectedParallel.id,
     };
 
@@ -881,23 +859,53 @@ export class CoursesComponent implements OnInit {
     return time ? time.substring(0, 5) : '';
   }
 
-  /** Devuelve el schedule (o null) para un día y hora de inicio dados */
+  /** Paleta de colores para materias */
+  private readonly SUBJECT_COLORS = [
+    { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-800', sigla: 'text-blue-600' },
+    { bg: 'bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-800', sigla: 'text-emerald-600' },
+    { bg: 'bg-amber-100', border: 'border-amber-300', text: 'text-amber-800', sigla: 'text-amber-600' },
+    { bg: 'bg-rose-100', border: 'border-rose-300', text: 'text-rose-800', sigla: 'text-rose-600' },
+    { bg: 'bg-violet-100', border: 'border-violet-300', text: 'text-violet-800', sigla: 'text-violet-600' },
+    { bg: 'bg-cyan-100', border: 'border-cyan-300', text: 'text-cyan-800', sigla: 'text-cyan-600' },
+    { bg: 'bg-orange-100', border: 'border-orange-300', text: 'text-orange-800', sigla: 'text-orange-600' },
+    { bg: 'bg-teal-100', border: 'border-teal-300', text: 'text-teal-800', sigla: 'text-teal-600' },
+    { bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-800', sigla: 'text-pink-600' },
+    { bg: 'bg-indigo-100', border: 'border-indigo-300', text: 'text-indigo-800', sigla: 'text-indigo-600' },
+    { bg: 'bg-lime-100', border: 'border-lime-300', text: 'text-lime-800', sigla: 'text-lime-600' },
+    { bg: 'bg-fuchsia-100', border: 'border-fuchsia-300', text: 'text-fuchsia-800', sigla: 'text-fuchsia-600' },
+  ];
+
+  private subjectColorMap = new Map<number, { bg: string; border: string; text: string; sigla: string }>();
+  private nextColorIndex = 0;
+
+  getSubjectColor(subjectId: number | undefined): { bg: string; border: string; text: string; sigla: string } {
+    if (!subjectId) return this.SUBJECT_COLORS[0];
+    if (!this.subjectColorMap.has(subjectId)) {
+      this.subjectColorMap.set(subjectId, this.SUBJECT_COLORS[this.nextColorIndex % this.SUBJECT_COLORS.length]);
+      this.nextColorIndex++;
+    }
+    return this.subjectColorMap.get(subjectId)!;
+  }
+
   getScheduleForSlot(day: string, startTime: string): any {
     return this.schedules.find(s =>
       s.day === day && this.normalizeTime(s.start_time) === startTime
     ) || null;
   }
 
-  /** Obtiene la hora fin a partir de la hora de inicio según los bloques definidos */
-  getEndTimeByStart(startTime: string): string {
-    const block = this.timeBlocks.find(b => b.start === startTime);
-    return block ? block.end : '';
+  get timeSlots(): { start: string; end: string }[] {
+    const seen = new Set<string>();
+    const slots: { start: string; end: string }[] = [];
+    for (const s of this.schedules) {
+      const start = this.normalizeTime(s.start_time);
+      const end = this.normalizeTime(s.end_time);
+      const key = `${start}-${end}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        slots.push({ start, end });
+      }
+    }
+    return slots.sort((a, b) => a.start.localeCompare(b.start));
   }
 
-  /** Retorna true si una celda tiene materia asignada */
-  hasSchedule(day: string, startTime: string): boolean {
-    return this.schedules.some(s =>
-      s.day === day && this.normalizeTime(s.start_time) === startTime
-    );
-  }
 }
