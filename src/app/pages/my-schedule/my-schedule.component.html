@@ -86,10 +86,10 @@
             @for (dia of dias; track dia) {
             @if (claseEn(franja, dia); as clase) {
             <td class="p-2 align-top">
-              <div class="rounded-lg p-2 text-xs h-full min-h-[64px] bg-indigo-50 text-indigo-700 border border-indigo-100">
-                <p class="font-semibold leading-tight">{{ clase.subject.sigla }} - {{ clase.subject.name }}</p>
+              <div [class]="'rounded-lg p-2 text-xs h-full min-h-[64px] border ' + getSubjectColor(clase.subject_id).bg + ' ' + getSubjectColor(clase.subject_id).border">
+                <p [class]="'font-semibold leading-tight ' + getSubjectColor(clase.subject_id).sigla">{{ clase.subject.sigla }} - {{ clase.subject.name }}</p>
                 @if (clase.docente) {
-                <p class="opacity-80 mt-0.5">{{ clase.docente }}</p>
+                <p [class]="'opacity-80 mt-0.5 ' + getSubjectColor(clase.subject_id).text">{{ clase.docente }}</p>
                 }
               </div>
             </td>

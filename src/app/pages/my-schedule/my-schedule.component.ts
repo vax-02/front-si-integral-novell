@@ -10,6 +10,7 @@ interface ScheduleEntry {
   day: string;
   start_time: string;
   end_time: string;
+  subject_id: number;
   subject: {
     sigla: string;
     name: string;
@@ -45,6 +46,31 @@ interface FranjaHoraria {
 })
 export class MyScheduleComponent {
   readonly dias: Dia[] = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'];
+
+  private readonly SUBJECT_COLORS = [
+    { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-800', sigla: 'text-blue-600' },
+    { bg: 'bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-800', sigla: 'text-emerald-600' },
+    { bg: 'bg-amber-100', border: 'border-amber-300', text: 'text-amber-800', sigla: 'text-amber-600' },
+    { bg: 'bg-rose-100', border: 'border-rose-300', text: 'text-rose-800', sigla: 'text-rose-600' },
+    { bg: 'bg-violet-100', border: 'border-violet-300', text: 'text-violet-800', sigla: 'text-violet-600' },
+    { bg: 'bg-cyan-100', border: 'border-cyan-300', text: 'text-cyan-800', sigla: 'text-cyan-600' },
+    { bg: 'bg-orange-100', border: 'border-orange-300', text: 'text-orange-800', sigla: 'text-orange-600' },
+    { bg: 'bg-teal-100', border: 'border-teal-300', text: 'text-teal-800', sigla: 'text-teal-600' },
+    { bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-800', sigla: 'text-pink-600' },
+    { bg: 'bg-indigo-100', border: 'border-indigo-300', text: 'text-indigo-800', sigla: 'text-indigo-600' },
+    { bg: 'bg-lime-100', border: 'border-lime-300', text: 'text-lime-800', sigla: 'text-lime-600' },
+    { bg: 'bg-fuchsia-100', border: 'border-fuchsia-300', text: 'text-fuchsia-800', sigla: 'text-fuchsia-600' },
+  ];
+  private subjectColorMap = new Map<number, { bg: string; border: string; text: string; sigla: string }>();
+  private nextColorIndex = 0;
+
+  getSubjectColor(subjectId: number): { bg: string; border: string; text: string; sigla: string } {
+    if (!this.subjectColorMap.has(subjectId)) {
+      this.subjectColorMap.set(subjectId, this.SUBJECT_COLORS[this.nextColorIndex % this.SUBJECT_COLORS.length]);
+      this.nextColorIndex++;
+    }
+    return this.subjectColorMap.get(subjectId)!;
+  }
 
   readonly carreras = signal<CarreraSimple[]>([]);
   readonly carreraSeleccionadaId = signal<number | null>(null);
