@@ -59,7 +59,7 @@
           <tr *ngFor="let docente of docentes" class="hover:bg-slate-50 transition">
             <td class="p-4">
               <div class="font-semibold text-slate-700">
-                {{ docente.user.name }} {{ docente.user.first_lastname }} {{ docente.user.second_lastname }}
+                {{ docente.degree?.abbreviation }} {{ docente.user.name }} {{ docente.user.first_lastname }} {{ docente.user.second_lastname }}
               </div>
               <div class="text-xs text-slate-400">{{ docente.user.email }}</div>
             </td>
@@ -174,7 +174,7 @@
         </div>
         <div>
           <h2 class="text-lg font-bold text-slate-800">
-            {{ docenteSeleccionado.user?.name }} {{ docenteSeleccionado.user?.first_lastname }} {{ docenteSeleccionado.user?.second_lastname }}
+            {{ docenteSeleccionado.degree?.abbreviation }} {{ docenteSeleccionado.user?.name }} {{ docenteSeleccionado.user?.first_lastname }} {{ docenteSeleccionado.user?.second_lastname }}
           </h2>
           <p class="text-sm text-slate-500">C.I. {{ docenteSeleccionado.user?.ci }}</p>
         </div>
@@ -290,7 +290,7 @@
         </div>
         <div>
           <h2 class="text-lg font-bold text-slate-800">
-            {{ docenteSeleccionado.user?.name }}
+            {{ docenteSeleccionado.degree?.abbreviation }} {{ docenteSeleccionado.user?.name }}
             {{ docenteSeleccionado.user?.first_lastname }}
             {{ docenteSeleccionado.user?.second_lastname }}
           </h2>
