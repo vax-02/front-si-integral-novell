@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { CareerService } from '../../service/career.service';
 
-type Dia = 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes';
+type Dia = 'Lunes' | 'Martes' | 'Miercoles' | 'Jueves' | 'Viernes';
 
 interface ScheduleEntry {
   day: string;
@@ -44,7 +44,7 @@ interface FranjaHoraria {
   styleUrl: './my-schedule.component.css',
 })
 export class MyScheduleComponent {
-  readonly dias: Dia[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+  readonly dias: Dia[] = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'];
 
   readonly carreras = signal<CarreraSimple[]>([]);
   readonly carreraSeleccionadaId = signal<number | null>(null);
