@@ -95,10 +95,11 @@ export const API_ENDPOINTS = {
     },
   },
   attendance: {
-    import: `${API_BASE_URL}/attendance/import`,
-    validate: `${API_BASE_URL}/attendance/validate`,
-    config: (docenteId: number) => `${API_BASE_URL}/docentes/${docenteId}/attendance-config`,
-    schedules: (docenteId: number) => `${API_BASE_URL}/docentes/${docenteId}/schedules`,
-    deleteSchedule: (scheduleId: number) => `${API_BASE_URL}/docente-schedules/${scheduleId}`,
+    import:        `${API_BASE_URL}/attendance/import`,
+    validate:      `${API_BASE_URL}/attendance/validate`,
+    myAttendance:  `${API_BASE_URL}/attendance/my-attendance`,
+    config:        (docenteId: number | string) => `${API_BASE_URL}/docentes/${docenteId}/attendance-config`,
+    schedules:     (docenteId: number | string) => `${API_BASE_URL}/docentes/${docenteId}/schedules`,
+    deleteSchedule:(scheduleId: number | string) => `${API_BASE_URL}/docente-schedules/${scheduleId}`,
   },
 } as const;

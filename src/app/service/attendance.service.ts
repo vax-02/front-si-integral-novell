@@ -67,6 +67,13 @@ export class AttendanceService {
     );
   }
 
+  myAttendance(from: string, to: string): Observable<any> {
+    return this.http.get(API_ENDPOINTS.attendance.myAttendance, {
+      params: { from, to },
+      headers: this.getHeaders(),
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
