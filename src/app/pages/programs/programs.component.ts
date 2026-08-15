@@ -67,6 +67,7 @@ export class ProgramsComponent {
       name: ['', Validators.required],
       duration: ['', Validators.required],
       type: ['', Validators.required],
+      area: ['', Validators.required],
     });
 
     this.subjectForm = this.fb.group({
@@ -205,6 +206,7 @@ export class ProgramsComponent {
       name: '',
       duration: '',
       type: '',
+      area: '',
     });
 
     this.selectedFile = null;
@@ -445,6 +447,7 @@ export class ProgramsComponent {
     formData.append('name', this.careerForm.get('name')?.value || '');
     formData.append('duration', this.careerForm.get('duration')?.value || '');
     formData.append('type', this.careerForm.get('type')?.value || '');
+    formData.append('area', this.careerForm.get('area')?.value || '');
     formData.append('file', this.selectedFile as File);
     return formData;
   }

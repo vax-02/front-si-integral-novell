@@ -3,6 +3,7 @@ export interface Career {
   name: string;
   duration: number;
   type: number;
+  area: string;
   status: number;
   created_at: string | null;
   updated_at: string | null;

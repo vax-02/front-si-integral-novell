@@ -67,6 +67,10 @@
               Tipo
             </th>
 
+            <th class="p-4 text-center hidden md:table-cell">
+              Área
+            </th>
+
             <th class="p-4 text-center">
               Estado
             </th>
@@ -142,6 +146,10 @@
               {{ career.type == 1? "Anual":"Semestral"}}
             </td>
 
+            <td class="px-6 py-4 text-center hidden md:table-cell">
+              {{ career.area }}
+            </td>
+
             <td class="px-6 py-4 text-center">
               <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="career.status
               ? 'bg-emerald-100 text-emerald-600'
@@ -209,6 +217,11 @@
           <span class="flex items-center gap-2">
             <i class="fa-solid fa-layer-group text-slate-400"></i>
             Tipo: {{ careerSelected?.type == 1 ? 'Anual' : 'Semestral' }}
+          </span>
+
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-tag text-slate-400"></i>
+            Área: {{ careerSelected?.area }}
           </span>
 
         </div>
@@ -314,7 +327,7 @@
 
     <div class="space-y-6">
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <form [formGroup]="careerForm" class="grid md:grid-cols-3 gap-5">
+        <form [formGroup]="careerForm" class="grid md:grid-cols-4 gap-5">
 
           <div>
             <app-base-input text="Nombre de la carrera" formControlName="name"></app-base-input>
@@ -338,6 +351,17 @@
             <option value="1">Anual</option>
             <option value="2">Semestral</option>
           </select>
+
+          <select formControlName="area"
+            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccione el área</option>
+            <option value="Comercial y servicios">Comercial y servicios</option>
+            <option value="Tecnologica">Tecnológica</option>
+          </select>
+          <p *ngIf="careerForm.get('area')?.invalid && careerForm.get('area')?.touched"
+            class="mt-2 text-sm text-red-600">
+            El área es obligatoria.
+          </p>
         </form>
       </div>
 
