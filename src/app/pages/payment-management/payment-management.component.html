@@ -163,13 +163,14 @@
               <option value="Matricula">Matrícula (Pago Único)</option>
               <option value="Mensualidad">Mensualidad (Cuotas)</option>
               <option value="Otro">Otro (Cursos, tallers, etc.)</option>
+              <option value="Tramite">Trámite</option>
 
             </select>
           </div>
         </div>
 
-        <div class="mt-7" *ngIf="configuracion.tipoConcepto == 'Otro'">
-            <app-base-input type="number" text="Defina la descripción del cobro" [(ngModel)]="configuracion.descripcion" (input)="onMontoChange()">
+        <div class="mt-7" *ngIf="configuracion.tipoConcepto == 'Otro' || configuracion.tipoConcepto == 'Tramite'">
+            <app-base-input type="text" text="Defina la descripción del cobro *" [(ngModel)]="configuracion.descripcion" (input)="onMontoChange()">
             </app-base-input>
         </div>
 
@@ -207,7 +208,7 @@
             <span class="font-semibold text-slate-600">Carrera</span><span>{{ getCareerName() || '--' }}</span>
             <span
               class="font-semibold text-slate-600">Tipo</span>
-              <span>{{ configuracion.tipoConcepto === 'Matricula' ? 'Pago Único' : configuracion.tipoConcepto === 'Mensualidad' ? 'Mensualidad' : 'Otro' }}</span>
+              <span>{{ configuracion.tipoConcepto === 'Matricula' ? 'Pago Único' : configuracion.tipoConcepto === 'Mensualidad' ? 'Mensualidad' : configuracion.tipoConcepto === 'Tramite' ? 'Trámite' : 'Otro' }}</span>
 
               <span class="font-semibold text-slate-600"  *ngIf="configuracion.descripcion != ''">Descripción</span><span *ngIf="configuracion.descripcion != ''">{{ configuracion.descripcion }}</span>
 

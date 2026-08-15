@@ -115,6 +115,11 @@ export class PaymentManagementComponent {
       this.mensajeValidacion = 'Seleccione el tipo de concepto';
       return false;
     }
+    if ((this.configuracion.tipoConcepto === 'Otro' || this.configuracion.tipoConcepto === 'Tramite')
+        && !this.configuracion.descripcion?.trim()) {
+      this.mensajeValidacion = 'La descripción es obligatoria para este tipo de concepto';
+      return false;
+    }
     if (!this.configuracion.carrera) {
       this.mensajeValidacion = 'Seleccione una carrera';
       return false;
