@@ -96,12 +96,18 @@ export class StudentsComponent {
     carnet: false,
   };
 
+  // Convalidación
+  ingresoType: 'nuevo' | 'convalidacion' = 'nuevo';
+  convalidation_type: 'BTH' | 'Tecnico_Medio' | '' = '';
+
   // Propiedades para adición de carrera
   newCareer = {
     career_id: null as number | null,
     parallel_id: null as number | null,
   };
   newCareerParallels: any[] = [];
+  newCareerIngresoType: 'nuevo' | 'convalidacion' = 'nuevo';
+  newCareerConvalidationType: 'BTH' | 'Tecnico_Medio' | '' = '';
 
   // Propiedades para el modal de opciones (3 tabs)
   optionTab: string = 'add-career'; // 'add-career' | 'change-parallel' | 'withdraw'
@@ -222,6 +228,22 @@ export class StudentsComponent {
     };
     this.parallels = [];
     this.saving = false;
+    this.ingresoType = 'nuevo';
+    this.convalidation_type = '';
+  }
+
+  getConvalidationStartLevel(): number {
+    if (this.ingresoType !== 'convalidacion' || !this.convalidation_type || !this.enrollment.career_id) {
+      return 1;
+    }
+    const career = this.careersForSelect.find(c => c.id === this.enrollment.career_id);
+    if (!career) return 1;
+    const isSemestral = career.type == 2;
+    if (this.convalidation_type === 'BTH') {
+      return isSemestral ? 3 : 2;
+    }
+    // Tecnico_Medio
+    return isSemestral ? 5 : 3;
   }
 
   onCareerChange() {
@@ -229,14 +251,24 @@ export class StudentsComponent {
       this.parallels = [];
       return;
     }
-    this.parallelService.getParallelsForCareerForNewStudent(this.enrollment.career_id).subscribe({
+    const startLevel = this.getConvalidationStartLevel();
+    this.parallelService.getParallelsForCareerAtLevel(this.enrollment.career_id, startLevel).subscribe({
         next: (response) =>{
           this.parallels = response.parallels;
         },
         error: (err) =>{
-
+          this.parallels = [];
         }
     });
+  }
+
+  onIngresoTypeChange() {
+    this.convalidation_type = '';
+    this.onCareerChange();
+  }
+
+  onConvalidationTypeChange() {
+    this.onCareerChange();
   }
 
   validarFormulario(): boolean {
@@ -245,6 +277,9 @@ export class StudentsComponent {
     if (!this.enrollment.ci) { this.toast.error('El C.I. es requerido'); return false; }
     if (!this.enrollment.email) { this.toast.error('El correo electrónico es requerido'); return false; }
     if (!this.enrollment.career_id) { this.toast.error('Seleccione una carrera'); return false; }
+    if (this.ingresoType === 'convalidacion') {
+      if (!this.convalidation_type) { this.toast.error('Seleccione el tipo de convalidación'); return false; }
+    }
     return true;
   }
   validarFormularioUpdate(): boolean {
@@ -258,7 +293,7 @@ export class StudentsComponent {
     if (!this.validarFormulario()) return;
     this.saving = true;
 
-    const data = {
+    const data: any = {
       name: this.enrollment.name,
       first_lastname: this.enrollment.first_lastname,
       second_lastname: this.enrollment.second_lastname,
@@ -271,6 +306,11 @@ export class StudentsComponent {
       school_diploma: this.enrollment.school_diploma,
       carnet: this.enrollment.carnet,
     };
+
+    // Agregar datos de convalidación si aplica
+    if (this.ingresoType === 'convalidacion' && this.convalidation_type) {
+      data.convalidation_type = this.convalidation_type;
+    }
 
 
     if (this.editModalStudent && this.selectedStudent) {
@@ -455,7 +495,8 @@ export class StudentsComponent {
       this.newCareer.parallel_id = null;
       return;
     }
-    this.parallelService.getParallelsForCareerForNewStudent(this.newCareer.career_id).subscribe({
+    const startLevel = this.getNewCareerConvalidationStartLevel();
+    this.parallelService.getParallelsForCareerAtLevel(this.newCareer.career_id, startLevel).subscribe({
       next: (response) => {
         this.newCareerParallels = response.parallels;
         this.newCareer.parallel_id = null;
@@ -464,6 +505,28 @@ export class StudentsComponent {
         this.toast.error('Error al cargar paralelos');
       }
     });
+  }
+
+  getNewCareerConvalidationStartLevel(): number {
+    if (this.newCareerIngresoType !== 'convalidacion' || !this.newCareerConvalidationType || !this.newCareer.career_id) {
+      return 1;
+    }
+    const career = this.careersForSelect.find(c => c.id === this.newCareer.career_id);
+    if (!career) return 1;
+    const isSemestral = career.type === 2;
+    if (this.newCareerConvalidationType === 'BTH') {
+      return isSemestral ? 3 : 2;
+    }
+    return isSemestral ? 5 : 3;
+  }
+
+  onNewCareerIngresoTypeChange() {
+    this.newCareerConvalidationType = '';
+    this.onNewCareerCareerChange();
+  }
+
+  onNewCareerConvalidationTypeChange() {
+    this.onNewCareerCareerChange();
   }
 
   isStudentInCareer(careerId: number): boolean {
@@ -486,12 +549,22 @@ export class StudentsComponent {
       this.toast.error('El estudiante ya está inscrito en esta carrera');
       return;
     }
+    if (this.newCareerIngresoType === 'convalidacion') {
+      if (!this.newCareerConvalidationType) {
+        this.toast.error('Seleccione el tipo de convalidación');
+        return;
+      }
+    }
     this.saving = true;
-    const data = {
+    const data: any = {
       student_id: this.selectedStudent?.id,
       career_id: this.newCareer.career_id,
       parallel_id: this.newCareer.parallel_id
     };
+
+    if (this.newCareerIngresoType === 'convalidacion' && this.newCareerConvalidationType) {
+      data.convalidation_type = this.newCareerConvalidationType;
+    }
 
     this.studentService.addCareer(data).subscribe({
       next: (resp) => {

@@ -22,4 +22,5 @@ export interface CareersResponse {
 export interface CareerForSelect {
   id: number;
   name: string;
+  type?: number;
 }
