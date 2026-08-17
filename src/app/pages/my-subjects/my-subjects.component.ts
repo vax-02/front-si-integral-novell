@@ -163,6 +163,47 @@ export class MySubjectsComponent {
     return evaluations.filter(e => (e.parcial || 1) === parcial);
   }
 
+  getEvaluationsByType(evaluations: Evaluation[], type: string): Evaluation[] {
+    return evaluations.filter(e => e.type === type);
+  }
+
+  getParcialTypeAvg(evaluations: Evaluation[], parcial: number, type: string): string {
+    const cols = evaluations.filter(e => (e.parcial || 1) === parcial && e.type === type);
+    let sum = 0;
+    let weightSum = 0;
+    for (const c of cols) {
+      if (c.grade !== null) {
+        sum += c.grade * c.weight;
+        weightSum += c.weight;
+      }
+    }
+    return weightSum > 0 ? (sum / weightSum).toFixed(2) : '—';
+  }
+
+  getParcialFinal(evaluations: Evaluation[], parcial: number, grade: SubjectGrade): string {
+    const theoAvg = this.getParcialTypeAvg(evaluations, parcial, 'teorica');
+    const praAvg = this.getParcialTypeAvg(evaluations, parcial, 'practica');
+    const tw = grade.theory_weight ?? 0.3;
+    const pw = grade.practice_weight ?? 0.7;
+
+    if (theoAvg !== '—' && praAvg !== '—') {
+      return (parseFloat(theoAvg) * tw + parseFloat(praAvg) * pw).toFixed(2);
+    }
+    if (theoAvg !== '—') return theoAvg;
+    if (praAvg !== '—') return praAvg;
+    return '—';
+  }
+
+  getParcialFinalColor(evaluations: Evaluation[], parcial: number, grade: SubjectGrade): string {
+    const val = this.getParcialFinal(evaluations, parcial, grade);
+    if (val === '—') return 'text-gray-400';
+    return parseFloat(val) >= 61 ? 'text-green-600' : 'text-red-600';
+  }
+
+  hasEvaluationsByType(evaluations: Evaluation[], parcial: number, type: string): boolean {
+    return evaluations.some(e => (e.parcial || 1) === parcial && e.type === type);
+  }
+
   getObservation(grade: SubjectGrade): string {
     if (grade.effective_grade === null || grade.effective_grade === undefined) {
       return 'En curso';

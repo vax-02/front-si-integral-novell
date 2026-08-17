@@ -123,17 +123,14 @@
           <label class="text-xs uppercase tracking-wide text-gray-500">Docente</label>
           <p class="mt-1 font-semibold text-gray-800">{{ grade.docente }}</p>
         </div>
-
         <div class="text-center">
           <label class="text-xs uppercase tracking-wide text-gray-500">Paralelo</label>
           <p class="mt-1 font-semibold text-gray-800">{{ grade.parallel_name }} ({{ grade.turno }})</p>
         </div>
-
         <div class="text-center">
           <label class="text-xs uppercase tracking-wide text-gray-500">Materia</label>
           <p class="mt-1 font-semibold text-gray-800">{{ grade.subject_name }}</p>
         </div>
-
         <div class="text-center">
           <label class="text-xs uppercase tracking-wide text-gray-500">Estado</label>
           <p class="mt-1 font-semibold"
@@ -148,42 +145,39 @@
       <!-- Por parciales -->
       @for (parcial of getParciales(grade.evaluations); track parcial) {
       <div class="border-t border-gray-200">
-        <div class="bg-purple-50 px-6 py-2">
-          <h4 class="text-sm font-bold text-purple-700">{{ parcial }}° Parcial</h4>
+        <!-- Header del parcial -->
+        <div class="bg-purple-600 text-white px-6 py-2.5 flex items-center justify-between">
+          <span class="text-sm font-bold">{{ parcial }}° Parcial</span>
+          <span class="text-xs font-semibold bg-purple-500/50 px-2.5 py-0.5 rounded-full">
+            Final: <span [class]="getParcialFinalColor(grade.evaluations, parcial, grade)">{{ getParcialFinal(grade.evaluations, parcial, grade) }}</span>
+          </span>
         </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-100">
+
+        <!-- Sección Teórica -->
+        @if (hasEvaluationsByType(grade.evaluations, parcial, 'teorica')) {
+        <div class="border-b border-blue-100">
+          <div class="bg-blue-50 px-6 py-1.5 flex items-center justify-between">
+            <span class="text-xs font-bold text-blue-700 uppercase tracking-wide">
+              <i class="fas fa-book-open mr-1"></i>Evaluaciones Teóricas
+            </span>
+            <span class="text-xs font-semibold text-blue-600">
+              Prom: {{ getParcialTypeAvg(grade.evaluations, parcial, 'teorica') }}
+            </span>
+          </div>
+          <table class="min-w-full divide-y divide-blue-100">
+            <thead class="bg-blue-50/50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                  Actividad
-                </th>
-                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                  Tipo
-                </th>
-                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                  Ponderación
-                </th>
-                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                  Calificación
-                </th>
+                <th class="px-6 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-blue-600">Actividad</th>
+                <th class="px-6 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-blue-600">Ponderación</th>
+                <th class="px-6 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-blue-600">Calificación</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 bg-white">
-              @for (evalItem of getEvaluationsByParcial(grade.evaluations, parcial); track evalItem.name) {
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 font-medium text-gray-700">{{ evalItem.name }}</td>
-                <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                    [class.bg-blue-100]="evalItem.type === 'teorica'"
-                    [class.text-blue-700]="evalItem.type === 'teorica'"
-                    [class.bg-green-100]="evalItem.type === 'practica'"
-                    [class.text-green-700]="evalItem.type === 'practica'">
-                    {{ evalItem.type === 'teorica' ? 'Teórica' : 'Práctica' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-center text-gray-500">{{ evalItem.weight_percent }}%</td>
-                <td class="px-6 py-4 text-center font-semibold"
+            <tbody class="divide-y divide-blue-50 bg-white">
+              @for (evalItem of getEvaluationsByType(getEvaluationsByParcial(grade.evaluations, parcial), 'teorica'); track evalItem.name) {
+              <tr class="hover:bg-blue-50/30">
+                <td class="px-6 py-3 font-medium text-gray-700 text-sm">{{ evalItem.name }}</td>
+                <td class="px-6 py-3 text-center text-sm text-gray-500">{{ evalItem.weight_percent }}%</td>
+                <td class="px-6 py-3 text-center font-semibold text-sm"
                   [class.text-green-600]="evalItem.grade !== null && evalItem.grade >= 61"
                   [class.text-red-600]="evalItem.grade !== null && evalItem.grade < 61"
                   [class.text-gray-400]="evalItem.grade === null">
@@ -194,27 +188,65 @@
             </tbody>
           </table>
         </div>
+        }
+
+        <!-- Sección Práctica -->
+        @if (hasEvaluationsByType(grade.evaluations, parcial, 'practica')) {
+        <div class="border-b border-green-100">
+          <div class="bg-green-50 px-6 py-1.5 flex items-center justify-between">
+            <span class="text-xs font-bold text-green-700 uppercase tracking-wide">
+              <i class="fas fa-tools mr-1"></i>Evaluaciones Prácticas
+            </span>
+            <span class="text-xs font-semibold text-green-600">
+              Prom: {{ getParcialTypeAvg(grade.evaluations, parcial, 'practica') }}
+            </span>
+          </div>
+          <table class="min-w-full divide-y divide-green-100">
+            <thead class="bg-green-50/50">
+              <tr>
+                <th class="px-6 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-green-600">Actividad</th>
+                <th class="px-6 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-green-600">Ponderación</th>
+                <th class="px-6 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-green-600">Calificación</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-green-50 bg-white">
+              @for (evalItem of getEvaluationsByType(getEvaluationsByParcial(grade.evaluations, parcial), 'practica'); track evalItem.name) {
+              <tr class="hover:bg-green-50/30">
+                <td class="px-6 py-3 font-medium text-gray-700 text-sm">{{ evalItem.name }}</td>
+                <td class="px-6 py-3 text-center text-sm text-gray-500">{{ evalItem.weight_percent }}%</td>
+                <td class="px-6 py-3 text-center font-semibold text-sm"
+                  [class.text-green-600]="evalItem.grade !== null && evalItem.grade >= 61"
+                  [class.text-red-600]="evalItem.grade !== null && evalItem.grade < 61"
+                  [class.text-gray-400]="evalItem.grade === null">
+                  {{ evalItem.grade !== null ? evalItem.grade : '—' }}
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
       </div>
       }
 
       <!-- Resumen final -->
-      <div class="border-t border-gray-200 bg-gray-50">
+      <div class="border-t-2 border-purple-200 bg-gray-50">
         <table class="min-w-full">
           <tbody>
             <tr class="border-b border-gray-200">
-              <td class="px-6 py-3 text-right font-semibold text-gray-600 text-sm">Promedio Eva. Teórica</td>
+              <td class="px-6 py-3 text-right font-semibold text-blue-600 text-sm">Promedio Teórico Global</td>
               <td class="px-6 py-3 text-center font-bold text-blue-600 w-32">
                 {{ grade.theoretical_average !== null ? grade.theoretical_average : '—' }}
               </td>
             </tr>
             <tr class="border-b border-gray-200">
-              <td class="px-6 py-3 text-right font-semibold text-gray-600 text-sm">Promedio Eva. Práctica</td>
+              <td class="px-6 py-3 text-right font-semibold text-green-600 text-sm">Promedio Práctico Global</td>
               <td class="px-6 py-3 text-center font-bold text-green-600 w-32">
                 {{ grade.practical_average !== null ? grade.practical_average : '—' }}
               </td>
             </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-6 py-3 text-right font-bold text-gray-700">Calificación Final</td>
+            <tr class="border-b border-gray-200 bg-purple-50/50">
+              <td class="px-6 py-3 text-right font-bold text-purple-700">Calificación Final</td>
               <td class="px-6 py-3 text-center text-lg font-bold"
                 [class.text-green-600]="grade.final_grade !== null && grade.final_grade >= 61"
                 [class.text-red-600]="grade.final_grade !== null && grade.final_grade < 61"
