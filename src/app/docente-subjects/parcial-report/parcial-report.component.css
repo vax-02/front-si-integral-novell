@@ -1,0 +1,22 @@
+@media print {
+  .print\:space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:border-none {
+    border: none !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sticky {
+    position: static !important;
+  }
+}

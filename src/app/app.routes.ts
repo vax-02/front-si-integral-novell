@@ -16,6 +16,7 @@ export const routes: Routes = [
     //docentes
     { path: 'professor/subjets', canActivate: [roleGuard], data: { roles: [Roles.DOCENTE.id] }, loadComponent: () => import('./docente-subjects/docente-subjects.component').then(m => m.DocenteSubjectsComponent) },
     { path: 'professor/grades', canActivate: [roleGuard], data: { roles: [Roles.DOCENTE.id] }, loadComponent: () => import('./docente-subjects/grades/grades.component').then(m => m.GradesComponent) },
+    { path: 'professor/parcial-report', canActivate: [roleGuard], data: { roles: [Roles.DOCENTE.id] }, loadComponent: () => import('./docente-subjects/parcial-report/parcial-report.component').then(m => m.ParcialReportComponent) },
     { path: 'professor/repository', canActivate: [roleGuard], data: { roles: [Roles.DOCENTE.id] }, loadComponent: () => import('./docente-subjects/repository/repository.component').then(m => m.RepositoryComponent) },
     { path: 'my-attendance', canActivate: [roleGuard], data: { roles: [Roles.DOCENTE.id] }, loadComponent: () => import('./pages/my-attendance/my-attendance.component').then(m => m.MyAttendanceComponent) },
 

@@ -17,48 +17,51 @@ interface GradeState {
 @Component({
   selector: 'app-grades',
   standalone: true,
-  imports: [CommonModule, FormsModule,BaseModalConfirmComponent],
+  imports: [CommonModule, FormsModule, BaseModalConfirmComponent],
   templateUrl: './grades.component.html',
   styleUrl: './grades.component.css',
 })
 export class GradesComponent implements OnInit, OnDestroy {
-  // Materias del docente
   subjects: any[] = [];
   loadingSubjects = false;
 
-  modalConfirm : boolean = false
-  columnIdSelect : number = 0
-  resetLoading : boolean = false
-  // Materia y paralelo seleccionados
+  modalConfirm: boolean = false;
+  columnIdSelect: number = 0;
+  resetLoading: boolean = false;
+
   selectedSubject: any = null;
 
-  // Estudiantes con calificaciones
   students: any[] = [];
   columns: any[] = [];
   parallel: any = null;
   loadingGrades = false;
   error = '';
 
-  // Estado de guardado por celda (studentId_columnId)
   cellStates: Record<string, GradeState> = {};
 
-  // Nueva columna a crear
   newColumnName = '';
   newColumnWeight = 0;
+  newColumnType: 'teorica' | 'practica' = 'teorica';
+  newColumnParcial = 1;
   savingColumn = false;
 
-  // Editar columna
   editingColumn: any = null;
   editColumnName = '';
   editColumnWeight = 0;
+  editColumnType: 'teorica' | 'practica' = 'teorica';
+  editColumnParcial = 1;
   savingEditColumn = false;
 
-  // Buscador de estudiantes
   searchStudent = '';
-
-  // Estado de publicación
   isPublished = false;
   publishing = false;
+
+  subjectConfig: any = null;
+  editingConfig = false;
+  configTheoryWeight = 0;
+  configPracticeWeight = 0;
+  configNumParciales = 2;
+  savingConfig = false;
 
   constructor(
     private docenteService: DocenteService,
@@ -72,7 +75,6 @@ export class GradesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadSubjects();
 
-    // Verificar si viene subject_id en query params
     this.route.queryParams.subscribe((params) => {
       if (params['subject_id']) {
         const subjectId = Number(params['subject_id']);
@@ -93,7 +95,6 @@ export class GradesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {}
 
-  /** Filtrar estudiantes por nombre o CI */
   get filteredStudents() {
     if (!this.searchStudent.trim()) return this.students;
     const term = this.searchStudent.toLowerCase();
@@ -102,6 +103,78 @@ export class GradesComponent implements OnInit, OnDestroy {
         s.name.toLowerCase().includes(term) ||
         s.ci.toLowerCase().includes(term)
     );
+  }
+
+  getColumnsByParcial(parcial: number): any[] {
+    return this.columns.filter((c: any) => c.parcial === parcial);
+  }
+
+  getColumnsByParcialAndType(parcial: number, type: 'teorica' | 'practica'): any[] {
+    return this.columns.filter((c: any) => c.parcial === parcial && c.type === type);
+  }
+
+  countColumnsByType(parcial: number, type: 'teorica' | 'practica'): number {
+    return this.columns.filter((c: any) => c.parcial === parcial && c.type === type).length;
+  }
+
+  getParcialOptions(): number[] {
+    const max = this.subjectConfig?.num_parciales || this.configNumParciales || 2;
+    return Array.from({ length: max }, (_, i) => i + 1);
+  }
+
+  getParciales(): number[] {
+    const parciales = [...new Set(this.columns.map((c: any) => c.parcial || 1))];
+    return parciales.sort((a, b) => a - b);
+  }
+
+  getParcialTheoreticalAvg(student: any, parcial: number): string {
+    const cols = this.getColumnsByParcial(parcial).filter((c: any) => c.type === 'teorica');
+    if (cols.length === 0) return '—';
+
+    let sum = 0;
+    let weightSum = 0;
+    for (const col of cols) {
+      const grade = student.grades[col.id]?.grade;
+      const w = parseFloat(col.weight) || 0;
+      if (grade !== null && grade !== undefined && grade !== '') {
+        sum += Number(grade) * w;
+        weightSum += w;
+      }
+    }
+    if (weightSum === 0) return '—';
+    return (sum / weightSum).toFixed(1);
+  }
+
+  getParcialPracticalAvg(student: any, parcial: number): string {
+    const cols = this.getColumnsByParcial(parcial).filter((c: any) => c.type === 'practica');
+    if (cols.length === 0) return '—';
+
+    let sum = 0;
+    let weightSum = 0;
+    for (const col of cols) {
+      const grade = student.grades[col.id]?.grade;
+      const w = parseFloat(col.weight) || 0;
+      if (grade !== null && grade !== undefined && grade !== '') {
+        sum += Number(grade) * w;
+        weightSum += w;
+      }
+    }
+    if (weightSum === 0) return '—';
+    return (sum / weightSum).toFixed(1);
+  }
+
+  getParcialFinal(student: any, parcial: number): string {
+    const theoAvg = this.getParcialTheoreticalAvg(student, parcial);
+    const praAvg = this.getParcialPracticalAvg(student, parcial);
+
+    if (theoAvg === '—' && praAvg === '—') return '—';
+    if (theoAvg === '—') return praAvg;
+    if (praAvg === '—') return theoAvg;
+
+    const theoryWeight = this.subjectConfig?.theory_weight || 0.30;
+    const practiceWeight = this.subjectConfig?.practice_weight || 0.70;
+    const final = (parseFloat(theoAvg) * theoryWeight) + (parseFloat(praAvg) * practiceWeight);
+    return final.toFixed(1);
   }
 
   loadSubjects() {
@@ -137,6 +210,7 @@ export class GradesComponent implements OnInit, OnDestroy {
       this.students = [];
       this.columns = [];
       this.parallel = null;
+      this.subjectConfig = null;
     }
   }
 
@@ -158,9 +232,19 @@ export class GradesComponent implements OnInit, OnDestroy {
         next: (resp) => {
           this.loadingGrades = false;
           this.students = resp.students || [];
-          this.columns = (resp.columns || []).sort((a: any, b: any) => a.order - b.order);
+          this.columns = (resp.columns || []).sort((a: any, b: any) => {
+            if (a.parcial !== b.parcial) return a.parcial - b.parcial;
+            return a.order - b.order;
+          });
           this.parallel = resp.parallel || null;
           this.isPublished = resp.published || false;
+          this.subjectConfig = resp.subject || null;
+
+          if (this.subjectConfig) {
+            this.configTheoryWeight = this.subjectConfig.theory_weight * 100;
+            this.configPracticeWeight = this.subjectConfig.practice_weight * 100;
+            this.configNumParciales = this.subjectConfig.num_parciales;
+          }
         },
         error: (err) => {
           this.loadingGrades = false;
@@ -168,6 +252,7 @@ export class GradesComponent implements OnInit, OnDestroy {
           this.students = [];
           this.columns = [];
           this.parallel = null;
+          this.subjectConfig = null;
         },
       });
   }
@@ -177,12 +262,10 @@ export class GradesComponent implements OnInit, OnDestroy {
     return grade?.grade !== null && grade?.grade !== undefined ? String(grade.grade) : '';
   }
 
-  /** Guardar calificación al salir del input (blur) */
   onGradeBlur(student: any, columnId: number, event: Event) {
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
-    // Validar que sea numérico
     if (value !== '' && (isNaN(Number(value)) || Number(value) < 0 || Number(value) > 100)) {
       input.value = this.getGrade(student, columnId);
       return;
@@ -207,15 +290,23 @@ export class GradesComponent implements OnInit, OnDestroy {
       next: (resp) => {
         this.cellStates[key] = { status: 'saved', message: '✓' };
 
-        // Actualizar la nota final del estudiante
         if (resp.final_grade !== undefined) {
           student.final_grade = resp.final_grade;
         }
-
-        // Actualizar grade en el objeto local
-        if (student.grades[columnId]) {
-          student.grades[columnId].id = resp.qualification_id;
+        if (resp.theoretical_average !== undefined) {
+          student.theoretical_average = resp.theoretical_average;
         }
+        if (resp.practical_average !== undefined) {
+          student.practical_average = resp.practical_average;
+        }
+
+        if (!student.grades) {
+          student.grades = {};
+        }
+        student.grades[columnId] = {
+          id: resp.qualification_id,
+          grade: body.grade,
+        };
 
         setTimeout(() => {
           if (this.cellStates[key]?.status === 'saved') {
@@ -234,12 +325,43 @@ export class GradesComponent implements OnInit, OnDestroy {
     });
   }
 
+  onRecoveryBlur(student: any, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
+    if (value !== '' && (isNaN(Number(value)) || Number(value) < 0 || Number(value) > 100)) {
+      input.value = student.recovery_grade !== null && student.recovery_grade !== undefined
+        ? String(student.recovery_grade) : '';
+      return;
+    }
+
+    const courseId = this.selectedSubject?.course_id || this.parallel?.course?.id;
+    const parallelId = this.selectedSubject?.parallel_id || this.parallel?.id;
+
+    const body = {
+      student_id: student.id,
+      subject_id: this.selectedSubject.id,
+      course_id: courseId,
+      parallel_id: parallelId,
+      recovery_grade: value !== '' ? Number(value) : null,
+    };
+
+    this.http.post<any>(API_ENDPOINTS.grades.saveRecovery, body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        student.recovery_grade = resp.recovery_grade;
+        this.toast.success('Nota de recuperación guardada.');
+      },
+      error: () => {
+        this.toast.error('Error al guardar nota de recuperación.');
+      },
+    });
+  }
+
   getCellState(studentId: number, columnId: number): GradeState {
     const key = `${studentId}_${columnId}`;
     return this.cellStates[key] || { status: 'idle' };
   }
 
-  /** Agregar una nueva columna de evaluación */
   addColumn() {
     if (!this.selectedSubject || !this.newColumnName.trim() || this.newColumnWeight <= 0) return;
 
@@ -251,6 +373,8 @@ export class GradesComponent implements OnInit, OnDestroy {
       parallel_id: this.selectedSubject.parallel_id,
       course_id: courseId,
       name: this.newColumnName.trim(),
+      type: this.newColumnType,
+      parcial: this.newColumnParcial,
       weight: this.newColumnWeight / 100,
       order: this.columns.length,
     };
@@ -259,8 +383,14 @@ export class GradesComponent implements OnInit, OnDestroy {
       next: (resp) => {
         this.savingColumn = false;
         this.columns.push(resp.column);
+        this.columns.sort((a: any, b: any) => {
+          if (a.parcial !== b.parcial) return a.parcial - b.parcial;
+          return a.order - b.order;
+        });
         this.newColumnName = '';
         this.newColumnWeight = 0;
+        this.newColumnType = 'teorica';
+        this.newColumnParcial = 1;
       },
       error: (err) => {
         this.savingColumn = false;
@@ -268,21 +398,22 @@ export class GradesComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Iniciar edición de columna */
   startEditColumn(column: any) {
     this.editingColumn = column;
     this.editColumnName = column.name;
     this.editColumnWeight = column.weight * 100;
+    this.editColumnType = column.type || 'teorica';
+    this.editColumnParcial = column.parcial || 1;
   }
 
-  /** Cancelar edición */
   cancelEditColumn() {
     this.editingColumn = null;
     this.editColumnName = '';
     this.editColumnWeight = 0;
+    this.editColumnType = 'teorica';
+    this.editColumnParcial = 1;
   }
 
-  /** Guardar edición de columna */
   saveEditColumn() {
     if (!this.editingColumn || !this.editColumnName.trim() || this.editColumnWeight <= 0) return;
 
@@ -291,6 +422,8 @@ export class GradesComponent implements OnInit, OnDestroy {
     const body = {
       name: this.editColumnName.trim(),
       weight: this.editColumnWeight / 100,
+      type: this.editColumnType,
+      parcial: this.editColumnParcial,
     };
 
     this.http.put<any>(API_ENDPOINTS.grades.columns.update(this.editingColumn.id), body, { headers: this.getHeaders() }).subscribe({
@@ -300,65 +433,82 @@ export class GradesComponent implements OnInit, OnDestroy {
         if (col) {
           col.name = resp.column?.name || this.editColumnName.trim();
           col.weight = resp.column?.weight || this.editColumnWeight / 100;
+          col.type = resp.column?.type || this.editColumnType;
+          col.parcial = resp.column?.parcial || this.editColumnParcial;
         }
         this.cancelEditColumn();
-        this.toast.success('Columna editada correctamente')
+        this.toast.success('Columna editada correctamente');
       },
       error: (err) => {
         this.savingEditColumn = false;
-        this.toast.error('Error al editar la columna')
+        this.toast.error('Error al editar la columna');
       },
     });
   }
-  /** Eliminar una columna de evaluación */
+
   deleteColumn(columnId: number) {
     this.modalConfirm = true;
-    this.columnIdSelect = columnId
+    this.columnIdSelect = columnId;
   }
-  confirmDeleteColumn(){
-    this.resetLoading = true
+
+  confirmDeleteColumn() {
+    this.resetLoading = true;
     this.http.delete<any>(API_ENDPOINTS.grades.columns.delete(this.columnIdSelect), { headers: this.getHeaders() }).subscribe({
       next: () => {
         this.columns = this.columns.filter((c) => c.id !== this.columnIdSelect);
         if (this.editingColumn?.id === this.columnIdSelect) {
           this.cancelEditColumn();
         }
-        this.toast.success('Columna eliminada correctamente')
-        this.resetLoading = false
-        this.modalConfirm = false
+        this.toast.success('Columna eliminada correctamente');
+        this.resetLoading = false;
+        this.modalConfirm = false;
       },
       error: (err) => {
-        this.toast.error('Error al eliminar columna')
-        this.resetLoading = false
+        this.toast.error('Error al eliminar columna');
+        this.resetLoading = false;
       },
     });
   }
 
-  /** Mover columna hacia arriba (disminuir order) */
-  moveColumnUp(index: number) {
-    if (index <= 0) return;
-    this.swapColumns(index, index - 1);
+  moveColumnUp(columnId: number) {
+    const col = this.columns.find((c) => c.id === columnId);
+    if (!col) return;
+    const sameGroup = this.columns
+      .filter((c) => c.parcial === col.parcial && c.type === col.type)
+      .sort((a, b) => a.order - b.order);
+    const idx = sameGroup.findIndex((c) => c.id === columnId);
+    if (idx <= 0) return;
+    this.swapColumns(sameGroup[idx], sameGroup[idx - 1]);
   }
 
-  /** Mover columna hacia abajo (aumentar order) */
-  moveColumnDown(index: number) {
-    if (index >= this.columns.length - 1) return;
-    this.swapColumns(index, index + 1);
+  moveColumnDown(columnId: number) {
+    const col = this.columns.find((c) => c.id === columnId);
+    if (!col) return;
+    const sameGroup = this.columns
+      .filter((c) => c.parcial === col.parcial && c.type === col.type)
+      .sort((a, b) => a.order - b.order);
+    const idx = sameGroup.findIndex((c) => c.id === columnId);
+    if (idx < 0 || idx >= sameGroup.length - 1) return;
+    this.swapColumns(sameGroup[idx], sameGroup[idx + 1]);
   }
 
-  private swapColumns(i: number, j: number) {
-    const temp = this.columns[i];
-    this.columns[i] = this.columns[j];
-    this.columns[j] = temp;
+  private swapColumns(colA: any, colB: any) {
+    const tempOrder = colA.order;
+    colA.order = colB.order;
+    colB.order = tempOrder;
 
-    this.columns.forEach((col, idx) => {
-      col.order = idx;
+    this.columns = [...this.columns].sort((a, b) => {
+      if (a.parcial !== b.parcial) return a.parcial - b.parcial;
+      if (a.type !== b.type) return a.type === 'teorica' ? -1 : 1;
+      return a.order - b.order;
     });
 
-    for (const col of [this.columns[i], this.columns[j]]) {
+    for (const col of [colA, colB]) {
       this.http.put<any>(API_ENDPOINTS.grades.columns.update(col.id), {
         name: col.name,
         weight: col.weight,
+        type: col.type,
+        parcial: col.parcial,
         order: col.order,
       }, { headers: this.getHeaders() }).subscribe({
         error: () => {},
@@ -366,7 +516,51 @@ export class GradesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Publicar notas */
+  startEditConfig() {
+    this.editingConfig = true;
+    this.configTheoryWeight = this.subjectConfig?.theory_weight * 100 || 30;
+    this.configPracticeWeight = this.subjectConfig?.practice_weight * 100 || 70;
+    this.configNumParciales = this.subjectConfig?.num_parciales || 2;
+  }
+
+  cancelEditConfig() {
+    this.editingConfig = false;
+    if (this.subjectConfig) {
+      this.configTheoryWeight = this.subjectConfig.theory_weight * 100;
+      this.configPracticeWeight = this.subjectConfig.practice_weight * 100;
+      this.configNumParciales = this.subjectConfig.num_parciales;
+    }
+  }
+
+  saveSubjectConfig() {
+    if (!this.selectedSubject) return;
+
+    this.savingConfig = true;
+    const parallelId = this.selectedSubject?.parallel_id || this.parallel?.id;
+
+    const body = {
+      subject_id: this.selectedSubject.id,
+      parallel_id: parallelId,
+      theory_weight: this.configTheoryWeight / 100,
+      practice_weight: this.configPracticeWeight / 100,
+      num_parciales: this.configNumParciales,
+    };
+
+    this.http.put<any>(API_ENDPOINTS.grades.subjectConfig, body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        this.savingConfig = false;
+        this.subjectConfig = resp.subject;
+        this.editingConfig = false;
+        this.toast.success('Configuración guardada correctamente');
+        this.loadGrades();
+      },
+      error: () => {
+        this.savingConfig = false;
+        this.toast.error('Error al guardar configuración');
+      },
+    });
+  }
+
   publishGrades() {
     if (!this.selectedSubject) return;
     this.publishing = true;
@@ -387,7 +581,6 @@ export class GradesComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Despublicar notas */
   unpublishGrades() {
     if (!this.selectedSubject) return;
     this.publishing = true;
@@ -410,6 +603,17 @@ export class GradesComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/home/professor/subjets']);
+  }
+
+  goToParcialReport() {
+    if (!this.selectedSubject) return;
+    const parallelId = this.selectedSubject.parallel_id || this.parallel?.id;
+    this.router.navigate(['/home/professor/parcial-report'], {
+      queryParams: {
+        subject_id: this.selectedSubject.id,
+        parallel_id: parallelId,
+      }
+    });
   }
 
   private getHeaders(): HttpHeaders {

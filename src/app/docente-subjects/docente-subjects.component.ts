@@ -47,6 +47,16 @@ export class DocenteSubjectsComponent implements OnInit {
     });
   }
 
+  /** Navegar al informe de parciales de la materia */
+  goToParcialReport(subject: any) {
+    this.router.navigate(['/home/professor/parcial-report'], {
+      queryParams: {
+        subject_id: subject.id,
+        parallel_id: subject.parallel_id,
+      },
+    });
+  }
+
   /** Navegar al repositorio con la materia preseleccionada */
   goToRepository(subject: any) {
     this.router.navigate(['/home/professor/repository'], {

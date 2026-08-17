@@ -88,6 +88,10 @@ export const API_ENDPOINTS = {
     save: `${API_BASE_URL}/grades/save`,
     publish: `${API_BASE_URL}/grades/publish`,
     unpublish: `${API_BASE_URL}/grades/unpublish`,
+    saveRecovery: `${API_BASE_URL}/grades/save-recovery`,
+    subjectConfig: `${API_BASE_URL}/grades/subject-config`,
+    parcialReport: `${API_BASE_URL}/grades/parcial-report`,
+    exportParcialReport: `${API_BASE_URL}/grades/parcial-report/export`,
     columns: {
       store: `${API_BASE_URL}/grades/columns`,
       update: (id: number) => `${API_BASE_URL}/grades/columns/${id}`,

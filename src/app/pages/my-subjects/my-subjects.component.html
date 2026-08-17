@@ -14,7 +14,6 @@
     <p class="text-slate-500">Cargando materias...</p>
   </div>
 
-  <!-- ERROR -->
   @if (error(); as errMsg) {
   <div class="bg-red-50 rounded-xl shadow-sm border border-red-200 p-6 text-center">
     <p class="text-red-600">{{ errMsg }}</p>
@@ -136,70 +135,110 @@
         </div>
 
         <div class="text-center">
-          <label class="text-xs uppercase tracking-wide text-gray-500">Estado <br> </label>
-          @if (grade.final_grade !== null && grade.final_grade !== undefined) {
-            @if (grade.final_grade >= 61) {
-            <span class="inline-flex mt-2 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-              Aprobado
-            </span>
-            } @else {
-            <span class="inline-flex mt-2 rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700">
-              Reprobado
-            </span>
-            }
-          } @else {
-          <span class="inline-flex mt-2 rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-700">
-            En curso
-          </span>
-          }
+          <label class="text-xs uppercase tracking-wide text-gray-500">Estado</label>
+          <p class="mt-1 font-semibold"
+            [class.text-green-600]="getObservation(grade) === 'Aprobado'"
+            [class.text-red-600]="getObservation(grade) === 'Reprobado'"
+            [class.text-yellow-600]="getObservation(grade) === 'En curso'">
+            {{ getObservation(grade) }}
+          </p>
         </div>
       </div>
 
-      <!-- Tabla -->
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                Actividad
-              </th>
-              <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                Ponderación
-              </th>
-              <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                Calificación
-              </th>
-            </tr>
-          </thead>
+      <!-- Por parciales -->
+      @for (parcial of getParciales(grade.evaluations); track parcial) {
+      <div class="border-t border-gray-200">
+        <div class="bg-purple-50 px-6 py-2">
+          <h4 class="text-sm font-bold text-purple-700">{{ parcial }}° Parcial</h4>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Actividad
+                </th>
+                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Tipo
+                </th>
+                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Ponderación
+                </th>
+                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Calificación
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+              @for (evalItem of getEvaluationsByParcial(grade.evaluations, parcial); track evalItem.name) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-700">{{ evalItem.name }}</td>
+                <td class="px-6 py-4 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                    [class.bg-blue-100]="evalItem.type === 'teorica'"
+                    [class.text-blue-700]="evalItem.type === 'teorica'"
+                    [class.bg-green-100]="evalItem.type === 'practica'"
+                    [class.text-green-700]="evalItem.type === 'practica'">
+                    {{ evalItem.type === 'teorica' ? 'Teórica' : 'Práctica' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-center text-gray-500">{{ evalItem.weight_percent }}%</td>
+                <td class="px-6 py-4 text-center font-semibold"
+                  [class.text-green-600]="evalItem.grade !== null && evalItem.grade >= 61"
+                  [class.text-red-600]="evalItem.grade !== null && evalItem.grade < 61"
+                  [class.text-gray-400]="evalItem.grade === null">
+                  {{ evalItem.grade !== null ? evalItem.grade : '—' }}
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
 
-          <tbody class="divide-y divide-gray-100 bg-white">
-            @for (evalItem of grade.evaluations; track evalItem.name) {
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 font-medium text-gray-700">{{ evalItem.name }}</td>
-              <td class="px-6 py-4 text-center text-gray-500">{{ evalItem.weight_percent }}%</td>
-              <td class="px-6 py-4 text-center font-semibold"
-                [class.text-green-600]="evalItem.grade !== null && evalItem.grade >= 61"
-                [class.text-red-600]="evalItem.grade !== null && evalItem.grade < 61"
-                [class.text-gray-400]="evalItem.grade === null">
-                {{ evalItem.grade !== null ? evalItem.grade : '—' }}
+      <!-- Resumen final -->
+      <div class="border-t border-gray-200 bg-gray-50">
+        <table class="min-w-full">
+          <tbody>
+            <tr class="border-b border-gray-200">
+              <td class="px-6 py-3 text-right font-semibold text-gray-600 text-sm">Promedio Eva. Teórica</td>
+              <td class="px-6 py-3 text-center font-bold text-blue-600 w-32">
+                {{ grade.theoretical_average !== null ? grade.theoretical_average : '—' }}
               </td>
             </tr>
-            }
-          </tbody>
-
-          <tfoot class="bg-gray-50">
-            <tr>
-              <td colspan="2" class="px-6 py-4 text-right font-bold text-gray-700">
-                Calificación Final
+            <tr class="border-b border-gray-200">
+              <td class="px-6 py-3 text-right font-semibold text-gray-600 text-sm">Promedio Eva. Práctica</td>
+              <td class="px-6 py-3 text-center font-bold text-green-600 w-32">
+                {{ grade.practical_average !== null ? grade.practical_average : '—' }}
               </td>
-              <td class="px-6 py-4 text-center text-lg font-bold"
+            </tr>
+            <tr class="border-b border-gray-200">
+              <td class="px-6 py-3 text-right font-bold text-gray-700">Calificación Final</td>
+              <td class="px-6 py-3 text-center text-lg font-bold"
                 [class.text-green-600]="grade.final_grade !== null && grade.final_grade >= 61"
                 [class.text-red-600]="grade.final_grade !== null && grade.final_grade < 61"
                 [class.text-gray-400]="grade.final_grade === null">
                 {{ grade.final_grade !== null ? grade.final_grade : '—' }}
               </td>
             </tr>
-          </tfoot>
+            @if (grade.recovery_grade !== null) {
+            <tr class="border-b border-gray-200 bg-yellow-50">
+              <td class="px-6 py-3 text-right font-semibold text-yellow-700 text-sm">Prueba de Recuperación</td>
+              <td class="px-6 py-3 text-center font-bold text-yellow-600 w-32">
+                {{ grade.recovery_grade }}
+              </td>
+            </tr>
+            }
+            @if (grade.effective_grade !== null && grade.effective_grade !== grade.final_grade) {
+            <tr class="bg-green-50">
+              <td class="px-6 py-3 text-right font-bold text-green-700">Nota Efectiva (con recuperación)</td>
+              <td class="px-6 py-3 text-center text-lg font-bold text-green-600">
+                {{ grade.effective_grade }}
+              </td>
+            </tr>
+            }
+          </tbody>
         </table>
       </div>
     </div>

@@ -378,7 +378,7 @@ export class CoursesComponent implements OnInit {
   }
 
   ordinalLabel(n: number | null): string {
-    const ordinals = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo'];
+    const ordinals = ['Primero', 'Segundo', 'Tercer', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo'];
     return ordinals[(n ?? 0) - 1] || `${n ?? 0}º`;
   }
 

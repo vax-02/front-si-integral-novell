@@ -31,6 +31,8 @@ interface Evaluation {
   weight: number;
   weight_percent: number;
   grade: number | null;
+  type: string;
+  parcial: number;
 }
 
 interface SubjectGrade {
@@ -42,7 +44,14 @@ interface SubjectGrade {
   course_name: string;
   docente: string;
   evaluations: Evaluation[];
+  theoretical_average: number | null;
+  practical_average: number | null;
   final_grade: number | null;
+  recovery_grade: number | null;
+  effective_grade: number | null;
+  theory_weight: number | null;
+  practice_weight: number | null;
+  num_parciales: number | null;
 }
 
 @Component({
@@ -60,7 +69,6 @@ export class MySubjectsComponent {
   readonly error = signal<string | null>(null);
   modalDetail: boolean = false;
 
-  // Datos de calificaciones del modal
   readonly selectedSubjectGrade = signal<SubjectGrade | null>(null);
   readonly loadingGrades = signal(false);
   readonly gradesError = signal<string | null>(null);
@@ -127,7 +135,6 @@ export class MySubjectsComponent {
       next: (resp) => {
         this.loadingGrades.set(false);
         const grades: SubjectGrade[] = resp.grades || [];
-        // Buscar la calificación que coincide con la sigla
         const grade = grades.find((g) => g.subject_sigla === subject.sigla) || null;
         this.selectedSubjectGrade.set(grade);
         if (!grade) {
@@ -145,6 +152,22 @@ export class MySubjectsComponent {
     this.modalDetail = false;
     this.selectedSubjectGrade.set(null);
     this.gradesError.set(null);
+  }
+
+  getParciales(evaluations: Evaluation[]): number[] {
+    const parciales = [...new Set(evaluations.map(e => e.parcial || 1))];
+    return parciales.sort((a, b) => a - b);
+  }
+
+  getEvaluationsByParcial(evaluations: Evaluation[], parcial: number): Evaluation[] {
+    return evaluations.filter(e => (e.parcial || 1) === parcial);
+  }
+
+  getObservation(grade: SubjectGrade): string {
+    if (grade.effective_grade === null || grade.effective_grade === undefined) {
+      return 'En curso';
+    }
+    return grade.effective_grade >= 61 ? 'Aprobado' : 'Reprobado';
   }
 
   private loadSubjectsForCareer(careerId: number) {
