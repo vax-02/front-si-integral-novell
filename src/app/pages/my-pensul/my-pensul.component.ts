@@ -21,6 +21,7 @@ interface LevelPensum {
 interface Carrera {
   id: number;
   nombre: string;
+  matricula: string;
   duration: string;
   type: number;
   total_subjects: number;
@@ -60,6 +61,7 @@ export class MyPensulComponent {
         const careers = (resp.careers || []).map((c: any) => ({
           id: c.id,
           nombre: c.name,
+          matricula: c.matricula,
           duration: c.duration,
           type: c.type,
           total_subjects: c.total_subjects,
