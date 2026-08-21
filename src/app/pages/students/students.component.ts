@@ -470,6 +470,43 @@ export class StudentsComponent {
     });
   }
 
+  previewExcelUrl: string | null = null;
+  previewExcelModal = false;
+
+  previewAcademicHistory(careerId?: number) {
+    if (!this.selectedStudent) return;
+
+    this.studentService.exportAcademicHistory(this.selectedStudent.id, careerId).subscribe({
+      next: (blob) => {
+        this.previewExcelUrl = window.URL.createObjectURL(blob);
+        this.previewExcelModal = true;
+      },
+      error: () => {
+        this.toast.error('Error al cargar el historial académico');
+      }
+    });
+  }
+
+  closePreviewExcel() {
+    if (this.previewExcelUrl) {
+      window.URL.revokeObjectURL(this.previewExcelUrl);
+      this.previewExcelUrl = null;
+    }
+    this.previewExcelModal = false;
+  }
+
+  downloadPreviewExcel() {
+    if (!this.previewExcelUrl || !this.selectedStudent) return;
+    const a = window.document.createElement('a');
+    a.href = this.previewExcelUrl;
+    const nombre = this.selectedStudent.user.first_lastname + '_' +
+                   (this.selectedStudent.user.second_lastname || '') + '_' +
+                   this.selectedStudent.user.name;
+    a.download = `Historial_Academico_${nombre.toUpperCase()}.xlsx`;
+    a.click();
+    this.toast.success('Historial académico descargado correctamente');
+  }
+
   openModalEdit(student: any) {
     this.selectedStudent = student;
     this.enrollment = {
