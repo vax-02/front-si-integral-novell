@@ -225,17 +225,12 @@ export class UsersComponent {
   }
 
   toggleUserStatus(id: number) {
-    const user = this.users.find((u) => u.id === id);
-    if (!user) return;
-
-    const action = user.status ? 'bloquear' : 'desbloquear';
-    if (!confirm(`¿Estás seguro de ${action} a ${user.name} ${user.first_lastname}?`)) {
-      return;
-    }
-
     this.userService.changeStatus(id).subscribe({
       next: (response) => {
-        user.status = response.status ?? (user.status ? 0 : 1);
+        const user = this.users.find((u) => u.id === id);
+        if (user) {
+          user.status = response.status ?? (user.status ? 0 : 1);
+        }
         this.toast.success('Estado del usuario actualizado exitosamente');
       },
       error: (err) => {
