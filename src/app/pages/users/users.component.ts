@@ -225,18 +225,22 @@ export class UsersComponent {
   }
 
   toggleUserStatus(id: number) {
+    const user = this.users.find((u) => u.id === id);
+    if (!user) return;
+
+    const action = user.status ? 'bloquear' : 'desbloquear';
+    if (!confirm(`¿Estás seguro de ${action} a ${user.name} ${user.first_lastname}?`)) {
+      return;
+    }
+
     this.userService.changeStatus(id).subscribe({
-      next: () => {
-        const user = this.users.find((u) => u.id === id);
-
-        if (user) {
-          user.status = user.status ? 0 : 1;
-        }
-
+      next: (response) => {
+        user.status = response.status ?? (user.status ? 0 : 1);
         this.toast.success('Estado del usuario actualizado exitosamente');
       },
-      error: (error) => {
-        this.toast.error('Error al actualizar el estado del usuario');
+      error: (err) => {
+        const message = err.error?.message || 'Error al actualizar el estado del usuario';
+        this.toast.error(message);
       },
     });
   }
@@ -335,11 +339,12 @@ export class UsersComponent {
         this.resetLoading = false;
         this.modalConfirmReset = false;
         this.selectedResetUserId = null;
-        this.toast.success('Contraseña reestablecida exitosamente');
+        this.toast.success('Contraseña restablecida exitosamente');
       },
-      error: (error) => {
+      error: (err) => {
+        const message = err.error?.message || 'Error al restablecer la contraseña';
+        this.toast.error(message);
         this.resetLoading = false;
-        this.toast.error('Error al reestablecer la contraseña');
       },
     });
   }
