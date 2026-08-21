@@ -15,8 +15,13 @@ export class StudentService {
   ) {}
 
   getStudents(page: number = 1, perPage: number = 10, search: string = ''): Observable<any> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      per_page: perPage.toString(),
+      search: search,
+    });
     return this.http.get<any>(
-      `${this.apiUrl.students.index}?page=${page}&per_page=${perPage}&search=${search}`,
+      `${this.apiUrl.students.index}?${params.toString()}`,
       { headers: this.getHeaders() },
     );
   }

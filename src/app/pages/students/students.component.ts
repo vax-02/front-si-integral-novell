@@ -1,4 +1,4 @@
-import { Component, ɵpatchComponentDefWithScope } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '../../shared/button/button.component';
@@ -51,7 +51,6 @@ interface Card {
 export class StudentsComponent {
   private searchTimeout: any;
   parallels: any[] = []
-  tipo: string = '';
   modalParallels : boolean = false
   students: Student[] = [];
   dataCards: Card = {
@@ -282,13 +281,6 @@ export class StudentsComponent {
     }
     return true;
   }
-  validarFormularioUpdate(): boolean {
-    if (!this.enrollment.name) { this.toast.error('El nombre es requerido'); return false; }
-    if (!this.enrollment.first_lastname) { this.toast.error('El apellido paterno es requerido'); return false; }
-    if (!this.enrollment.ci) { this.toast.error('El C.I. es requerido'); return false; }
-    if (!this.enrollment.email) { this.toast.error('El correo electrónico es requerido'); return false; }
-    return true;
-  }
   saveStudent() {
     if (!this.validarFormulario()) return;
     this.saving = true;
@@ -361,35 +353,6 @@ export class StudentsComponent {
     this.toast.error(fallback);
   }
 
-  updateStudent() {
-    if (!this.validarFormularioUpdate()) return;
-    this.saving = true;
-
-    const data = {
-      name: this.enrollment.name,
-      first_lastname: this.enrollment.first_lastname,
-      second_lastname: this.enrollment.second_lastname,
-      ci: this.enrollment.ci,
-      email: this.enrollment.email,
-      cellphone: this.enrollment.cellphone,
-      birth_certificate: this.enrollment.birth_certificate,
-      school_diploma: this.enrollment.school_diploma,
-      carnet: this.enrollment.carnet,
-    };
-
-    this.studentService.updateStudent(this.selectedStudent!.id, data).subscribe({
-      next: (response) => {
-        this.saving = false;
-        this.toast.success('Estudiante actualizado exitosamente');
-        this.editModalStudent = false;
-        this.loadStudents();
-      },
-      error: (err) => {
-        this.saving = false;
-        this.showValidationError(err, 'Error al actualizar estudiante');
-      }
-    });
-  }
   openModalView(student: Student) {
     this.selectedStudent = student;
     this.parallelHistory = [];
@@ -648,11 +611,6 @@ export class StudentsComponent {
     }
     this.saving = true;
 
-    // Buscar el student_career_id correspondiente
-    const careerEntry = this.studentCareers.find(
-      (sc: any) => sc.career_id === this.changeParallelCareerId || sc.career?.id === this.changeParallelCareerId
-    );
-
     this.studentService.updateStudentParallel(this.selectedStudent!.id, {
       career_id: this.changeParallelCareerId,
       parallel_id: this.changeParallelId
@@ -716,22 +674,8 @@ export class StudentsComponent {
     });
   }
 
-  saveBaja() {
-    if (this.tipo === 'baja') {
-      // estado = INACTIVO
-    }
-    if (this.tipo === 'congelado') {
-      // estado = CONGELADO
-    }
-  }
-
   // ── Toggle status (bloquear/activar acceso al sistema) ───────────────────
   toggleStatus(student: any): void {
-    const action = student.user.status ? 'bloquear' : 'activar';
-    if (!confirm(`¿Desea ${action} el acceso de ${student.user.name} ${student.user.first_lastname}?`)) {
-      return;
-    }
-
     this.studentService.toggleStatus(student.id).subscribe({
       next: (res) => {
         student.user.status = res.status;
