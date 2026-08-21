@@ -1,35 +1,32 @@
 import { Component, inject } from '@angular/core';
-
 import {
   FormBuilder,
   Validators,
   ReactiveFormsModule,
   AbstractControl,
   ValidationErrors,
-  ɵInternalFormsSharedModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../service/user.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
 import { ButtonComponent } from '../../shared/button/button.component';
-import { AuthService } from '../../core/services/auth.service';
 
 function passwordMatchValidator(
   group: AbstractControl,
 ): ValidationErrors | null {
   const password = group.get('newPassword')?.value;
   const confirm = group.get('confirmPassword')?.value;
-
   return password === confirm ? null : { passwordMismatch: true };
 }
+
 @Component({
   selector: 'app-change-password',
   imports: [
     ButtonComponent,
     BaseInputComponent,
-    ɵInternalFormsSharedModule,
     ReactiveFormsModule,
+    CommonModule,
   ],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.css',
@@ -69,7 +66,6 @@ export class ChangePasswordComponent {
     return this.form.get('confirmPassword');
   }
 
-  constructor(private auth:AuthService){}
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -78,18 +74,19 @@ export class ChangePasswordComponent {
 
     this.loading = true;
     const data = {
-      password: this.form.get('currentPassword')?.value,
-      new: this.form.get('newPassword')?.value,
+      password: this.currentPassword?.value,
+      new: this.newPassword?.value,
     };
 
     this.userService.changePassword(data).subscribe({
-      next: (response) => {
-        this.toast.success('Contraseña actualizada');
+      next: () => {
+        this.toast.success('Contraseña actualizada correctamente');
         this.form.reset();
         this.loading = false;
       },
-      error: (error) => {
-        this.toast.error('Error al actualizar contraseña');
+      error: (err) => {
+        const message = err.error?.message || 'Error al actualizar la contraseña';
+        this.toast.error(message);
         this.loading = false;
       },
     });

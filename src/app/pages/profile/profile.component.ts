@@ -14,6 +14,7 @@ import { ToastService } from '../../shared/services/toast.service';
 import { AuthService, User } from '../../core/services/auth.service';
 import { Roles } from '../../core/constants/roles.constants';
 import { getDefaultRoute } from '../../core/guards/role.guard';
+
 @Component({
   selector: 'app-profile',
   imports: [
@@ -25,12 +26,13 @@ import { getDefaultRoute } from '../../core/guards/role.guard';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   editModalStudent = false;
   loading = false;
   profileForm!: FormGroup;
   user!: User;
   Roles = Roles;
+
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
@@ -40,6 +42,7 @@ export class ProfileComponent {
   ) {
     this.user = this.auth.user!;
   }
+
   ngOnInit(): void {
     this.initForm();
   }
@@ -73,39 +76,40 @@ export class ProfileComponent {
       phone: this.user?.cellphone || '',
     });
   }
+
   updateProfile(): void {
     if (!this.user) return;
-    this.loading = true;
-    if (this.profileForm.valid) {
-      const phoneValue = this.profileForm.get('phone')?.value;
-      const data = {
-        phone: phoneValue,
-      };
-      this.userService.updateProfile(this.user.id, data).subscribe({
-        next: (response) => {
-          this.user!.cellphone = phoneValue;
-          localStorage.setItem('user', JSON.stringify(this.user));
 
-          this.loading = false;
-          this.editModalStudent = false;
-          this.toast.success('Perfil actualizado');
-        },
-        error: (error) => {
-          this.loading = false;
-          this.toast.error('Erro al actualizar');
-        },
-      });
-    } else {
-      // Marcar todos los campos como tocados para mostrar errores
+    if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
+      return;
     }
+
+    this.loading = true;
+    const phoneValue = this.profileForm.get('phone')?.value;
+    const data = { phone: phoneValue };
+
+    this.userService.updateProfile(this.user.id, data).subscribe({
+      next: () => {
+        this.user.cellphone = phoneValue;
+        this.auth.updateUser(this.user);
+        this.loading = false;
+        this.editModalStudent = false;
+        this.toast.success('Perfil actualizado correctamente');
+      },
+      error: (err) => {
+        const message = err.error?.message || 'Error al actualizar el perfil';
+        this.toast.error(message);
+        this.loading = false;
+      },
+    });
   }
 
-  // Cancelar edición
   cancelEdit(): void {
     this.editModalStudent = false;
     this.profileForm.reset();
   }
+
   get phone() {
     return this.profileForm.get('phone');
   }

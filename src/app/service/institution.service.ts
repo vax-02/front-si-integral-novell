@@ -24,8 +24,8 @@ export class InstitutionService {
     return this.http.get<any>(`${this.apiUrl.institution}`);
   }
 
-  updateInstitution(id: number = 1, data: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl.institution}/${id}`, data, {
+  updateInstitution(data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl.institution}/1`, data, {
       headers: this.getHeaders(),
     });
   }

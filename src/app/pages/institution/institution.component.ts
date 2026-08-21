@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -10,6 +10,7 @@ import { BaseInputComponent } from '../../shared/base-input/base-input.component
 import { ButtonComponent } from '../../shared/button/button.component';
 import { InstitutionService } from '../../service/institution.service';
 import { ToastService } from '../../shared/services/toast.service';
+
 @Component({
   selector: 'app-institution',
   imports: [
@@ -21,28 +22,31 @@ import { ToastService } from '../../shared/services/toast.service';
   templateUrl: './institution.component.html',
   styleUrl: './institution.component.css',
 })
-export class InstitutionComponent {
+export class InstitutionComponent implements OnInit {
   loading = false;
-
   form: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private intitutionService: InstitutionService,
+    private institutionService: InstitutionService,
     private toast: ToastService,
   ) {
     this.form = this.fb.group({
-      address: ['', Validators.required],
+      address: ['', [Validators.required, Validators.maxLength(255)]],
       cellphone: [
         '',
         [Validators.required, Validators.pattern(/^[0-9]{8,10}$/)],
       ],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
     });
+  }
+
+  ngOnInit(): void {
     this.loadInfo();
   }
-  loadInfo() {
-    this.intitutionService.getInstitution().subscribe({
+
+  loadInfo(): void {
+    this.institutionService.getInstitution().subscribe({
       next: (resp) => {
         this.form.patchValue({
           address: resp.address,
@@ -51,10 +55,11 @@ export class InstitutionComponent {
         });
       },
       error: () => {
-        this.toast.error('Error al cargar los datos');
+        this.toast.error('Error al cargar los datos de la institución');
       },
     });
   }
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -63,13 +68,15 @@ export class InstitutionComponent {
 
     this.loading = true;
     const data = this.form.value;
-    this.intitutionService.updateInstitution(1, data).subscribe({
+
+    this.institutionService.updateInstitution(data).subscribe({
       next: () => {
-        this.toast.success('Información actualizada');
+        this.toast.success('Información actualizada correctamente');
         this.loading = false;
       },
-      error: () => {
-        this.toast.error('Error al actualizar');
+      error: (err) => {
+        const message = err.error?.message || 'Error al actualizar la información';
+        this.toast.error(message);
         this.loading = false;
       },
     });
