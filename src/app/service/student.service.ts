@@ -87,6 +87,17 @@ export class StudentService {
     });
   }
 
+  exportAcademicHistory(studentId: number, careerId?: number): Observable<Blob> {
+    let url = this.apiUrl.students.academicHistoryExport(studentId);
+    if (careerId) {
+      url += `?career_id=${careerId}`;
+    }
+    return this.http.get(url, {
+      headers: this.getHeaders(),
+      responseType: 'blob',
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,

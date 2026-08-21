@@ -449,6 +449,27 @@ export class StudentsComponent {
     return this.subjectHistoryGroups.reduce((acc: number, g: any) => acc + g.missing, 0);
   }
 
+  exportAcademicHistory(careerId?: number) {
+    if (!this.selectedStudent) return;
+
+    this.studentService.exportAcademicHistory(this.selectedStudent.id, careerId).subscribe({
+      next: (blob) => {
+        const a = window.document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        const nombre = this.selectedStudent.user.first_lastname + '_' +
+                       (this.selectedStudent.user.second_lastname || '') + '_' +
+                       this.selectedStudent.user.name;
+        a.download = `Historial_Academico_${nombre.toUpperCase()}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(a.href);
+        this.toast.success('Historial académico descargado correctamente');
+      },
+      error: () => {
+        this.toast.error('Error al descargar el historial académico');
+      }
+    });
+  }
+
   openModalEdit(student: any) {
     this.selectedStudent = student;
     this.enrollment = {

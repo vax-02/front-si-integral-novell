@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     advanceLevel: (id: number) => `${API_BASE_URL}/students/${id}/advance-level`,
     advancePreview: (id: number) => `${API_BASE_URL}/students/${id}/preview-advance`,
     graduate: (id: number) => `${API_BASE_URL}/students/${id}/graduate`,
+    academicHistoryExport: (id: number) => `${API_BASE_URL}/students/${id}/academic-history/export`,
   },
   carrers: {
     index: `${API_BASE_URL}/careers`,
