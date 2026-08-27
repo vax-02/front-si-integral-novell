@@ -66,6 +66,7 @@
           <tr>
             <th class="px-4 py-3 text-left">Concepto</th>
             <th class="px-4 py-3 text-left">Descripción</th>
+            <th class="px-4 py-3 text-center">Forma de Pago</th>
             <th class="px-4 py-3 text-center">Gestión</th>
             <th class="px-4 py-3 text-center">Semestre</th>
             <th class="px-4 py-3 text-center">Monto</th>
@@ -87,6 +88,15 @@
             </td>
             <td class="px-4 py-3 text-xs text-slate-500">
               {{ pay.description || '—' }}
+            </td>
+            <td class="px-4 py-3 text-center">
+              <span class="px-2 py-1 text-2xs rounded-full text-[11px] font-semibold"
+                [ngClass]="{
+                  'bg-amber-100 text-amber-700': pay.payment_method === 'efectivo',
+                  'bg-violet-100 text-violet-700': pay.payment_method === 'qr'
+                }">
+                {{ pay.payment_method === 'qr' ? 'QR' : 'Efectivo' }}
+              </span>
             </td>
             <td class="px-4 py-3 text-center text-xs">{{ pay.concept.gestion }}</td>
             <td class="px-4 py-3 text-center text-xs">{{ pay.concept.semestre || '—' }}</td>

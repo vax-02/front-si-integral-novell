@@ -36,7 +36,8 @@ paymentForm = {
   concept_id: null,
   amount: 0,
   discount: 0,
-  description: ''
+  description: '',
+  payment_method: 'efectivo'
 };
   private searchTimeout: any;
   registerModalOpen = false;
@@ -145,6 +146,7 @@ paymentForm = {
       amount: this.paymentForm.amount,
       discount: this.paymentForm.discount || 0,
       description: this.paymentForm.description || null,
+      payment_method: this.paymentForm.payment_method,
     };
 
     this.payServie.createPay(data).subscribe({
@@ -222,7 +224,8 @@ paymentForm = {
       concept_id: null,
       amount: 0,
       discount: 0,
-      description: ''
+      description: '',
+      payment_method: 'efectivo'
     };
   }
 
