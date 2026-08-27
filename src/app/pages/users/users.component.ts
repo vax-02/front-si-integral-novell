@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { UserService } from '../../service/user.service';
+import { DocenteService } from '../../service/docente.service';
+import { DegreeService } from '../../service/degree.service';
+import { StudentService } from '../../service/student.service';
+import { CareerService } from '../../service/career.service';
+import { ParallelService } from '../../service/parallel.service';
 import { BaseModalComponent } from '../../shared/base-modal/base-modal.component';
 import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-modal-confirm.component';
 import { BaseInputComponent } from '../../shared/base-input/base-input.component';
@@ -53,14 +58,50 @@ export class UsersComponent {
   resetLoading = false;
   loading = false;
   loadingModal = false;
+  // ── Modal Docente ──────────────────────────────────────────────────────
+  modalDocente = false;
+  loadingDocente = false;
+  degrees: any[] = [];
+  degreeId: number | null = null;
+  documentos = {
+    hojaVida: false,
+    tituloProfesional: false,
+    ciCopia: false,
+    certificados: false,
+  };
+  userCreatedId: number | null = null;
+  userCreatedData: any = null;
+  initialRoleIds: number[] = [];
+
+  // ── Modal Estudiante ──────────────────────────────────────────────────
+  modalEstudiante = false;
+  loadingEstudiante = false;
+  careers: any[] = [];
+  parallels: any[] = [];
+  studentData = {
+    career_id: null as number | null,
+    parallel_id: null as number | null,
+    convalidation_type: '' as 'BTH' | 'Tecnico_Medio' | '',
+    birth_certificate: false,
+    school_diploma: false,
+    carnet: false,
+  };
+
   constructor(
     private userService: UserService,
+    private docenteService: DocenteService,
+    private degreeService: DegreeService,
+    private studentService: StudentService,
+    private careerService: CareerService,
+    private parallelService: ParallelService,
     private toast: ToastService,
     private fb: FormBuilder,
   ) {}
   ngOnInit(): void {
     this.initForm();
     this.loadUsers();
+    this.loadDegrees();
+    this.loadCareers();
 
     this.form.get('ci')?.valueChanges.subscribe(() => {
       const control = this.f['ci'];
@@ -132,6 +173,43 @@ export class UsersComponent {
       });
   }
 
+  loadDegrees() {
+    this.degreeService.getDegrees().subscribe({
+      next: (data) => {
+        this.degrees = data.degrees ?? data;
+      },
+      error: () => {
+        this.toast.error('Error al cargar grados académicos');
+      },
+    });
+  }
+
+  loadCareers() {
+    this.careerService.getCareersForSelect().subscribe({
+      next: (data) => {
+        this.careers = data.careers ?? data;
+      },
+      error: () => {
+        this.toast.error('Error al cargar carreras');
+      },
+    });
+  }
+
+  onCareerChange() {
+    this.studentData.parallel_id = null;
+    this.parallels = [];
+    if (this.studentData.career_id) {
+      this.parallelService.getParallelsForCareerForNewStudent(this.studentData.career_id).subscribe({
+        next: (data) => {
+          this.parallels = data.parallels ?? data;
+        },
+        error: () => {
+          this.toast.error('Error al cargar paralelos');
+        },
+      });
+    }
+  }
+
   save() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -162,7 +240,6 @@ export class UsersComponent {
         this.userModalCreate = false;
         this.editingUserId = null;
         this.form.reset({ status: 1 });
-
         this.loadUsers();
         this.toast.success(
           isEdit
@@ -280,6 +357,7 @@ export class UsersComponent {
       user.name + ' ' + user.first_lastname + ' ' + user.second_lastname;
     this.selectedUserId = user.id;
     this.userRoles = (user.roles ?? []).map((role: any) => ({ role }));
+    this.initialRoleIds = (user.roles ?? []).map((r: any) => r.id);
   }
 
   hasRole(roleId: number): boolean {
@@ -298,6 +376,21 @@ export class UsersComponent {
     if (!this.selectedUserId) return;
 
     const roleIds = this.userRoles.map((r: any) => r.role?.id ?? r.id);
+    const isAddingDocente = roleIds.includes(Roles.DOCENTE.id) && !this.initialRoleIds.includes(Roles.DOCENTE.id);
+    const isAddingEstudiante = roleIds.includes(Roles.ESTUDIANTE.id) && !this.initialRoleIds.includes(Roles.ESTUDIANTE.id);
+
+    if (isAddingDocente || isAddingEstudiante) {
+      this.userCreatedId = this.selectedUserId;
+      this.pendingRoleIds = roleIds;
+      this.pendingForms = [];
+      this.modalRoles = false;
+
+      if (isAddingDocente) this.pendingForms.push('docente');
+      if (isAddingEstudiante) this.pendingForms.push('estudiante');
+
+      this.openNextForm();
+      return;
+    }
 
     this.loadingModal = true;
     this.userService.syncUserRoles(this.selectedUserId, roleIds).subscribe({
@@ -313,6 +406,47 @@ export class UsersComponent {
         this.toast.error('Error al actualizar los roles');
       },
     });
+  }
+
+  openNextForm() {
+    const next = this.pendingForms.shift();
+    if (next === 'docente') {
+      this.resetDocenteForm();
+      this.modalDocente = true;
+    } else if (next === 'estudiante') {
+      this.resetStudentForm();
+      this.modalEstudiante = true;
+    } else {
+      this.syncRolesAndClose();
+    }
+  }
+
+  syncRolesAndClose() {
+    if (!this.userCreatedId || this.pendingRoleIds.length === 0) {
+      this.resetModalState();
+      return;
+    }
+
+    this.loadingModal = true;
+    this.userService.syncUserRoles(this.userCreatedId, this.pendingRoleIds).subscribe({
+      next: () => {
+        this.loadingModal = false;
+        this.toast.success('Roles actualizados exitosamente');
+        this.resetModalState();
+        this.loadUsers();
+      },
+      error: () => {
+        this.loadingModal = false;
+        this.toast.error('Error al actualizar los roles');
+        this.resetModalState();
+      },
+    });
+  }
+
+  resetModalState() {
+    this.userCreatedId = null;
+    this.pendingRoleIds = [];
+    this.pendingForms = [];
   }
 
   openResetPasswordModal(user: any) {
@@ -340,6 +474,123 @@ export class UsersComponent {
         const message = err.error?.message || 'Error al restablecer la contraseña';
         this.toast.error(message);
         this.resetLoading = false;
+      },
+    });
+  }
+
+  // ── Modal Docente ──────────────────────────────────────────────────────
+  resetDocenteForm() {
+    this.degreeId = null;
+    this.documentos = {
+      hojaVida: false,
+      tituloProfesional: false,
+      ciCopia: false,
+      certificados: false,
+    };
+  }
+
+  cancelDocente() {
+    this.modalDocente = false;
+    this.resetDocenteForm();
+    this.openNextForm();
+  }
+
+  pendingRoleIds: number[] = [];
+  pendingForms: ('docente' | 'estudiante')[] = [];
+
+  saveDocente() {
+    if (!this.degreeId) {
+      this.toast.error('El grado académico es requerido');
+      return;
+    }
+
+    this.loadingDocente = true;
+
+    const payload = {
+      user_id: this.userCreatedId,
+      degree_id: this.degreeId,
+      cv: this.documentos.hojaVida,
+      professional_title: this.documentos.tituloProfesional,
+      carnet: this.documentos.ciCopia,
+      certificate: this.documentos.certificados,
+    };
+
+    this.docenteService.createDocenteFromUser(payload).subscribe({
+      next: () => {
+        this.loadingDocente = false;
+        this.modalDocente = false;
+        this.resetDocenteForm();
+        this.toast.success('Docente creado exitosamente');
+        this.openNextForm();
+      },
+      error: (err) => {
+        this.loadingDocente = false;
+        const message = err.error?.message || 'Error al crear el docente';
+        this.toast.error(message);
+      },
+    });
+  }
+
+  hasDocenteRole(): boolean {
+    return this.userRoles.some((r) => (r.role?.id ?? r.id) === Roles.DOCENTE.id);
+  }
+
+  // ── Modal Estudiante ──────────────────────────────────────────────────
+  resetStudentForm() {
+    this.studentData = {
+      career_id: null,
+      parallel_id: null,
+      convalidation_type: '',
+      birth_certificate: false,
+      school_diploma: false,
+      carnet: false,
+    };
+    this.parallels = [];
+  }
+
+  cancelStudent() {
+    this.modalEstudiante = false;
+    this.resetStudentForm();
+    this.openNextForm();
+  }
+
+  saveStudent() {
+    if (!this.studentData.career_id) {
+      this.toast.error('La carrera es requerida');
+      return;
+    }
+    if (!this.studentData.parallel_id) {
+      this.toast.error('El paralelo es requerido');
+      return;
+    }
+
+    this.loadingEstudiante = true;
+
+    const payload: any = {
+      user_id: this.userCreatedId,
+      career_id: this.studentData.career_id,
+      parallel_id: this.studentData.parallel_id,
+      birth_certificate: this.studentData.birth_certificate,
+      school_diploma: this.studentData.school_diploma,
+      carnet: this.studentData.carnet,
+    };
+
+    if (this.studentData.convalidation_type) {
+      payload.convalidation_type = this.studentData.convalidation_type;
+    }
+
+    this.studentService.createStudentFromUser(payload).subscribe({
+      next: () => {
+        this.loadingEstudiante = false;
+        this.modalEstudiante = false;
+        this.resetStudentForm();
+        this.toast.success('Estudiante creado exitosamente');
+        this.openNextForm();
+      },
+      error: (err) => {
+        this.loadingEstudiante = false;
+        const message = err.error?.message || 'Error al crear el estudiante';
+        this.toast.error(message);
       },
     });
   }

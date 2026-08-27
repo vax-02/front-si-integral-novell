@@ -269,7 +269,6 @@
                 <option [ngValue]="null">Seleccione un rol</option>
                 <option [value]="roles.ADMIN.id">{{ roles.ADMIN.name }}</option>
                 <option [value]="roles.SECRETARIA.id">{{ roles.SECRETARIA.name }}</option>
-
               </select>
               <p class="text-rose-600 text-xs" *ngIf="f['role_id'].invalid && f['role_id'].touched">
                 <span *ngIf="f['role_id'].errors?.['required']">El rol es obligatorio.</span>
@@ -357,5 +356,153 @@
     (confirm)="confirmResetPassword()"
     (cancel)="cancelResetPassword()">
   </app-base-modal-confirm>
+
+  <!-- MODAL INFORMACIÓN DOCENTE -->
+  <app-base-modal
+    [isOpen]="modalDocente"
+    title="Información del Docente"
+    subtitle="Complete la información profesional del docente"
+    size="lg"
+    confirmText="Guardar"
+    cancelText="Cancelar"
+    [loading]="loadingDocente"
+    (confirm)="saveDocente()"
+    (cancel)="cancelDocente()">
+
+    <div class="space-y-6">
+
+      <!-- Información profesional -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Información Profesional
+        </h3>
+        <div class="space-y-1">
+          <select [(ngModel)]="degreeId"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm">
+            <option [ngValue]="null">Seleccione grado académico *</option>
+            <option *ngFor="let d of degrees" [value]="d.id">{{ d.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Documentos -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Documentos recibidos
+        </h3>
+        <div class="grid md:grid-cols-2 gap-3">
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.hojaVida" class="w-4 h-4 accent-blue-500">
+            Hoja de Vida (CV)
+          </label>
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.tituloProfesional" class="w-4 h-4 accent-blue-500">
+            Título Profesional
+          </label>
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.ciCopia" class="w-4 h-4 accent-blue-500">
+            C.I. (Copia)
+          </label>
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="documentos.certificados" class="w-4 h-4 accent-blue-500">
+            Certificados
+          </label>
+        </div>
+      </div>
+
+      <!-- Nota -->
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 flex items-center gap-2">
+        <i class="fas fa-info-circle"></i>
+        La contraseña del docente será su número de C.I.
+      </div>
+
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL INFORMACIÓN ESTUDIANTE -->
+  <app-base-modal
+    [isOpen]="modalEstudiante"
+    title="Información del Estudiante"
+    subtitle="Complete la información académica del estudiante"
+    size="lg"
+    confirmText="Guardar"
+    cancelText="Cancelar"
+    [loading]="loadingEstudiante"
+    (confirm)="saveStudent()"
+    (cancel)="cancelStudent()">
+
+    <div class="space-y-6">
+
+      <!-- Datos Académicos -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Datos Académicos
+        </h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <select [(ngModel)]="studentData.career_id" (change)="onCareerChange()"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm">
+              <option [ngValue]="null">Seleccione carrera *</option>
+              <option *ngFor="let c of careers" [value]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <select [(ngModel)]="studentData.parallel_id"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm">
+              <option [ngValue]="null">Seleccione paralelo *</option>
+              <option *ngFor="let p of parallels" [value]="p.id">
+                {{ p.paralelo }} - {{ p.turno }} (Cupo: {{ p.available_slots }})
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tipo de Ingreso -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Tipo de Ingreso
+        </h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <select [(ngModel)]="studentData.convalidation_type"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm">
+              <option value="">Nuevo Ingreso</option>
+              <option value="BTH">Convalidación BTH</option>
+              <option value="Tecnico_Medio">Convalidación Técnico Medio</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentos -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Documentos recibidos
+        </h3>
+        <div class="grid md:grid-cols-3 gap-3">
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="studentData.birth_certificate" class="w-4 h-4 accent-blue-500">
+            Cert. de Nacimiento
+          </label>
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="studentData.school_diploma" class="w-4 h-4 accent-blue-500">
+            Título de Bachiller
+          </label>
+          <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 transition cursor-pointer">
+            <input type="checkbox" [(ngModel)]="studentData.carnet" class="w-4 h-4 accent-blue-500">
+            Copia de C.I.
+          </label>
+        </div>
+      </div>
+
+      <!-- Nota -->
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 flex items-center gap-2">
+        <i class="fas fa-info-circle"></i>
+        La contraseña del estudiante será su número de C.I.
+      </div>
+
+    </div>
+  </app-base-modal>
 
 </div>

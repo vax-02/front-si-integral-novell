@@ -38,6 +38,12 @@ export class StudentService {
     });
   }
 
+  createStudentFromUser(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.students.index}/from-user`, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
   updateStudent(id: number, data: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl.students.index}/${id}`, data, {
       headers: this.getHeaders(),

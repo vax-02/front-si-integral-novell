@@ -28,6 +28,12 @@ export class DocenteService {
     });
   }
 
+  createDocenteFromUser(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.docentes}/from-user`, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
   updateDocente(id: number, data: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl.docentes}/${id}`, data, {
       headers: this.getHeaders(),
