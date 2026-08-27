@@ -1,7 +1,10 @@
 <div class="relative">
   <input [type]="type_i" [value]="value" (input)="updateValue($event)" (blur)="onTouched()" id="{{ text }}"
+    [disabled]="disabled" [readonly]="readonly"
     type="{{ type_i }}" placeholder=" " class="peer w-full px-3 pt-2 pb-2 rounded-xl border border-slate-300
-           focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+           focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none
+           disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed
+           readonly:bg-slate-50 readonly:text-slate-600" />
 
   <label for="{{ text }}" class="absolute left-3 bg-white px-1 text-slate-500 transition-all duration-200
            top-1/2 -translate-y-1/2

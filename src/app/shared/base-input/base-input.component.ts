@@ -17,6 +17,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class BaseInputComponent {
   @Input() text = '';
   @Input() type_i = 'text';
+  @Input() disabled = false;
+  @Input() readonly = false;
   value = '';
 
   onChange = (value: any) => {};

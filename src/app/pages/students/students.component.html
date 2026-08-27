@@ -576,7 +576,7 @@
           <app-base-input text="Nombre" [(ngModel)]="enrollment.name" />
           <app-base-input text="Apellido paterno" [(ngModel)]="enrollment.first_lastname" />
           <app-base-input text="Apellido Materno" [(ngModel)]="enrollment.second_lastname" />
-          <app-base-input text="C.I." [(ngModel)]="enrollment.ci" />
+          <app-base-input text="C.I." [(ngModel)]="enrollment.ci" [readonly]="true" />
         </div>
       </div>
 

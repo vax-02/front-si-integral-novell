@@ -306,6 +306,7 @@ export class StudentsComponent {
 
 
     if (this.editModalStudent && this.selectedStudent) {
+      delete data.ci;
       this.studentService.updateStudent(this.selectedStudent.id, data).subscribe({
         next: (response) => {
           this.saving = false;
