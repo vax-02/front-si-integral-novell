@@ -619,7 +619,7 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-slate-800">{{ parallelAdvancePreview.summary.total }}</p>
             <p class="text-xs text-slate-500 uppercase tracking-wide">Estudiantes</p>
@@ -631,6 +631,10 @@
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-amber-600">{{ parallelAdvancePreview.summary.last_level }}</p>
             <p class="text-xs text-amber-500 uppercase tracking-wide">&Uacute;ltimo nivel</p>
+          </div>
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-orange-600">{{ parallelAdvancePreview.summary.no_active_parallel }}</p>
+            <p class="text-xs text-orange-500 uppercase tracking-wide">Sin paralelo</p>
           </div>
           <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-red-600">{{ parallelAdvancePreview.summary.with_alerts }}</p>
@@ -654,11 +658,15 @@
                 <td class="p-3 font-semibold text-slate-700">{{ student.name }}</td>
                 <td class="p-3 text-center text-slate-600">{{ student.ci }}</td>
                 <td class="p-3 text-center">
-                  <span *ngIf="student.is_last_level"
+                  <span *ngIf="student.no_active_parallel"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-600">
+                    Sin paralelo
+                  </span>
+                  <span *ngIf="!student.no_active_parallel && student.is_last_level"
                     class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-600">
                     No - &uacute;ltimo nivel
                   </span>
-                  <span *ngIf="!student.is_last_level"
+                  <span *ngIf="!student.no_active_parallel && !student.is_last_level"
                     class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
                     S&iacute;
                   </span>
@@ -742,7 +750,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
           <p class="text-2xl font-bold text-slate-800">{{ parallelAdvanceResult.summary.advanced }}</p>
           <p class="text-xs text-slate-500 uppercase tracking-wide">Avanzaron</p>
@@ -751,13 +759,13 @@
           <p class="text-2xl font-bold text-amber-600">{{ parallelAdvanceResult.summary.skipped_last_level }}</p>
           <p class="text-xs text-amber-500 uppercase tracking-wide">&Uacute;ltimo nivel</p>
         </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 text-center">
+          <p class="text-2xl font-bold text-orange-600">{{ parallelAdvanceResult.summary.skipped_no_active }}</p>
+          <p class="text-xs text-orange-500 uppercase tracking-wide">Sin paralelo</p>
+        </div>
         <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
           <p class="text-2xl font-bold text-red-600">{{ parallelAdvanceResult.summary.with_alerts }}</p>
           <p class="text-xs text-red-500 uppercase tracking-wide">Con alertas</p>
-        </div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
-          <p class="text-2xl font-bold text-slate-800">{{ parallelAdvanceResult.summary.skipped_no_active }}</p>
-          <p class="text-xs text-slate-500 uppercase tracking-wide">Sin activo</p>
         </div>
       </div>
 
