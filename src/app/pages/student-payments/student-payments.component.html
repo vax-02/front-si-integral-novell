@@ -47,11 +47,11 @@
     <p class="font-medium">No hay pagos registrados</p>
   </div>
 
-  <!-- GRUPOS POR CARRERA -->
+  <!-- GRUPOS POR CARRERA / TALLER -->
   <div *ngFor="let group of groups()" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
     <div class="flex justify-between items-center px-5 py-3 border-b bg-slate-50">
       <div class="flex items-center gap-3">
-        <i class="fa-solid fa-graduation-cap text-blue-600 text-lg"></i>
+        <i [class]="group.source === 'workshop' ? 'fa-solid fa-tools text-purple-600 text-lg' : 'fa-solid fa-graduation-cap text-blue-600 text-lg'"></i>
         <div>
           <h3 class="font-semibold text-slate-700">{{ group.career_name }}</h3>
           <small class="text-slate-500">{{ group.payments.length }} pago(s) registrado(s)</small>
@@ -67,8 +67,7 @@
             <th class="px-4 py-3 text-left">Concepto</th>
             <th class="px-4 py-3 text-left">Descripción</th>
             <th class="px-4 py-3 text-center">Forma de Pago</th>
-            <th class="px-4 py-3 text-center">Gestión</th>
-            <th class="px-4 py-3 text-center">Semestre</th>
+            <th class="px-4 py-3 text-center">Detalle</th>
             <th class="px-4 py-3 text-center">Monto</th>
             <th class="px-4 py-3 text-center">Estado</th>
             <th class="px-4 py-3 text-center">Fecha</th>
@@ -79,11 +78,10 @@
             <td class="px-4 py-3">
               <span class="px-2 py-1 text-2xs rounded-full text-[11px] font-semibold"
                 [ngClass]="{
-                  'bg-blue-100 text-blue-700': pay.concept.type === 'Matricula',
-                  'bg-emerald-100 text-emerald-700': pay.concept.type === 'Mensualidad',
-                  'bg-purple-100 text-purple-700': pay.concept.type === 'Otro'
+                  'bg-blue-100 text-blue-700': pay.source === 'career',
+                  'bg-purple-100 text-purple-700': pay.source === 'workshop'
                 }">
-                {{ pay.concept.type }}
+                {{ pay.concept?.type || pay.workshop_concept?.type }}
               </span>
             </td>
             <td class="px-4 py-3 text-xs text-slate-500">
@@ -98,8 +96,10 @@
                 {{ pay.payment_method === 'qr' ? 'QR' : 'Efectivo' }}
               </span>
             </td>
-            <td class="px-4 py-3 text-center text-xs">{{ pay.concept.gestion }}</td>
-            <td class="px-4 py-3 text-center text-xs">{{ pay.concept.semestre || '—' }}</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-500">
+              <span *ngIf="pay.source === 'career'">{{ pay.concept?.gestion }} <span *ngIf="pay.concept?.semestre">/ {{ pay.concept?.semestre }}</span></span>
+              <span *ngIf="pay.source === 'workshop'">{{ pay.workshop_concept?.edition?.name }}</span>
+            </td>
             <td class="px-4 py-3 text-center font-semibold text-emerald-600">
               Bs. {{ pay.amount }}
               <p class="text-xs text-slate-400" *ngIf="pay.discount > 0">Dto. Bs. {{ pay.discount }}</p>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PayService } from '../../service/pay.service';
 
 interface PaymentGroup {
+  source: string;
   career_id: number;
   career_name: string;
   payments: any[];
