@@ -5,11 +5,13 @@
         Gestión de Cobros
       </h1>
       <p class="text-sm text-slate-500 mt-1">
-        Configura los conceptos de cobro por carrera
+        Configura los conceptos de cobro por carrera y taller
       </p>
     </div>
 
-    <div class="self-start sm:self-auto">
+    <div class="self-start sm:self-auto flex gap-2">
+      <app-button icon="fas fa-tools px-2" type="secondary" (click)="openWorkshopPaymentModal()">
+      </app-button>
       <app-button icon="fas fa-plus px-2" type="primary" (click)="openRegisterModal()">
       </app-button>
     </div>
@@ -34,7 +36,7 @@
   <!-- FILTROS -->
   <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-6">
     <div class="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4">
-      <input type="text" placeholder="Buscar concepto..." [(ngModel)]="filters.search"
+      <input type="text" placeholder="Buscar concepto, carrera, taller..." [(ngModel)]="filters.search"
         class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
       <select [(ngModel)]="filters.gestion"
         class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 text-sm">
@@ -54,25 +56,33 @@
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="flex justify-between items-center p-6 border-b border-slate-200">
       <span class="font-semibold text-slate-700">Configuración de Cobros</span>
-      <span class="text-xs text-slate-400">{{ concepts.length }} registros</span>
+      <span class="text-xs text-slate-400">{{ filteredConcepts.length }} registros</span>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
           <tr>
-            <th class="p-4 text-center">Gestión</th>
-            <th class="p-4 text-center">Carrera</th>
+            <th class="p-4 text-center">Origen</th>
             <th class="p-4 text-center">Concepto</th>
+            <th class="p-4 text-center">Detalle</th>
             <th class="p-4 text-center">Monto</th>
             <th class="p-4 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr *ngFor="let concept of concepts" class="hover:bg-slate-50 transition">
-            <td class="p-4 text-center">{{ concept.gestion }} <span *ngIf="concept.semestre != null">/ {{ concept.semestre }} </span> </td>
-            <td class="p-4 text-center">{{ concept.career.name }}</td>
+          <tr *ngFor="let concept of filteredConcepts" class="hover:bg-slate-50 transition">
+            <td class="p-4 text-center">
+              <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="concept.source === 'carrera' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'">
+                {{ concept.source === 'carrera' ? 'Carrera' : 'Taller' }}
+              </span>
+            </td>
             <td class="p-4 text-center">{{ concept.type }}
-              <small class="block" *ngIf="concept.description != null">{{ concept.description  }}</small>
+              <small class="block" *ngIf="concept.description != null">{{ concept.description }}</small>
+            </td>
+            <td class="p-4 text-center text-xs text-slate-500">
+              <span *ngIf="concept.source === 'carrera'">{{ concept.career?.name }} <span *ngIf="concept.gestion">/ {{ concept.gestion }}</span></span>
+              <span *ngIf="concept.source === 'taller'">{{ concept.taller_name }} - {{ concept.edicion_name }}</span>
             </td>
             <td class="p-4 text-center font-semibold text-blue-700">Bs. {{ concept.amount }}</td>
             <td class="p-4">
@@ -89,13 +99,13 @@
           <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
             <tr *ngIf="loading" class="hover:bg-slate-50 transition">
               <td class="p-4">
-                <div class="h-4 w-24 bg-slate-200 rounded animate-pulse mx-auto"></div>
-              </td>
-              <td class="p-4">
-                <div class="h-4 w-40 bg-slate-200 rounded animate-pulse mx-auto"></div>
+                <div class="h-4 w-20 bg-slate-200 rounded animate-pulse mx-auto"></div>
               </td>
               <td class="p-4">
                 <div class="h-4 w-32 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-4">
+                <div class="h-4 w-40 bg-slate-200 rounded animate-pulse mx-auto"></div>
               </td>
               <td class="p-4">
                 <div class="h-4 w-20 bg-slate-200 rounded animate-pulse mx-auto"></div>
@@ -113,14 +123,7 @@
 
     <!-- PAGINACIÓN -->
     <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-slate-200">
-      <p class="text-xs text-slate-500">Mostrando {{ from }} - {{ to }} de {{ totalConcepts }} conceptos</p>
-      <div class="flex gap-2">
-        <button (click)="previousPage()" [disabled]="currentPage === 1"
-          class="px-3 py-1 border rounded disabled:opacity-50">Anterior</button>
-        <span class="px-3 py-1 bg-blue-600 text-white rounded">{{ currentPage }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage === lastPage"
-          class="px-3 py-1 border rounded disabled:opacity-50">Siguiente</button>
-      </div>
+      <p class="text-xs text-slate-500">Mostrando {{ filteredConcepts.length }} de {{ allConcepts.length }} conceptos</p>
     </div>
   </div>
 
@@ -300,16 +303,102 @@
         </div>
       </div>
       <div class="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-slate-500">Concepto:</span><span
-            class="font-semibold">{{ conceptToDelete.concept_name }}</span></div>
-        <div class="flex justify-between"><span
-            class="text-slate-500">Tipo:</span><span>{{ conceptToDelete.type }}</span></div>
-        <div class="flex justify-between"><span
-            class="text-slate-500">Carrera:</span><span>{{ conceptToDelete.career?.name }}</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Tipo:</span><span>{{ conceptToDelete.type }}</span></div>
+        <div class="flex justify-between" *ngIf="conceptToDelete.source === 'carrera'"><span class="text-slate-500">Carrera:</span><span>{{ conceptToDelete.career?.name }}</span></div>
+        <div class="flex justify-between" *ngIf="conceptToDelete.source === 'taller'"><span class="text-slate-500">Taller:</span><span>{{ conceptToDelete.taller_name }} - {{ conceptToDelete.edicion_name }}</span></div>
         <div class="flex justify-between"><span class="text-slate-500">Monto:</span><span
             class="font-semibold text-blue-700">Bs. {{ conceptToDelete.amount }}</span></div>
-        <div class="flex justify-between"><span
+        <div class="flex justify-between" *ngIf="conceptToDelete.gestion"><span
             class="text-slate-500">Gestión:</span><span>{{ conceptToDelete.gestion }}</span></div>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- ============ MODAL CONCEPTO COBRO TALLER ============ -->
+  <app-base-modal [isOpen]="workshopPaymentModalOpen" [loading]="savingWorkshopPayment" title="Concepto de Cobro - Taller"
+    subtitle="Registrar un concepto de cobro para una edición de taller." size="xl"
+    confirmText="{{ savingWorkshopPayment ? 'Guardando...' : 'Guardar' }}" cancelText="Cancelar"
+    (confirm)="saveWorkshopPayment()" (cancel)="closeWorkshopPaymentModal()">
+    <div class="grid lg:grid-cols-2 gap-8 p-2">
+      <div class="space-y-4">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Información general
+        </h3>
+
+        <!-- Taller y Edición en la misma línea -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Taller *</label>
+            <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="wpForm.workshop_id" (change)="onWorkshopChange()">
+              <option value="">Seleccionar Taller</option>
+              <option *ngFor="let w of wpWorkshops" [value]="w.id">{{ w.name }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Edición / Versión *</label>
+            <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+              [(ngModel)]="wpForm.edition_id"
+              [disabled]="!wpForm.workshop_id">
+              <option value="">Seleccionar Edición</option>
+              <option *ngFor="let e of wpEditions" [value]="e.id">{{ e.name }} ({{ e.shift }})</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tipo de Concepto -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Concepto *</label>
+          <select class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
+            [(ngModel)]="wpForm.type">
+            <option value="">Seleccionar Tipo</option>
+            <option value="Inscripcion">Inscripción (Pago Único)</option>
+            <option value="Cuota">Cuota (Mensualidad)</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <!-- Descripción -->
+        <div *ngIf="wpForm.type === 'Otro'">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Descripción *</label>
+          <input type="text" [(ngModel)]="wpForm.description"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-sm"
+            placeholder="Descripción del concepto" />
+        </div>
+
+        <!-- Monto -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Monto (Bs.) *</label>
+          <input type="number" [(ngModel)]="wpForm.amount" min="0"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-sm" />
+        </div>
+
+        <div *ngIf="wpMensajeValidacion"
+          class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
+          <i class="fas fa-exclamation-triangle mr-2"></i>{{ wpMensajeValidacion }}
+        </div>
+      </div>
+
+      <!-- Vista previa -->
+      <div class="space-y-5">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 border-l-4 border-blue-500 pl-3">
+          Vista previa
+        </h3>
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <span class="font-semibold text-slate-600">Taller</span>
+            <span>{{ getWpWorkshopName() || '--' }}</span>
+            <span class="font-semibold text-slate-600">Edición</span>
+            <span>{{ getWpEditionName() || '--' }}</span>
+            <span class="font-semibold text-slate-600">Tipo</span>
+            <span>{{ wpForm.type === 'Inscripcion' ? 'Inscripción' : wpForm.type === 'Cuota' ? 'Cuota' : wpForm.type === 'Otro' ? 'Otro' : '--' }}</span>
+            <span *ngIf="wpForm.description" class="font-semibold text-slate-600">Descripción</span>
+            <span *ngIf="wpForm.description">{{ wpForm.description }}</span>
+            <span class="font-semibold text-slate-600">Monto</span>
+            <span class="font-bold text-blue-700">Bs. {{ wpForm.amount || 0 }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </app-base-modal>

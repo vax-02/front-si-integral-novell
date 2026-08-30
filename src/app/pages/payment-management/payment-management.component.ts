@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { CareerService } from '../../service/career.service';
 import { ConceptService } from '../../service/concept.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { WorkshopService } from '../../service/workshop.service';
 
 interface ConfiguracionCobro {
   carrera: number,
@@ -43,6 +44,9 @@ export class PaymentManagementComponent {
 
   // Datos
   concepts: any[] = [];
+  workshopConcepts: any[] = [];
+  allConcepts: any[] = [];
+  filteredConcepts: any[] = [];
   selectedConcept: any = null;
   conceptToDelete: any = null;
 
@@ -76,15 +80,15 @@ export class PaymentManagementComponent {
   public mensajeValidacion: string = '';
 
   get totalActivos(): number {
-    return this.concepts.length;
+    return this.allConcepts.length;
   }
 
   get totalMensualidades(): number {
-    return this.concepts.filter((c) => c.type === 'Mensualidad').length;
+    return this.allConcepts.filter((c) => c.type === 'Mensualidad' || c.type === 'Cuota').length;
   }
 
   get totalMatriculas(): number {
-    return this.concepts.filter((c) => c.type === 'Matricula').length;
+    return this.allConcepts.filter((c) => c.type === 'Matricula' || c.type === 'Inscripcion').length;
   }
 
   onTipoConceptoChange(): void {
@@ -237,29 +241,46 @@ export class PaymentManagementComponent {
     if (!this.conceptToDelete) return;
     this.deleting = true;
 
-    this.conceptService.deleteConcept(this.conceptToDelete.id).subscribe({
-      next: (response) => {
-        this.deleting = false;
-        this.toast.success('Concepto eliminado exitosamente');
-        this.cancelDelete();
-        this.loadConcepts();
-      },
-      error: (err) => {
-        this.deleting = false;
-        this.toast.error('Error al eliminar el concepto.');
-      },
-    });
+    if (this.conceptToDelete.source === 'taller') {
+      this.workshopService.deleteConcept(this.conceptToDelete.id).subscribe({
+        next: () => {
+          this.deleting = false;
+          this.toast.success('Concepto eliminado exitosamente');
+          this.cancelDelete();
+          this.loadWorkshopConcepts();
+        },
+        error: (err) => {
+          this.deleting = false;
+          this.toast.error(err?.error?.message || 'Error al eliminar el concepto.');
+        },
+      });
+    } else {
+      this.conceptService.deleteConcept(this.conceptToDelete.id).subscribe({
+        next: () => {
+          this.deleting = false;
+          this.toast.success('Concepto eliminado exitosamente');
+          this.cancelDelete();
+          this.loadConcepts();
+        },
+        error: (err) => {
+          this.deleting = false;
+          this.toast.error(err?.error?.message || 'Error al eliminar el concepto.');
+        },
+      });
+    }
   }
 
   constructor(
     private careerService: CareerService,
     private conceptService: ConceptService,
     private toast: ToastService,
+    private workshopService: WorkshopService,
   ) {}
 
   ngOnInit() {
     this.loadCareers();
     this.loadConcepts();
+    this.loadWorkshopConcepts();
     this.generateGestion();
   }
 
@@ -274,7 +295,6 @@ export class PaymentManagementComponent {
 
   loadConcepts() {
     this.loading = true;
-    // Solo enviar filtros con valor para que al estar vacíos cargue todos los datos
     const params: any = { page: this.filters.page, per_page: this.filters.per_page };
     if (this.filters.search.trim()) params.search = this.filters.search.trim();
     if (this.filters.gestion) params.gestion = this.filters.gestion;
@@ -289,6 +309,7 @@ export class PaymentManagementComponent {
         this.from = response.from ?? 0;
         this.to = response.to ?? 0;
         this.loading = false;
+        this.mergeConcepts();
       },
       error: (err) => {
         this.loading = false;
@@ -296,26 +317,79 @@ export class PaymentManagementComponent {
     });
   }
 
+  loadWorkshopConcepts() {
+    this.workshopService.getAllWorkshopConcepts().subscribe({
+      next: (res) => {
+        this.workshopConcepts = (res.concepts || []).map((c: any) => ({
+          ...c,
+          source: 'taller',
+          taller_name: c.edition?.workshop?.name || '',
+          edicion_name: c.edition?.name || '',
+          gestion: null,
+          semestre: null,
+          career: null,
+          career_id: null,
+        }));
+        this.mergeConcepts();
+      },
+      error: () => {},
+    });
+  }
+
+  mergeConcepts() {
+    const careerNormalized = this.concepts.map((c: any) => ({
+      ...c,
+      source: 'carrera',
+      taller_name: '',
+      edicion_name: '',
+    }));
+    this.allConcepts = [...careerNormalized, ...this.workshopConcepts];
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    let result = [...this.allConcepts];
+    const search = this.filters.search.trim().toLowerCase();
+
+    if (search) {
+      result = result.filter((c) =>
+        c.type?.toLowerCase().includes(search) ||
+        c.description?.toLowerCase().includes(search) ||
+        c.career?.name?.toLowerCase().includes(search) ||
+        c.taller_name?.toLowerCase().includes(search) ||
+        c.edicion_name?.toLowerCase().includes(search)
+      );
+    }
+    if (this.filters.gestion) {
+      result = result.filter((c) => c.gestion == this.filters.gestion);
+    }
+    if (this.filters.career_id) {
+      result = result.filter((c) => c.career_id == this.filters.career_id);
+    }
+
+    this.filteredConcepts = result;
+  }
+
   changePage(page: number) {
     this.filters.page = page;
-    this.loadConcepts();
+    this.applyFilters();
   }
   nextPage() {
     if (this.currentPage < this.lastPage) {
       this.filters.page++;
-      this.loadConcepts();
+      this.applyFilters();
     }
   }
   previousPage() {
     if (this.currentPage > 1) {
       this.filters.page--;
-      this.loadConcepts();
+      this.applyFilters();
     }
   }
 
   filter() {
     this.filters.page = 1;
-    this.loadConcepts();
+    this.applyFilters();
   }
 
   generateGestion(): void {
@@ -324,5 +398,121 @@ export class PaymentManagementComponent {
     for (let i = 0; i <= 5; i++) {
       this.gestiones.push((currentYear + i).toString());
     }
+  }
+
+  // ============ CONCEPTO COBRO TALLER ============
+  workshopPaymentModalOpen = false;
+  savingWorkshopPayment = false;
+  wpMensajeValidacion = '';
+
+  wpWorkshops: any[] = [];
+  wpEditions: any[] = [];
+
+  wpForm = {
+    workshop_id: '',
+    edition_id: '',
+    type: '',
+    description: '',
+    amount: 0,
+  };
+
+  openWorkshopPaymentModal() {
+    this.resetWpForm();
+    this.workshopPaymentModalOpen = true;
+    this.loadWpWorkshops();
+  }
+
+  closeWorkshopPaymentModal() {
+    this.workshopPaymentModalOpen = false;
+  }
+
+  resetWpForm() {
+    this.wpForm = {
+      workshop_id: '',
+      edition_id: '',
+      type: '',
+      description: '',
+      amount: 0,
+    };
+    this.wpEditions = [];
+    this.wpMensajeValidacion = '';
+  }
+
+  loadWpWorkshops() {
+    this.workshopService.getWorkshopsSimple().subscribe({
+      next: (res) => { this.wpWorkshops = res.workshops || res; },
+      error: () => { this.toast.error('Error al cargar talleres'); },
+    });
+  }
+
+  onWorkshopChange() {
+    this.wpForm.edition_id = '';
+    this.wpEditions = [];
+
+    if (!this.wpForm.workshop_id) return;
+
+    this.workshopService.getEditions(Number(this.wpForm.workshop_id)).subscribe({
+      next: (res) => { this.wpEditions = res.editions || res; },
+      error: () => { this.toast.error('Error al cargar ediciones'); },
+    });
+  }
+
+  getWpWorkshopName(): string {
+    const w = this.wpWorkshops.find((w: any) => w.id == this.wpForm.workshop_id);
+    return w ? w.name : '';
+  }
+
+  getWpEditionName(): string {
+    const e = this.wpEditions.find((e: any) => e.id == this.wpForm.edition_id);
+    return e ? `${e.name} (${e.shift})` : '';
+  }
+
+  saveWpPaymentValidation(): boolean {
+    this.wpMensajeValidacion = '';
+    if (!this.wpForm.workshop_id) {
+      this.wpMensajeValidacion = 'Seleccione un taller';
+      return false;
+    }
+    if (!this.wpForm.edition_id) {
+      this.wpMensajeValidacion = 'Seleccione una edición';
+      return false;
+    }
+    if (!this.wpForm.type) {
+      this.wpMensajeValidacion = 'Seleccione el tipo de concepto';
+      return false;
+    }
+    if (this.wpForm.type === 'Otro' && !this.wpForm.description?.trim()) {
+      this.wpMensajeValidacion = 'La descripción es obligatoria para este tipo de concepto';
+      return false;
+    }
+    if (!this.wpForm.amount || this.wpForm.amount <= 0) {
+      this.wpMensajeValidacion = 'El monto debe ser mayor a 0';
+      return false;
+    }
+    return true;
+  }
+
+  saveWorkshopPayment() {
+    if (!this.saveWpPaymentValidation()) return;
+    this.savingWorkshopPayment = true;
+
+    const data = {
+      type: this.wpForm.type,
+      description: this.wpForm.description || null,
+      amount: this.wpForm.amount,
+    };
+
+    this.workshopService.createEditionConcept(Number(this.wpForm.edition_id), data).subscribe({
+      next: () => {
+        this.savingWorkshopPayment = false;
+        this.toast.success('Concepto de cobro creado exitosamente');
+        this.closeWorkshopPaymentModal();
+        this.loadWorkshopConcepts();
+      },
+      error: (err) => {
+        this.savingWorkshopPayment = false;
+        this.toast.error(err?.error?.message || 'Error al crear concepto de cobro');
+      },
+    });
   }
 }
