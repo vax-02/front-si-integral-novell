@@ -78,6 +78,7 @@ export class StudentsComponent {
   parallelHistory: any[] = [];
   subjectHistory: any[] = [];
   subjectHistoryGroups: any[] = [];
+  workshopEnrollments: any[] = [];
 
   // Propiedades del formulario de inscripción/edición
   enrollment = {
@@ -358,6 +359,7 @@ export class StudentsComponent {
     this.selectedStudent = student;
     this.parallelHistory = [];
     this.subjectHistory = [];
+    this.workshopEnrollments = [];
     this.viewModalStudent = true;
     this.studentService.getStudent(student.id).subscribe({
       next: (res) => {
@@ -390,6 +392,15 @@ export class StudentsComponent {
       },
       error: () => {
         this.toast.error('Error al cargar el detalle del estudiante');
+      }
+    });
+
+    this.studentService.getWorkshopEnrollments(student.id).subscribe({
+      next: (res) => {
+        this.workshopEnrollments = res.enrollments || [];
+      },
+      error: () => {
+        this.workshopEnrollments = [];
       }
     });
   }

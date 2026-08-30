@@ -109,6 +109,18 @@ export class StudentService {
     });
   }
 
+  getWorkshopEnrollments(studentId: number): Observable<any> {
+    return this.http.get(this.apiUrl.students.workshopEnrollments(studentId), {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getStudentByUserId(userId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl.students.index}?search=&per_page=1`, {
+      headers: this.getHeaders(),
+    });
+  }
+
   private getHeaders() {
     return new HttpHeaders({
       Authorization: `Bearer ${this.auth.token}`,
