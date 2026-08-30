@@ -1,0 +1,264 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Capacitaciones / Talleres</h1>
+      <p class="text-sm text-slate-500 mt-1">Gestiona los cursos, módulos y ediciones</p>
+    </div>
+    <app-button icon="fas fa-plus" (click)="openWorkshopModal('create')"></app-button>
+  </div>
+
+  <!-- Tarjetas resumen -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-bold uppercase text-slate-400">Total Talleres</p>
+      <p class="text-3xl font-bold text-slate-800 mt-1">{{ total }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-bold uppercase text-slate-400">Activos</p>
+      <p class="text-3xl font-bold text-green-600 mt-1">{{ active }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-bold uppercase text-slate-400">Inactivos</p>
+      <p class="text-3xl font-bold text-red-500 mt-1">{{ total - active }}</p>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50">
+            <th class="text-left px-6 py-3 font-semibold text-slate-600">Nombre</th>
+            <th class="text-left px-6 py-3 font-semibold text-slate-600">Descripción</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Módulos</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Ediciones</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Estado</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of workshops" class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 font-medium text-slate-800">{{ w.name }}</td>
+            <td class="px-6 py-4 text-slate-500 max-w-xs truncate">{{ w.description || '—' }}</td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">{{ w.modules_count }}</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">{{ w.editions_count }}</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button (click)="toggleWorkshopStatus(w)"
+                class="px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+                [ngClass]="w.status ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'">
+                {{ w.status ? 'Activo' : 'Inactivo' }}
+              </button>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-center gap-2">
+                <button (click)="openDetail(w)" title="Ver detalle"
+                  class="bg-blue-500 text-white px-2 py-1.5 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button (click)="openWorkshopModal('edit', w)" title="Editar"
+                  class="bg-amber-500 text-white px-2 py-1.5 rounded-lg hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button (click)="openDeleteWorkshopConfirm(w)" title="Eliminar"
+                  class="bg-rose-500 text-white px-2 py-1.5 rounded-lg hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="workshops.length === 0 && !loading">
+            <td colspan="6" class="px-6 py-12 text-center text-slate-400">No hay talleres registrados</td>
+          </tr>
+
+          <!-- Loading: skeleton -->
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
+            <tr *ngIf="loading" class="animate-pulse border-b border-slate-50">
+              <td class="px-6 py-4">
+                <div class="h-3.5 w-32 bg-slate-200 rounded"></div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="h-3.5 w-40 bg-slate-200 rounded"></div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="h-5 w-8 bg-slate-200 rounded-full mx-auto"></div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="h-5 w-8 bg-slate-200 rounded-full mx-auto"></div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="h-5 w-16 bg-slate-200 rounded-full mx-auto"></div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex gap-2 justify-center">
+                  <div class="h-8 w-9 bg-slate-200 rounded-lg"></div>
+                  <div class="h-8 w-9 bg-slate-200 rounded-lg"></div>
+                  <div class="h-8 w-9 bg-slate-200 rounded-lg"></div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Crear/Editar Taller -->
+<app-base-modal [isOpen]="workshopModalOpen" (cancel)="closeWorkshopModal()" (confirm)="saveWorkshop()"
+  [title]="workshopModalMode === 'edit' ? 'Editar Taller' : 'Nuevo Taller'"
+  [loading]="saving" confirmText="Guardar" [showFooter]="true">
+  <form [formGroup]="workshopForm" class="space-y-4">
+    <app-base-input text="Nombre *" formControlName="name" placeholder="Nombre del taller"></app-base-input>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+      <textarea formControlName="description" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Descripción del taller"></textarea>
+    </div>
+  </form>
+</app-base-modal>
+
+<!-- Modal: Detalle del Taller -->
+<app-base-modal [isOpen]="detailModalOpen" (cancel)="closeDetail()" [title]="selectedWorkshop?.name || 'Detalle'" [size]="'lg'" [showFooter]="false">
+  <div *ngIf="loadingDetail" class="flex justify-center py-8">
+    <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i>
+  </div>
+  <div *ngIf="!loadingDetail && selectedWorkshop" class="space-y-4">
+    <!-- Tabs -->
+    <div class="flex border-b border-slate-200">
+      <button (click)="activeTab = 'modules'" class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+        [ngClass]="activeTab === 'modules' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'">
+        Módulos ({{ selectedWorkshop.modules?.length || 0 }})
+      </button>
+      <button (click)="activeTab = 'editions'" class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+        [ngClass]="activeTab === 'editions' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'">
+        Ediciones ({{ selectedWorkshop.editions?.length || 0 }})
+      </button>
+    </div>
+
+    <!-- Tab: Módulos -->
+    <div *ngIf="activeTab === 'modules'" class="space-y-3">
+      <div class="flex gap-2">
+        <input [(ngModel)]="newModuleName" type="text" placeholder="Nombre del módulo"
+          class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" />
+        <app-button icon="fas fa-plus" (click)="addModule()"></app-button>
+      </div>
+      <div *ngIf="selectedWorkshop.modules?.length === 0" class="text-center py-6 text-slate-400 text-sm">
+        No hay módulos. Agrega el primero arriba.
+      </div>
+      <div *ngFor="let mod of selectedWorkshop.modules" class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+        <div class="flex items-center gap-3">
+          <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">{{ mod.order }}</span>
+          <span class="text-sm font-medium text-slate-700">{{ mod.name }}</span>
+        </div>
+        <button (click)="openDeleteModuleConfirm(mod)"
+          class="bg-rose-500 text-white px-2 py-1.5 rounded-lg hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition text-xs" title="Eliminar">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Ediciones -->
+    <div *ngIf="activeTab === 'editions'" class="space-y-3">
+      <div class="flex justify-end">
+        <app-button icon="fas fa-plus" (click)="openEditionModal()"></app-button>
+      </div>
+
+      <div *ngIf="selectedWorkshop.editions?.length === 0" class="text-center py-6 text-slate-400 text-sm">
+        No hay ediciones registradas.
+      </div>
+      <div *ngFor="let ed of selectedWorkshop.editions" class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-medium text-slate-700">{{ ed.name }}</span>
+            <button (click)="toggleEditionStatus(ed)" class="px-2 py-0.5 rounded-full text-xs font-semibold"
+              [ngClass]="ed.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'">
+              {{ ed.status ? 'Activa' : 'Inactiva' }}
+            </button>
+          </div>
+          <div class="text-xs text-slate-500 mt-1">
+            {{ ed.start_date | date:'dd/MM/yyyy' }} - {{ ed.end_date ? (ed.end_date | date:'dd/MM/yyyy') : '...' }}
+            | {{ ed.shift }} | {{ ed.enrollments_count }}/{{ ed.capacity }} inscritos
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button (click)="openEditionDetail(ed)"
+            class="bg-blue-500 text-white px-2 py-1.5 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition text-xs" title="Ver conceptos">
+            <i class="fa-solid fa-coins"></i>
+          </button>
+          <button (click)="openDeleteEditionConfirm(ed)"
+            class="bg-rose-500 text-white px-2 py-1.5 rounded-lg hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition text-xs" title="Eliminar">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-base-modal>
+
+<!-- Modal: Detalle Edición / Conceptos -->
+<app-base-modal [isOpen]="editionDetailModalOpen" (cancel)="closeEditionDetail()" [title]="'Conceptos de Cobro - ' + (selectedEdition?.name || '')" [showFooter]="false">
+  <div *ngIf="loadingEditionDetail" class="flex justify-center py-8">
+    <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i>
+  </div>
+  <div *ngIf="!loadingEditionDetail && selectedEdition" class="space-y-4">
+    <div *ngIf="selectedEdition.concepts?.length === 0" class="text-center py-6 text-slate-400 text-sm">
+      No hay conceptos de cobro.
+    </div>
+    <div *ngFor="let c of selectedEdition.concepts" class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+      <div>
+        <span class="px-2 py-0.5 rounded-full text-xs font-semibold"
+          [ngClass]="{'bg-blue-100 text-blue-700': c.type === 'Inscripcion', 'bg-amber-100 text-amber-700': c.type === 'Cuota', 'bg-slate-100 text-slate-700': c.type === 'Otro'}">
+          {{ c.type }}
+        </span>
+        <span class="ml-2 text-sm font-medium text-slate-700">{{ c.description || '—' }}</span>
+      </div>
+      <span class="font-bold text-slate-800">{{ c.amount | number:'1.2-2' }} Bs</span>
+    </div>
+  </div>
+</app-base-modal>
+
+<!-- Modal: Crear Edición -->
+<app-base-modal [isOpen]="editionModalOpen" (cancel)="closeEditionModal()" (confirm)="saveEdition()"
+  title="Nueva Edición" [loading]="savingEdition" confirmText="Crear">
+  <form [formGroup]="editionForm" class="space-y-4">
+    <app-base-input text="Nombre *" formControlName="name" placeholder="Ej: Marzo 2026"></app-base-input>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Turno *</label>
+      <select formControlName="shift" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+        <option value="Mañana">Mañana</option>
+        <option value="Tarde">Tarde</option>
+        <option value="Noche">Noche</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <app-base-input text="Fecha Inicio *" formControlName="start_date" type_i="date"></app-base-input>
+      <app-base-input text="Fecha Fin" formControlName="end_date" type_i="date"></app-base-input>
+    </div>
+    <app-base-input text="Capacidad *" formControlName="capacity" type_i="number"></app-base-input>
+  </form>
+</app-base-modal>
+
+<!-- Confirm: Eliminar Taller -->
+<app-base-modal-confirm [isOpen]="confirmWorkshopDeleteOpen" (cancel)="closeDeleteWorkshopConfirm()" title="Eliminar Taller"
+  [message]="'¿Estás seguro de eliminar el taller ' + (workshopToDelete?.name || '') + '? Esta acción no se puede deshacer.'"
+  confirmText="Eliminar" [icon]="'fa-solid fa-trash text-4xl text-red-600'" (confirm)="deleteWorkshop()">
+</app-base-modal-confirm>
+
+<!-- Confirm: Eliminar Módulo -->
+<app-base-modal-confirm [isOpen]="confirmModuleDeleteOpen" (cancel)="closeDeleteModuleConfirm()" title="Eliminar Módulo"
+  [message]="'¿Estás seguro de eliminar el módulo ' + (moduleToDelete?.name || '') + '?'"
+  confirmText="Eliminar" [icon]="'fa-solid fa-trash text-4xl text-red-600'" (confirm)="deleteModule()">
+</app-base-modal-confirm>
+
+<!-- Confirm: Eliminar Edición -->
+<app-base-modal-confirm [isOpen]="confirmEditionDeleteOpen" (cancel)="closeDeleteEditionConfirm()" title="Eliminar Edición"
+  [message]="'¿Estás seguro de eliminar la edición ' + (editionToDelete?.name || '') + '?'"
+  confirmText="Eliminar" [icon]="'fa-solid fa-trash text-4xl text-red-600'" (confirm)="deleteEdition()">
+</app-base-modal-confirm>
+
+

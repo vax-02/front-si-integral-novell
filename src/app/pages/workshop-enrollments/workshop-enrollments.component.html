@@ -1,0 +1,232 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Inscripciones a Capacitaciones</h1>
+      <p class="text-sm text-slate-500 mt-1">Gestiona las inscripciones de estudiantes y participantes externos</p>
+    </div>
+    <app-button label="Inscribir" icon="fas fa-plus" (click)="openEnrollModal()"></app-button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white p-2 sm:p-6 rounded-2xl shadow-sm border border-slate-200
+            grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4">
+      <input type="text" [(ngModel)]="search" (keyup.enter)="onSearch()" placeholder="Buscar por nombre o CI..."
+        class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" />
+      <div class="lg:col-span-1">
+        <app-button label="Filtrar" variant="secondary" [fullWidth]="true" (click)="onSearch()"></app-button>
+      </div>
+  </div>
+
+  <!-- Resumen -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+    <p class="text-sm text-slate-500">Total de inscripciones: <span class="font-bold text-slate-800">{{ total }}</span></p>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50">
+            <th class="text-left px-6 py-3 font-semibold text-slate-600">Código</th>
+            <th class="text-left px-6 py-3 font-semibold text-slate-600">Participante</th>
+            <th class="text-left px-6 py-3 font-semibold text-slate-600">Taller</th>
+            <th class="text-left px-6 py-3 font-semibold text-slate-600">Edición</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Fecha</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Estado</th>
+            <th class="text-center px-6 py-3 font-semibold text-slate-600">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="7" class="px-6 py-4">
+              <div *ngFor="let i of [1,2,3,4,5]" class="flex items-center gap-4 py-3 border-b border-slate-50">
+                <div class="h-3 bg-slate-200 rounded animate-pulse w-16"></div>
+                <div class="h-3 bg-slate-200 rounded animate-pulse w-40"></div>
+                <div class="h-3 bg-slate-200 rounded animate-pulse w-32"></div>
+                <div class="h-3 bg-slate-200 rounded animate-pulse w-28"></div>
+                <div class="h-3 bg-slate-200 rounded animate-pulse w-20 mx-auto"></div>
+                <div class="h-5 bg-slate-200 rounded-full animate-pulse w-16 mx-auto"></div>
+                <div class="h-3 bg-slate-200 rounded animate-pulse w-20 mx-auto"></div>
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let e of enrollments" class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 font-mono text-xs text-slate-600">{{ e.code }}</td>
+            <td class="px-6 py-4 font-medium text-slate-800">{{ getStudentName(e) }}</td>
+            <td class="px-6 py-4 text-slate-600">{{ getWorkshopName(e) }}</td>
+            <td class="px-6 py-4 text-slate-600">{{ getEditionName(e) }}</td>
+            <td class="px-6 py-4 text-center text-slate-500">{{ e.enrolled | date:'dd/MM/yyyy' }}</td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="{
+                  'bg-green-100 text-green-700': e.status === 'Activo',
+                  'bg-blue-100 text-blue-700': e.status === 'Completado',
+                  'bg-red-100 text-red-600': e.status === 'Retirado'
+                }">
+                {{ e.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-center gap-1 sm:gap-2">
+                <button (click)="openViewModal(e)" title="Ver detalle"
+                  class="bg-blue-500 text-white px-2 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition">
+                  <i class="text-lg fas fa-eye"></i>
+                </button>
+                <button (click)="confirmAnular(e)" title="Anular inscripción"
+                  class="bg-rose-500 text-white px-2 rounded-lg hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition">
+                  <i class="text-lg fas fa-ban"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="enrollments.length === 0 && !loading">
+            <td colspan="7" class="px-6 py-12 text-center text-slate-400">No hay inscripciones registradas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="lastPage > 1" class="flex items-center justify-between px-6 py-3 border-t border-slate-100">
+      <p class="text-xs text-slate-500">Página {{ page }} de {{ lastPage }}</p>
+      <div class="flex gap-2">
+        <button (click)="loadEnrollments(page - 1)" [disabled]="page <= 1"
+          class="px-3 py-1 rounded-lg text-xs font-medium border border-slate-200 hover:bg-slate-50 disabled:opacity-50">
+          Anterior
+        </button>
+        <button (click)="loadEnrollments(page + 1)" [disabled]="page >= lastPage"
+          class="px-3 py-1 rounded-lg text-xs font-medium border border-slate-200 hover:bg-slate-50 disabled:opacity-50">
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nueva Inscripción -->
+<app-base-modal [isOpen]="enrollModalOpen" (cancel)="closeEnrollModal()" (confirm)="saveEnrollment()"
+  title="Nueva Inscripción" [size]="'lg'" [loading]="saving" confirmText="Inscribir">
+  <form [formGroup]="enrollmentForm" class="space-y-4">
+    <!-- Tipo de participante -->
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-2">Tipo de participante</label>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" value="existing" formControlName="student_type" class="text-blue-600" />
+          <span class="text-sm text-slate-700">Estudiante existente</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" value="external" formControlName="student_type" class="text-blue-600" />
+          <span class="text-sm text-slate-700">Participante externo</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Si es existente -->
+    <div *ngIf="enrollmentForm.get('student_type')?.value === 'existing'" class="relative student-search-container">
+      <label class="block text-sm font-medium text-slate-700 mb-1">Buscar estudiante *</label>
+      <div class="relative">
+        <input type="text" [value]="studentSearch"
+          (input)="studentSearch = $any($event.target).value; onStudentSearch()"
+          (focus)="studentDropdownOpen = true; onStudentSearch()"
+          placeholder="Buscar por nombre o CI..."
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm pr-8" />
+        <button *ngIf="studentSearch || enrollmentForm.get('student_id')?.value"
+          (click)="clearStudentSelection()" type="button"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+      <div *ngIf="studentDropdownOpen" class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div *ngIf="filteredStudents.length === 0" class="px-3 py-2 text-sm text-slate-400">No se encontraron estudiantes</div>
+        <button *ngFor="let s of filteredStudents" type="button"
+          (click)="selectStudent(s)"
+          class="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0"
+          [class.bg-blue-50]="enrollmentForm.get('student_id')?.value == s.id">
+          <span class="font-medium text-slate-800">{{ s.user?.name }} {{ s.user?.first_lastname }} {{ s.user?.second_lastname }}</span>
+          <span class="text-slate-400 ml-2">CI: {{ s.user?.ci }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Si es externo -->
+    <div *ngIf="enrollmentForm.get('student_type')?.value === 'external'" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <app-base-input text="Nombre *" formControlName="external_name" placeholder="Nombre"></app-base-input>
+      <app-base-input text="Apellido *" formControlName="external_surname" placeholder="Apellido"></app-base-input>
+      <app-base-input text="CI *" formControlName="external_ci" placeholder="Carnet de identidad"></app-base-input>
+      <app-base-input text="Email" formControlName="external_email" type_i="email" placeholder="email@ejemplo.com"></app-base-input>
+      <app-base-input text="Teléfono" formControlName="external_phone" placeholder="Teléfono"></app-base-input>
+    </div>
+
+    <!-- Taller y edición -->
+    <div class="border-t border-slate-200 pt-4">
+      <p class="text-sm font-bold text-slate-700 mb-3">Seleccionar taller y edición</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Taller *</label>
+          <select formControlName="workshop_id" (change)="onWorkshopChange()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+            <option value="">-- Seleccionar taller --</option>
+            <option *ngFor="let w of workshops" [value]="w.id">{{ w.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Edición *</label>
+          <select formControlName="workshop_edition_id" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+            <option value="">-- Seleccionar edición --</option>
+            <option *ngFor="let e of filteredEditions" [value]="e.id">
+              {{ e.name }} ({{ e.shift }}) - {{ e.start_date | date:'dd/MM/yyyy' }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </form>
+</app-base-modal>
+
+<!-- Confirm: Anular Inscripción -->
+<app-base-modal-confirm [isOpen]="confirmAnularOpen" (cancel)="closeAnularConfirm()" title="Anular Inscripción"
+  [message]="'¿Estás seguro de anular la inscripción ' + (enrollmentToAnular?.code || '') + '? Esta acción no se puede deshacer.'"
+  confirmText="Sí, anular" [icon]="'fa-solid fa-ban text-4xl text-red-600'" (confirm)="anularEnrollment()">
+</app-base-modal-confirm>
+
+<!-- Modal: Ver Detalle Inscripción -->
+<app-base-modal [isOpen]="viewModalOpen" (cancel)="closeViewModal()" title="Detalle de Inscripción"
+  size="md" [loading]="false" [showConfirm]="false" cancelText="Aceptar">
+  <div *ngIf="enrollmentToView" class="space-y-4">
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <p class="text-xs text-slate-500">Código</p>
+        <p class="text-sm font-semibold text-slate-800">{{ enrollmentToView.code }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500">Fecha de inscripción</p>
+        <p class="text-sm font-semibold text-slate-800">{{ enrollmentToView.enrolled | date:'dd/MM/yyyy' }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500">Estado</p>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold"
+          [ngClass]="{
+            'bg-green-100 text-green-700': enrollmentToView.status === 'Activo',
+            'bg-blue-100 text-blue-700': enrollmentToView.status === 'Completado',
+            'bg-red-100 text-red-600': enrollmentToView.status === 'Retirado'
+          }">
+          {{ enrollmentToView.status }}
+        </span>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500">Participante</p>
+        <p class="text-sm font-semibold text-slate-800">{{ getStudentName(enrollmentToView) }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500">Taller</p>
+        <p class="text-sm font-semibold text-slate-800">{{ getWorkshopName(enrollmentToView) }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500">Edición</p>
+        <p class="text-sm font-semibold text-slate-800">{{ getEditionName(enrollmentToView) }}</p>
+      </div>
+    </div>
+  </div>
+</app-base-modal>

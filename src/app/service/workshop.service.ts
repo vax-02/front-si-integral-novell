@@ -83,6 +83,10 @@ export class WorkshopService {
     return this.http.get(this.apiUrl.workshops.editionConcepts(id), { headers: this.getHeaders() });
   }
 
+  getAllWorkshopConcepts(): Observable<any> {
+    return this.http.get(this.apiUrl.workshops.allConcepts, { headers: this.getHeaders() });
+  }
+
   createEditionConcept(id: number, data: any): Observable<any> {
     return this.http.post(this.apiUrl.workshops.editionConcepts(id), data, { headers: this.getHeaders() });
   }
