@@ -1,0 +1,98 @@
+<div class="space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Mis Talleres</h1>
+      <p class="text-sm text-slate-500">Talleres en los que estás inscrito</p>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="space-y-4">
+    <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-xl border border-slate-200 p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-5 w-48 bg-slate-200 rounded animate-pulse"></div>
+      </div>
+      <div class="space-y-3">
+        <div class="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
+        <div class="h-4 w-3/4 bg-slate-100 rounded animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIN INSCRIPCIONES -->
+  <div *ngIf="!loading && enrollments.length === 0"
+    class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">
+    <i class="fa-solid fa-tools text-3xl text-slate-300 mb-3"></i>
+    <p class="font-medium">No estás inscrito en ningún taller</p>
+  </div>
+
+  <!-- LISTA DE INSCRIPCIONES -->
+  <div *ngFor="let enrollment of enrollments" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+
+    <!-- Header clickable -->
+    <div (click)="toggleExpand(enrollment.id)"
+      class="flex justify-between items-center px-5 py-4 cursor-pointer hover:bg-slate-50 transition-colors">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-tools text-blue-600 text-lg"></i>
+        <div>
+          <h3 class="font-semibold text-slate-800 uppercase">{{ enrollment.edition?.workshop?.name }}</h3>
+          <small class="text-slate-500">{{ enrollment.edition?.name }} - {{ enrollment.edition?.shift }}</small>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold"
+          [ngClass]="{
+            'bg-green-100 text-green-700': enrollment.status === 'Activo',
+            'bg-blue-100 text-blue-700': enrollment.status === 'Completado',
+            'bg-red-100 text-red-600': enrollment.status === 'Retirado'
+          }">
+          {{ enrollment.status }}
+        </span>
+        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"
+          [class.rotate-180]="isExpanded(enrollment.id)"></i>
+      </div>
+    </div>
+
+    <!-- Info row -->
+    <div class="px-5 pb-3 flex flex-wrap gap-4 text-xs text-slate-500">
+      <span><i class="fa-solid fa-calendar mr-1"></i> {{ enrollment.enrolled | date:'dd/MM/yyyy' }}</span>
+      <span><i class="fa-solid fa-barcode mr-1"></i> {{ enrollment.code }}</span>
+      <span *ngIf="enrollment.edition?.start_date"><i class="fa-solid fa-play mr-1"></i> {{ enrollment.edition.start_date | date:'dd/MM/yyyy' }}</span>
+      <span *ngIf="enrollment.edition?.end_date"><i class="fa-solid fa-stop mr-1"></i> {{ enrollment.edition.end_date | date:'dd/MM/yyyy' }}</span>
+    </div>
+
+    <!-- Descripción del taller -->
+    <div *ngIf="enrollment.edition?.workshop?.description" class="px-5 pb-3">
+      <p class="text-sm text-slate-600">{{ enrollment.edition.workshop.description }}</p>
+    </div>
+
+    <!-- Módulos expandibles -->
+    <div *ngIf="isExpanded(enrollment.id)" class="border-t border-slate-200 bg-slate-50 px-5 py-4">
+      <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-list-check text-blue-600"></i>
+        Módulos del Taller
+      </h4>
+
+      <div *ngIf="enrollment.edition?.workshop?.modules?.length === 0" class="text-sm text-slate-400 italic">
+        No hay módulos registrados
+      </div>
+
+      <div *ngIf="enrollment.edition?.workshop?.modules?.length > 0" class="space-y-2">
+        <div *ngFor="let module of enrollment.edition.workshop.modules; let i = index"
+          class="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-3">
+          <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
+            {{ i + 1 }}
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-slate-800">{{ module.name }}</p>
+            <p *ngIf="module.description" class="text-xs text-slate-500">{{ module.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
