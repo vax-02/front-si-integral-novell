@@ -215,7 +215,7 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="flex justify-between items-center px-5 py-3 border-b bg-slate-50">
             <div class="flex items-center gap-3">
-              <i class="fa-solid fa-graduation-cap text-blue-600 text-lg">
+              <i [class]="group.source === 'workshop' ? 'fa-solid fa-tools text-purple-600 text-lg' : 'fa-solid fa-graduation-cap text-blue-600 text-lg'">
               </i>
               <div>
 
@@ -258,10 +258,12 @@
                     {{ pay.casher.second_lastname }}
                   </td>
                   <td class="px-4 py-3 font-medium text-center">
-                    <span class="px-2 py-1 text-2xs rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
-
-                      {{ pay.concept.type }}
-
+                    <span class="px-2 py-1 text-2xs rounded-full text-[11px] font-semibold"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-700': pay.source === 'career',
+                        'bg-purple-100 text-purple-700': pay.source === 'workshop'
+                      }">
+                      {{ pay.concept?.type || pay.workshop_concept?.type }}
                     </span>
                     <p>
                       {{ pay.description != null ? pay.description : '...' }}
@@ -347,48 +349,63 @@
   <!-- Formulario -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-
-    <!-- Carrera -->
+    <!-- Tipo de Pago -->
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">
-        Carrera
+        Tipo de Pago *
       </label>
-
       <select
         class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-        [(ngModel)]="paymentForm.career_id"
-        (change)="loadConceptsByCareer(paymentForm.career_id!)"
-        >
-
-        <option [value]="null">
-          Seleccione carrera
-        </option>
-
-        <option *ngFor="let career of studentSelected.student_careers" [value]="career.career.id">{{ career.career.name }}</option>
-
+        [(ngModel)]="paymentForm.paymentType"
+        (change)="onPaymentTypeChange()">
+        <option value="carrera">Carrera</option>
+        <option value="taller">Taller</option>
       </select>
     </div>
 
+    <!-- Carrera (solo si tipo = carrera) -->
+    <div *ngIf="paymentForm.paymentType === 'carrera'">
+      <label class="block text-sm font-medium text-slate-700 mb-1">
+        Carrera *
+      </label>
+      <select
+        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+        [(ngModel)]="paymentForm.career_id"
+        (change)="loadConceptsByCareer(paymentForm.career_id!)">
+        <option [value]="null">Seleccione carrera</option>
+        <option *ngFor="let career of studentSelected.student_careers" [value]="career.career.id">{{ career.career.name }}</option>
+      </select>
+    </div>
+
+    <!-- Taller (solo si tipo = taller) -->
+    <div *ngIf="paymentForm.paymentType === 'taller'">
+      <label class="block text-sm font-medium text-slate-700 mb-1">
+        Taller / Edición *
+      </label>
+      <select
+        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+        [(ngModel)]="paymentForm.workshop_edition_id"
+        (change)="loadConceptsByEdition(paymentForm.workshop_edition_id!)">
+        <option [value]="null">Seleccione edición</option>
+        <option *ngFor="let enrollment of workshopEnrollments" [value]="enrollment.edition?.id">
+          {{ enrollment.edition?.workshop?.name }} - {{ enrollment.edition?.name }} ({{ enrollment.edition?.shift }})
+        </option>
+      </select>
+    </div>
 
     <!-- Concepto -->
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">
-        Concepto
+        Concepto *
       </label>
-
       <select
         class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
         [(ngModel)]="paymentForm.concept_id"
         (change)="onConceptChange()">
-
-        <option [value]="null">
-          Seleccione concepto
-        </option>
-
+        <option [value]="null">Seleccione concepto</option>
         <option *ngFor="let concept of conceptsFiltered" [value]="concept.id">
           {{ concept.type }} - Bs. {{ concept.amount }}
         </option>
-
       </select>
     </div>
 
@@ -439,18 +456,16 @@
 
     </div>
 
-    <!-- Descripción (solo para Mensualidad) -->
-    <div *ngIf="conceptSelected?.type === 'Mensualidad'" class="col-span-1 md:col-span-2">
+    <!-- Descripción -->
+    <div class="col-span-1 md:col-span-2">
       <label class="block text-sm font-medium text-slate-700 mb-1">
         Descripción
       </label>
-
       <input
         type="text"
         class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
         [(ngModel)]="paymentForm.description"
         placeholder="Descripción del pago">
-
     </div>
 
     <!-- Forma de Pago -->
@@ -524,7 +539,7 @@
 
       <div class="flex justify-between items-center pb-2 border-b border-slate-100">
         <span class="text-slate-500">Gestión</span>
-        <span class="font-medium text-slate-700">{{ detailConcept.gestion }}</span>
+        <span class="font-medium text-slate-700">{{ detailConcept.gestion || '—' }}</span>
       </div>
 
       <div class="flex justify-between items-center pb-2 border-b border-slate-100">
@@ -601,8 +616,8 @@
         <h3 class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Detalle del Pago</h3>
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-slate-500">Carrera</span>
-            <span class="font-semibold text-slate-700">{{ payCreated.concept?.career?.name || '—' }}</span>
+            <span class="text-slate-500">Carrera/Taller</span>
+            <span class="font-semibold text-slate-700">{{ payCreated.concept?.career?.name || payCreated.workshopConcept?.edition?.workshop?.name || '—' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Concepto</span>
@@ -624,7 +639,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Gestión</span>
-            <span class="font-semibold text-slate-700">{{ payCreated.concept?.gestion || '—' }}</span>
+            <span class="font-semibold text-slate-700">{{ payCreated.concept?.gestion || payCreated.workshopConcept?.edition?.name || '—' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Semestre</span>

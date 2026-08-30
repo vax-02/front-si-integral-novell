@@ -8,6 +8,7 @@ import { Student } from '../students/students.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { PayService } from '../../service/pay.service';
 import { ConceptService } from '../../service/concept.service';
+import { WorkshopService } from '../../service/workshop.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Roles } from '../../core/constants/roles.constants';
 import { API_ENDPOINTS } from '../../config/api-endpoints';
@@ -32,7 +33,9 @@ export class PaymentsComponent {
   modalConfirm : boolean = false
   payIdSelectd : number = 0
 paymentForm = {
+  paymentType: 'carrera',
   career_id: null,
+  workshop_edition_id: null,
   concept_id: null,
   amount: 0,
   discount: 0,
@@ -78,6 +81,7 @@ paymentForm = {
   detailConcept: any = null;
   savingPay: boolean = false;
   payCreated: any = null;
+  workshopEnrollments: any[] = [];
 
   get currentDate(): string {
     const now = new Date();
@@ -99,6 +103,7 @@ paymentForm = {
     private studentService: StudentService,
     private payServie: PayService,
     private conceptService: ConceptService,
+    private workshopService: WorkshopService,
     private toast: ToastService,
     private auth: AuthService,
   ) {}
@@ -140,14 +145,21 @@ paymentForm = {
     }
 
     this.savingPay = true;
-    const data = {
+    const isWorkshop = this.paymentForm.paymentType === 'taller';
+    const data: any = {
       student_id: this.studentSelected.id,
       concept_id: this.paymentForm.concept_id,
       amount: this.paymentForm.amount,
       discount: this.paymentForm.discount || 0,
       description: this.paymentForm.description || null,
       payment_method: this.paymentForm.payment_method,
+      source: isWorkshop ? 'workshop' : 'career',
     };
+
+    if (isWorkshop) {
+      data.workshop_concept_id = this.paymentForm.concept_id;
+      delete data.concept_id;
+    }
 
     this.payServie.createPay(data).subscribe({
       next: (response) => {
@@ -219,14 +231,37 @@ paymentForm = {
     this.conceptsFiltered = [];
     this.conceptSelected = null;
     this.detailConcept = null;
+    this.workshopEnrollments = [];
     this.paymentForm = {
+      paymentType: 'carrera',
       career_id: null,
+      workshop_edition_id: null,
       concept_id: null,
       amount: 0,
       discount: 0,
       description: '',
       payment_method: 'efectivo'
     };
+
+    this.studentService.getWorkshopEnrollments(student.id).subscribe({
+      next: (response) => {
+        this.workshopEnrollments = response.enrollments || [];
+      },
+      error: () => {
+        this.workshopEnrollments = [];
+      }
+    });
+  }
+
+  onPaymentTypeChange() {
+    this.paymentForm.career_id = null;
+    this.paymentForm.workshop_edition_id = null;
+    this.paymentForm.concept_id = null;
+    this.paymentForm.amount = 0;
+    this.paymentForm.description = '';
+    this.conceptsFiltered = [];
+    this.conceptSelected = null;
+    this.detailConcept = null;
   }
 
   loadConceptsByCareer(careerId: number) {
@@ -254,6 +289,31 @@ paymentForm = {
     });
   }
 
+  loadConceptsByEdition(editionId: number) {
+    if (!editionId) {
+      this.conceptsFiltered = [];
+      this.conceptSelected = null;
+      this.detailConcept = null;
+      this.paymentForm.concept_id = null;
+      this.paymentForm.amount = 0;
+      this.paymentForm.description = '';
+      return;
+    }
+    this.workshopService.getEditionConcepts(editionId).subscribe({
+      next: (response) => {
+        this.conceptsFiltered = response.concepts || [];
+        this.conceptSelected = null;
+        this.detailConcept = null;
+        this.paymentForm.concept_id = null;
+        this.paymentForm.amount = 0;
+        this.paymentForm.description = '';
+      },
+      error: (err) => {
+        this.toast.error('Error al cargar conceptos');
+      }
+    });
+  }
+
   onConceptChange() {
     const conceptId = this.paymentForm.concept_id;
     if (!conceptId) {
@@ -267,8 +327,7 @@ paymentForm = {
     if (this.conceptSelected) {
       this.paymentForm.amount = this.conceptSelected.amount;
       this.detailConcept = this.conceptSelected;
-      // Auto-generar descripción si es Mensualidad
-      if (this.conceptSelected.type === 'Mensualidad') {
+      if (this.conceptSelected.type === 'Cuota' || this.conceptSelected.type === 'Mensualidad') {
         this.paymentForm.description = `Mensualidad de ${this.currentMonthName}`;
       } else {
         this.paymentForm.description = this.conceptSelected.description || '';
