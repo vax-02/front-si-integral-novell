@@ -195,6 +195,37 @@
       </div>
       </div>
 
+      <!-- CAPACITACIONES -->
+      <div>
+        <div (click)="toggleCapacitaciones()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"
+          [ngClass]="collapsed && !isMobile ? 'justify-center' : 'justify-between'">
+          <div class="flex items-center" [ngClass]="collapsed && !isMobile ? '' : 'gap-4'">
+            <i class="fa-solid fa-certificate text-slate-500 group-hover:text-blue-600 text-lg"></i>
+            <span *ngIf="!collapsed || isMobile" class="text-xs font-bold uppercase text-slate-400">Capacitaciones</span>
+          </div>
+          <i *ngIf="!collapsed || isMobile" class="fa-solid fa-chevron-down transition-transform"
+            [class.rotate-180]="openCapacitaciones"></i>
+        </div>
+
+        <div *ngIf="!collapsed || isMobile" class="submenu-grid" [class.open]="openCapacitaciones">
+        <div>
+        <div class="ml-6 space-y-1">
+          <a routerLink="/home/workshops" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Talleres
+          </a>
+          <a routerLink="/home/workshop-enrollments" routerLinkActive="text-blue-600"
+            class="block py-2 text-sm hover:text-blue-600 transition-colors"
+            (click)="isMobile ? collapsed = true : null">
+            Inscripciones
+          </a>
+
+        </div>
+        </div>
+      </div>
+      </div>
+
       <!-- FINANZAS -->
       <div>
         <div (click)="toggleFinanzas()" class="flex items-center p-3 rounded-xl hover:bg-slate-50 cursor-pointer group"

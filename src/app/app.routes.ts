@@ -40,6 +40,11 @@ export const routes: Routes = [
     { path: 'programs', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/programs/programs.component').then(m => m.ProgramsComponent) },
     { path: 'courses', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/courses/courses.component').then(m => m.CoursesComponent) },
 
+    // Capacitaciones
+    { path: 'workshops', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/workshops/workshops.component').then(m => m.WorkshopsComponent) },
+    { path: 'workshop-enrollments', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id, Roles.SECRETARIA.id] }, loadComponent: () => import('./pages/workshop-enrollments/workshop-enrollments.component').then(m => m.WorkshopEnrollmentsComponent) },
+
+
     { path: 'schedule-docente', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/schedule-docente/schedule-docente.component').then(m => m.ScheduleDocenteComponent) },
 
     { path: 'subjects', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id] }, loadComponent: () => import('./pages/subjects/subjects.component').then(m => m.SubjectsComponent) },
