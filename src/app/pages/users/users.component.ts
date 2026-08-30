@@ -268,23 +268,45 @@ export class UsersComponent {
   cancel() {
     this.userModalCreate = false;
     this.editingUserId = null;
+    this.f['role_id'].setValidators([Validators.required]);
+    this.f['role_id'].updateValueAndValidity();
+    this.f['ci'].setValidators([
+      Validators.required,
+      Validators.pattern(/^\d{5,12}$/),
+      Validators.minLength(5),
+      Validators.maxLength(12),
+    ]);
+    this.f['ci'].updateValueAndValidity();
     this.form.reset({ status: 1 });
   }
 
   openCreateModal() {
     this.editingUserId = null;
+    this.f['role_id'].setValidators([Validators.required]);
+    this.f['role_id'].updateValueAndValidity();
+    this.f['ci'].setValidators([
+      Validators.required,
+      Validators.pattern(/^\d{5,12}$/),
+      Validators.minLength(5),
+      Validators.maxLength(12),
+    ]);
+    this.f['ci'].updateValueAndValidity();
     this.form.reset({ status: 1 });
     this.userModalCreate = true;
   }
 
   openEditModal(user: any) {
     this.editingUserId = user.id;
+    this.f['role_id'].clearValidators();
+    this.f['role_id'].updateValueAndValidity();
+    this.f['ci'].clearValidators();
+    this.f['ci'].updateValueAndValidity();
     this.form.patchValue({
       nombre: user.name || '',
       apellido_paterno: user.first_lastname || '',
       apellido_materno: user.second_lastname || '',
       ci: user.ci || '',
-      role_id: user.role?.id ?? null,
+      role_id: user.roles?.[0]?.id ?? null,
       email: user.email || '',
       celular: user.cellphone || '',
       password: '',

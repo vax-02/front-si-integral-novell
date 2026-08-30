@@ -251,7 +251,7 @@
             </div>
             <app-base-input text="Apellido Materno" formControlName="apellido_materno" />
             <div class="space-y-1">
-              <app-base-input text="C.I." formControlName="ci" />
+              <app-base-input text="C.I." formControlName="ci" [disabled]="editingUserId != null" />
               <p class="text-rose-600 text-xs" *ngIf="f['ci'].invalid && f['ci'].touched">
                 <span *ngIf="f['ci'].errors?.['required']">El CI es obligatorio.</span>
                 <span
