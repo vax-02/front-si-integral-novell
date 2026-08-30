@@ -26,6 +26,7 @@ export const routes: Routes = [
     { path: 'my-pensul', canActivate: [roleGuard], data: { roles: [Roles.ESTUDIANTE.id] }, loadComponent: () => import('./pages/my-pensul/my-pensul.component').then(m => m.MyPensulComponent) },
     { path: 'materials', canActivate: [roleGuard], data: { roles: [Roles.ESTUDIANTE.id] }, loadComponent: () => import('./pages/materials/materials.component').then(m => m.MaterialsComponent) },
     { path: 'my-payments', canActivate: [roleGuard], data: { roles: [Roles.ESTUDIANTE.id] }, loadComponent: () => import('./pages/student-payments/student-payments.component').then(m => m.StudentPaymentsComponent) },
+    { path: 'my-workshops', canActivate: [roleGuard], data: { roles: [Roles.ESTUDIANTE.id] }, loadComponent: () => import('./pages/my-workshops/my-workshops.component').then(m => m.MyWorkshopsComponent) },
 
     //secretaria
     { path: 'payments', canActivate: [roleGuard], data: { roles: [Roles.ADMIN.id, Roles.SECRETARIA.id] }, loadComponent: () => import('./pages/payments/payments.component').then(m => m.PaymentsComponent) },
