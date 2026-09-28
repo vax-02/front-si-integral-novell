@@ -62,14 +62,20 @@ export class ParallelService {
     });
   }
 
-  previewParallelAdvance(id: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl.parallels.previewAdvance(id)}`, {}, {
+  previewParallelAdvance(id: number, maxSubjects: number = 6): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.parallels.previewAdvance(id)}`, { max_subjects: maxSubjects }, {
       headers: this.getHeaders(),
     });
   }
 
-  advanceParallelLevel(id: number, destParallelId: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl.parallels.advanceLevel(id)}`, { parallel_id: destParallelId }, {
+  advanceParallelLevel(id: number, destParallelId: number, maxSubjects: number = 6): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.parallels.advanceLevel(id)}`, { parallel_id: destParallelId, max_subjects: maxSubjects }, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  autoAdvanceParallel(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.parallels.autoAdvance(id)}`, {}, {
       headers: this.getHeaders(),
     });
   }

@@ -54,9 +54,22 @@
     </div>
 
     <!-- Loading -->
-    <div *ngIf="loadingMaterials" class="p-10 text-center">
-      <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
-      <p class="text-sm text-slate-400 mt-2">Cargando materiales...</p>
+    <div *ngIf="loadingMaterials" class="divide-y divide-slate-100">
+      <div *ngFor="let i of [1, 2, 3, 4]" class="p-4 flex items-start gap-4">
+        <div class="w-10 h-10 rounded-lg bg-slate-200 animate-pulse shrink-0"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-4 w-48 bg-slate-200 rounded animate-pulse"></div>
+          <div class="h-3 w-64 bg-slate-200 rounded animate-pulse"></div>
+          <div class="h-3 w-40 bg-slate-200 rounded animate-pulse"></div>
+          <div class="h-3 w-52 bg-slate-200 rounded animate-pulse"></div>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <div class="w-8 h-8 rounded-lg bg-slate-200 animate-pulse"></div>
+          <div class="w-8 h-8 rounded-lg bg-slate-200 animate-pulse"></div>
+          <div class="w-8 h-8 rounded-lg bg-slate-200 animate-pulse"></div>
+          <div class="w-8 h-8 rounded-lg bg-slate-200 animate-pulse"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Sin materiales -->

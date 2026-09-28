@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule,
@@ -22,6 +22,7 @@ import { BaseModalConfirmComponent } from '../../shared/base-modal-confirm/base-
 
 @Component({
   selector: 'app-courses',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -77,6 +78,8 @@ export class CoursesComponent implements OnInit {
   schedules: any[] = [];
   selectedParallel: any = null;
   modalSchedule: boolean = false;
+  parallels: any[] = [];
+  selectedCourseLevel: number = 0;
 
   // Materials by parallel
   modalMaterials: boolean = false;
@@ -112,11 +115,38 @@ export class CoursesComponent implements OnInit {
   parallelAdvancePreview: any = null;
   parallelAdvanceParallels: any[] = [];
   parallelAdvanceParallelId: number | null = null;
+  parallelAdvanceMaxSubjects: number = 6;
   parallelAdvanceLoading = false;
   parallelAdvanceSaving = false;
   parallelAdvanceConfirmOpen = false;
   parallelAdvanceResultModal = false;
   parallelAdvanceResult: any = null;
+
+  // Manual subject assignment
+  modalAssignSubjects = false;
+  assignSubjectsStudent: any = null;
+  assignSubjectsList: any[] = [];
+  assignSubjectsLoading = false;
+  assignSubjectsSaving = false;
+
+  // Block detail modal
+  modalBlockDetail = false;
+  blockDetailStudent: any = null;
+  loadingBlockDetail = false;
+
+  // Student grades detail modal
+  modalGradesDetail = false;
+  loadingGradesDetail = false;
+  gradesDetailData: any = null;
+
+  // Assignment detail modal (preview data per student)
+  modalAssignmentDetail = false;
+  assignmentDetailStudent: any = null;
+
+  // Prerequisite alerts detail modal
+  modalAlertsDetail = false;
+  alertsDetailStudent: any = null;
+  alertsDetailAlerts: any[] = [];
 
   // Form for adding/editing schedule items
   scheduleForm: FormGroup;
@@ -137,6 +167,7 @@ export class CoursesComponent implements OnInit {
     private studentService: StudentService,
     private toast: ToastService,
     private authService: AuthService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.formParallel = this.fb.group({
       course_id: [null, Validators.required],
@@ -152,6 +183,24 @@ export class CoursesComponent implements OnInit {
       end_time: ['', Validators.required],
     });
   }
+
+  // ── TrackBy functions ──
+  trackByIndex(index: number): number { return index; }
+  trackById(_index: number, item: any): any { return item?.id ?? item; }
+  trackBySigla(_index: number, item: any): string { return item?.sigla ?? _index; }
+  trackByLevel(_index: number, item: any): number { return item?.level ?? _index; }
+  trackBySlot(_index: number, item: any): string { return `${item.start}-${item.end}`; }
+  trackByDay(_index: number, day: string): string { return day; }
+  trackByName(_index: number, item: any): string { return item?.name ?? _index; }
+
+  // ── Memoization caches ──
+  private _assignSubjectsByLevelCache: { level: number; subjects: any[] }[] | null = null;
+  private _assignSubjectsListVersion = 0;
+  private _assignSubjectsListCurrentVersion = 0;
+
+  private _timeSlotsCache: { start: string; end: string }[] | null = null;
+  private _schedulesVersion = 0;
+  private _schedulesCurrentVersion = 0;
 
   ngOnInit(): void {
     this.loadCourses();
@@ -170,10 +219,12 @@ export class CoursesComponent implements OnInit {
           this.currentPage = response.courses.current_page;
           this.lastPage = response.courses.last_page;
           this.courses = response.courses.data;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading = false;
           this.toast.error('Error al cargar los cursos');
+          this.cdr.markForCheck();
         },
       });
   }
@@ -193,9 +244,11 @@ export class CoursesComponent implements OnInit {
         this.totalStudents = resp.summary.total_students;
         this.totalCapacity = resp.summary.total_capacity;
         this.parallels = resp.parallels;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.loadingModal = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -244,6 +297,10 @@ export class CoursesComponent implements OnInit {
     this.openModalCreate = true;
   }
 
+  openModalAddParallelFromView(): void {
+    this.openModalCreate = true;
+  }
+
   // ── Guardar paralelo (crear o editar) ──
   save(): void {
     this.formParallel.patchValue({
@@ -270,21 +327,26 @@ export class CoursesComponent implements OnInit {
               this.totalStudents = resp.summary.total_students;
               this.totalCapacity = resp.summary.total_capacity;
               this.parallels = resp.parallels;
+              this.cdr.markForCheck();
             },
             error: (err) => {
               this.loadingModal = false;
+              this.cdr.markForCheck();
             },
           });
           this.openModalEdit = false;
           this.parallelSelect = null;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loadingModal = false;
           if (err?.status === 422) {
             this.toast.info('No se puede reducir el cupo');
+            this.cdr.markForCheck();
             return;
           }
           this.toast.error('Ocurrió un error');
+          this.cdr.markForCheck();
         },
       });
     } else {
@@ -295,10 +357,22 @@ export class CoursesComponent implements OnInit {
           this.toast.success('Paralelo registrado correctamente.');
           this.loadCourses()
           this.openModalCreate = false;
+
+          if (this.openModalView) {
+            this.parallelService.getParallelsByCourse(this.courseIdSelect).subscribe({
+              next: (resp) => {
+                this.parallels = resp.parallels;
+                this.cdr.markForCheck();
+              },
+            });
+          }
+
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loadingModal = false;
           this.toast.error('Ocurrió un error');
+          this.cdr.markForCheck();
         },
       });
     }
@@ -329,11 +403,13 @@ export class CoursesComponent implements OnInit {
       next: (resp) => {
         this.loadingMaterials = false;
         this.parallelMaterials = resp.materials || [];
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loadingMaterials = false;
         this.parallelMaterials = [];
         this.toast.error('Error al cargar los materiales del paralelo');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -355,11 +431,13 @@ export class CoursesComponent implements OnInit {
       next: (resp) => {
         this.loadingStudents = false;
         this.parallelStudents = resp.students || [];
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loadingStudents = false;
         this.parallelStudents = [];
         this.toast.error('Error al cargar los estudiantes del paralelo');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -417,15 +495,18 @@ export class CoursesComponent implements OnInit {
         this.advanceTotalLevels = res.total_levels;
         this.advanceIsLastLevel = res.is_last_level;
         this.advanceParallels = res.available_parallels || [];
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.advanceLoading = false;
         const message = err?.error?.message;
         if (message) {
           this.toast.info(message);
+          this.cdr.markForCheck();
           return;
         }
         this.toast.error('Error al obtener la vista previa del avance');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -463,19 +544,23 @@ export class CoursesComponent implements OnInit {
         this.advanceResultModal = true;
         this.toast.success('Nivel avanzado correctamente');
         this.reloadParallelStudents();
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.advanceSaving = false;
         const message = err?.error?.message;
         if (message) {
           this.toast.info(message);
+          this.cdr.markForCheck();
           return;
         }
         if (err.status === 403) {
           this.toast.error('Solo el administrador puede realizar esta acción');
+          this.cdr.markForCheck();
           return;
         }
         this.toast.error('Error al avanzar de nivel');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -492,19 +577,23 @@ export class CoursesComponent implements OnInit {
         this.toast.success(res?.message || 'Estudiante egresado correctamente');
         this.closeAdvance();
         this.reloadParallelStudents();
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.advanceSaving = false;
         const message = err?.error?.message;
         if (message) {
           this.toast.info(message);
+          this.cdr.markForCheck();
           return;
         }
         if (err.status === 403) {
           this.toast.error('Solo el administrador puede realizar esta acción');
+          this.cdr.markForCheck();
           return;
         }
         this.toast.error('Error al egresar al estudiante');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -532,27 +621,35 @@ export class CoursesComponent implements OnInit {
     this.parallelAdvancePreview = null;
     this.parallelAdvanceParallels = [];
     this.parallelAdvanceParallelId = null;
+    this.parallelAdvanceMaxSubjects = 6;
     this.parallelAdvanceResult = null;
     this.parallelAdvanceResultModal = false;
+  }
+
+  onMaxSubjectsChange() {
+    this.loadParallelAdvancePreview();
   }
 
   loadParallelAdvancePreview() {
     if (!this.studentsParallel) return;
     this.parallelAdvanceLoading = true;
-    this.parallelService.previewParallelAdvance(this.studentsParallel.id).subscribe({
+    this.parallelService.previewParallelAdvance(this.studentsParallel.id, this.parallelAdvanceMaxSubjects).subscribe({
       next: (res) => {
         this.parallelAdvanceLoading = false;
         this.parallelAdvancePreview = res;
         this.parallelAdvanceParallels = res.available_parallels || [];
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.parallelAdvanceLoading = false;
         const message = err?.error?.message;
         if (message) {
           this.toast.info(message);
+          this.cdr.markForCheck();
           return;
         }
         this.toast.error('Error al obtener la vista previa del avance del paralelo');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -562,7 +659,13 @@ export class CoursesComponent implements OnInit {
       return '¿Confirma el avance de nivel de todos los estudiantes del paralelo?';
     }
     const s = this.parallelAdvancePreview.summary || {};
-    return `Se avanzarán ${s.advanceable ?? 0} estudiante(s) del nivel ${this.ordinalLabel(this.parallelAdvancePreview.current_level)} al ${this.ordinalLabel(this.parallelAdvancePreview.new_level)}. ${s.last_level ?? 0} se omiten por cursar el último nivel. Esta acción no se puede deshacer.`;
+    const blocked = s.blocked ?? 0;
+    const skipped = (s.last_level ?? 0) + (s.no_active_parallel ?? 0);
+    let msg = `Se avanzarán ${s.advanceable ?? 0} estudiante(s) del nivel ${this.ordinalLabel(this.parallelAdvancePreview.current_level)} al ${this.ordinalLabel(this.parallelAdvancePreview.new_level)}.`;
+    if (skipped > 0) msg += ` ${skipped} se omiten (último nivel o sin paralelo).`;
+    if (blocked > 0) msg += ` ${blocked} quedarán bloqueados (sin calificación completa).`;
+    msg += ' Esta acción no se puede deshacer.';
+    return msg;
   }
 
   hasSufficientParallel(): boolean {
@@ -578,27 +681,267 @@ export class CoursesComponent implements OnInit {
     }
     this.parallelAdvanceSaving = true;
     this.parallelAdvanceConfirmOpen = false;
-    this.parallelService.advanceParallelLevel(this.studentsParallel.id, this.parallelAdvanceParallelId).subscribe({
+    this.parallelService.advanceParallelLevel(this.studentsParallel.id, this.parallelAdvanceParallelId, this.parallelAdvanceMaxSubjects).subscribe({
       next: (res) => {
         this.parallelAdvanceSaving = false;
         this.parallelAdvanceResult = res;
         this.parallelAdvanceResultModal = true;
         this.toast.success(res?.message || 'Paralelo avanzado de nivel correctamente');
         this.reloadParallelStudents();
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.parallelAdvanceSaving = false;
         const message = err?.error?.message;
         if (message) {
           this.toast.info(message);
+          this.cdr.markForCheck();
           return;
         }
         if (err.status === 403) {
           this.toast.error('Solo el administrador puede realizar esta acción');
+          this.cdr.markForCheck();
           return;
         }
         this.toast.error('Error al avanzar de nivel el paralelo');
+        this.cdr.markForCheck();
       },
+    });
+  }
+
+  // ── Asignación manual de materias ──
+  openAssignSubjects(student: any) {
+    this.assignSubjectsStudent = student;
+    this.assignSubjectsList = [];
+    this._assignSubjectsByLevelCache = null;
+    this.modalAssignSubjects = true;
+    this.loadCareerSubjects();
+  }
+
+  closeAssignSubjects() {
+    this.modalAssignSubjects = false;
+    this.assignSubjectsStudent = null;
+    this.assignSubjectsList = [];
+    this._assignSubjectsByLevelCache = null;
+  }
+
+  loadCareerSubjects() {
+    if (!this.assignSubjectsStudent) return;
+    const careerId = this.assignSubjectsStudent.career_id || this.careerId;
+    if (!careerId) {
+      this.assignSubjectsLoading = false;
+      this.toast.error('No se pudo determinar la carrera');
+      return;
+    }
+    this.assignSubjectsLoading = true;
+    this.studentService.getCareerSubjects(this.assignSubjectsStudent.id, careerId).subscribe({
+      next: (res) => {
+        this.assignSubjectsLoading = false;
+        this.assignSubjectsList = res.subjects || [];
+        this._assignSubjectsByLevelCache = null;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.assignSubjectsLoading = false;
+        this.toast.error('Error al cargar materias');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  toggleSubjectStatus(subject: any, newStatus: string) {
+    subject.status = newStatus;
+    subject.enrolled = true;
+    subject.observation = newStatus === 'Registrado' ? 'Sin calificación' : 'Falta';
+    this._assignSubjectsByLevelCache = null;
+  }
+
+  getAssignSubjectsByLevel(): { level: number; subjects: any[] }[] {
+    if (this._assignSubjectsListCurrentVersion === this._assignSubjectsListVersion && this._assignSubjectsByLevelCache) {
+      return this._assignSubjectsByLevelCache;
+    }
+    const groups: { level: number; subjects: any[] }[] = [];
+    const sorted = [...this.assignSubjectsList].sort((a, b) => a.level - b.level);
+    for (const s of sorted) {
+      let group = groups.find(g => g.level === s.level);
+      if (!group) {
+        group = { level: s.level, subjects: [] };
+        groups.push(group);
+      }
+      group.subjects.push(s);
+    }
+    this._assignSubjectsByLevelCache = groups;
+    this._assignSubjectsListCurrentVersion = this._assignSubjectsListVersion;
+    return groups;
+  }
+
+  saveAssignSubjects() {
+    if (!this.assignSubjectsStudent || !this.careerId) return;
+    this.assignSubjectsSaving = true;
+
+    const subjects = this.assignSubjectsList
+      .filter(s => s.observation !== 'Aprobado' && s.observation !== 'Aprobado con recuperación')
+      .filter(s => s.enrolled)
+      .map(s => ({ subject_id: s.id, status: s.status }));
+
+    this.studentService.assignSubjects(this.assignSubjectsStudent.id, this.careerId, subjects).subscribe({
+      next: () => {
+        this.assignSubjectsSaving = false;
+        this.toast.success('Materias actualizadas correctamente');
+        this.closeAssignSubjects();
+        // Si el modal de avance paralelo está abierto, recargar preview
+        if (this.modalParallelAdvance) {
+          this.loadParallelAdvancePreview();
+        } else {
+          this.reloadParallelStudents();
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.assignSubjectsSaving = false;
+        const message = err?.error?.message;
+        this.toast.error(message || 'Error al guardar materias');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // ── Detalle de bloqueo ──
+  openBlockDetail(student: any) {
+    this.blockDetailStudent = null;
+    this.loadingBlockDetail = true;
+    this.modalBlockDetail = true;
+    setTimeout(() => {
+      this.blockDetailStudent = student;
+      this.loadingBlockDetail = false;
+      this.cdr.markForCheck();
+    }, 30);
+  }
+
+  closeBlockDetail() {
+    this.modalBlockDetail = false;
+    this.blockDetailStudent = null;
+  }
+
+  assignFromBlockDetail() {
+    const student = this.blockDetailStudent;
+    this.closeBlockDetail();
+    this.openAssignSubjects(student);
+  }
+
+  // ── Detalle de calificaciones por estudiante ──
+  openGradesDetail(student: any) {
+    this.gradesDetailData = null;
+    this.loadingGradesDetail = true;
+    this.modalGradesDetail = true;
+
+    const studentId = student.id;
+    if (!studentId || !this.careerId) {
+      this.loadingGradesDetail = false;
+      this.toast.error('No se pudo determinar el estudiante o la carrera');
+      return;
+    }
+
+    this.studentService.getStudentGradesDetail(studentId, this.careerId).subscribe({
+      next: (res) => {
+        this.gradesDetailData = res;
+        this.loadingGradesDetail = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingGradesDetail = false;
+        this.toast.error('Error al cargar calificaciones del estudiante');
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  closeGradesDetail() {
+    this.modalGradesDetail = false;
+    this.gradesDetailData = null;
+  }
+
+  // ── Detalle de asignación por estudiante (datos del preview) ──
+  openAssignmentDetail(student: any) {
+    this.assignmentDetailStudent = student;
+    this.modalAssignmentDetail = true;
+    this.cdr.markForCheck();
+  }
+
+  closeAssignmentDetail() {
+    this.modalAssignmentDetail = false;
+    this.assignmentDetailStudent = null;
+  }
+
+  getGradeColor(grade: number | null): string {
+    if (grade === null || grade === undefined) return 'text-slate-400';
+    return grade >= 61 ? 'text-emerald-600' : 'text-red-600';
+  }
+
+  getObservationClass(observation: string): string {
+    switch (observation) {
+      case 'Aprobado': return 'bg-emerald-100 text-emerald-700';
+      case 'Aprobado con recuperación': return 'bg-amber-100 text-amber-700';
+      case 'Reprobado': return 'bg-red-100 text-red-700';
+      case 'Sin calificación': return 'bg-slate-100 text-slate-500';
+      case 'No inscrito': return 'bg-slate-100 text-slate-400';
+      default: return 'bg-slate-100 text-slate-500';
+    }
+  }
+
+  getApprovedCount(): number {
+    if (!this.gradesDetailData?.subjects) return 0;
+    return this.gradesDetailData.subjects.filter((s: any) =>
+      s.observation === 'Aprobado' || s.observation === 'Aprobado con recuperación'
+    ).length;
+  }
+
+  getRepeatedCount(): number {
+    if (!this.gradesDetailData?.subjects) return 0;
+    return this.gradesDetailData.subjects.filter((s: any) =>
+      s.observation === 'Reprobado'
+    ).length;
+  }
+
+  getPendingCount(): number {
+    if (!this.gradesDetailData?.subjects) return 0;
+    return this.gradesDetailData.subjects.filter((s: any) =>
+      s.observation === 'Sin calificación' || s.observation === 'No inscrito'
+    ).length;
+  }
+
+  // ── Detalle de alertas de pre-requisito ──
+  openAlertsDetail(student: any) {
+    this.alertsDetailStudent = student;
+    this.alertsDetailAlerts = student.prerequisite_alerts || [];
+    this.modalAlertsDetail = true;
+  }
+
+  closeAlertsDetail() {
+    this.modalAlertsDetail = false;
+    this.alertsDetailStudent = null;
+    this.alertsDetailAlerts = [];
+  }
+
+  // ── Detalle de bloqueo desde resultado del avance del paralelo ──
+  openBlockDetailFromResult(student: any) {
+    this.blockDetailStudent = null;
+    this.loadingBlockDetail = true;
+    this.modalBlockDetail = true;
+    setTimeout(() => {
+      this.blockDetailStudent = {
+        name: student.name,
+        block_reasons: student.block_reasons || [],
+      };
+      this.loadingBlockDetail = false;
+      this.cdr.markForCheck();
+    }, 30);
+  }
+
+  assignFromResult(student: any) {
+    this.openAssignSubjects({
+      id: student.id,
+      name: student.name,
     });
   }
 
@@ -610,9 +953,11 @@ export class CoursesComponent implements OnInit {
         setTimeout(() => {
           window.URL.revokeObjectURL(url);
         }, 1000);
+        this.cdr.markForCheck();
       },
       error: () => {
         this.toast.error('Error al abrir el archivo');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -633,21 +978,22 @@ export class CoursesComponent implements OnInit {
           a.click();
           window.URL.revokeObjectURL(url);
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.toast.error('Error al descargar el archivo');
+        this.cdr.markForCheck();
       },
     });
   }
 
   // ── Schedule / Horario CRUD ──
-  parallels: any[] = [];
-  selectedCourseLevel: number = 0;
 
   selectParallel(parallel: any) {
     this.selectedParallel = parallel;
     this.modalSchedule = true;
     this.schedules = [];
+    this._timeSlotsCache = null;
     this.showScheduleForm = false;
     this.editingScheduleId = null;
     this.scheduleForm.reset();
@@ -659,9 +1005,11 @@ export class CoursesComponent implements OnInit {
       this.scheduleService.getSubjectsByCareer(this.careerId, this.selectedCourseLevel).subscribe({
         next: (resp) => {
           this.subjects = resp.subjects || [];
+          this.cdr.markForCheck();
         },
         error: () => {
           this.subjects = [];
+          this.cdr.markForCheck();
         },
       });
     }
@@ -675,9 +1023,13 @@ export class CoursesComponent implements OnInit {
     this.scheduleService.getByParallel(this.selectedParallel.id).subscribe({
       next: (resp) => {
         this.schedules = resp.schedules || [];
+        this._timeSlotsCache = null;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.schedules = [];
+        this._timeSlotsCache = null;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -742,10 +1094,12 @@ export class CoursesComponent implements OnInit {
           this.toast.success('Horario actualizado correctamente.');
           this.cancelScheduleForm();
           this.loadSchedules();
+          this.cdr.markForCheck();
         },
         error: () => {
           this.savingScheduleItem = false;
           this.toast.error('Error al actualizar el horario.');
+          this.cdr.markForCheck();
         },
       });
     } else {
@@ -756,10 +1110,12 @@ export class CoursesComponent implements OnInit {
           this.toast.success('Horario agregado correctamente.');
           this.cancelScheduleForm();
           this.loadSchedules();
+          this.cdr.markForCheck();
         },
         error: () => {
           this.savingScheduleItem = false;
           this.toast.error('Error al agregar el horario.');
+          this.cdr.markForCheck();
         },
       });
     }
@@ -785,10 +1141,12 @@ export class CoursesComponent implements OnInit {
         this.toast.success('Horario eliminado correctamente.');
         this.cancelDeleteSchedule();
         this.loadSchedules();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.savingScheduleItem = false;
         this.toast.error('Error al eliminar el horario.');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -828,13 +1186,16 @@ export class CoursesComponent implements OnInit {
           if (parallel) {
             parallel.status = parallel.status ? 0 : 1;
           }
+          this.cdr.markForCheck();
       },
       error: (err) =>{
         if(err.status = 422){
           this.toast.info('El paralelo no puede inhabilitarse')
+          this.cdr.markForCheck();
           return
         }
         this.toast.error('Error al actualizar el paralelo')
+        this.cdr.markForCheck();
       }
     })
 
@@ -894,6 +1255,9 @@ export class CoursesComponent implements OnInit {
   }
 
   get timeSlots(): { start: string; end: string }[] {
+    if (this._schedulesCurrentVersion === this._schedulesVersion && this._timeSlotsCache) {
+      return this._timeSlotsCache;
+    }
     const seen = new Set<string>();
     const slots: { start: string; end: string }[] = [];
     for (const s of this.schedules) {
@@ -905,7 +1269,9 @@ export class CoursesComponent implements OnInit {
         slots.push({ start, end });
       }
     }
-    return slots.sort((a, b) => a.start.localeCompare(b.start));
+    this._timeSlotsCache = slots.sort((a, b) => a.start.localeCompare(b.start));
+    this._schedulesCurrentVersion = this._schedulesVersion;
+    return this._timeSlotsCache;
   }
 
 }

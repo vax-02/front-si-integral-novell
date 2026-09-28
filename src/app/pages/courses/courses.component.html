@@ -59,13 +59,14 @@
 
     <!-- TABLA RESPONSIVE -->
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[900px] text-sm">
+      <table class="w-full min-w-[1000px] text-sm">
 
         <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
           <tr class="text-center">
             <th class="p-3 sm:p-4 ">Carrera</th>
             <th class="p-3 sm:p-4 ">Grado</th>
             <th class="p-3 sm:p-4 ">Paralelos</th>
+            <th class="p-3 sm:p-4 ">Estudiantes</th>
             <th class="p-3 sm:p-4 text-center">Acciones</th>
           </tr>
         </thead>
@@ -73,7 +74,7 @@
         <tbody class="divide-y divide-slate-100">
 
           <!-- Filas de datos -->
-          <tr *ngFor="let course of courses" class="hover:bg-slate-50 transition">
+          <tr *ngFor="let course of courses; trackBy: trackById" class="hover:bg-slate-50 transition">
 
             <td class="p-3 sm:p-4">
               <div class="font-semibold text-slate-700">{{ course.career?.name ?? '—' }}</div>
@@ -86,30 +87,28 @@
             <td class="p-3 sm:p-4 text-center text-slate-600">
               {{ course.parallels_count }}
             </td>
+            <td class="p-3 sm:p-4 text-center text-slate-600">
+              {{ course.students_count }}
+            </td>
             <td class="p-3 sm:p-4 text-center">
-              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-                <button (click)="openModalAddParallel(course)" title="Añadir"
-                  class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-400 transition">
-                  <i class="fas fa-plus"></i>
-                </button>
-
-                <button (click)="viewParallels(course)" title="Ver"
-                  class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-400 transition">
-                  <i class="fas fa-eye"></i>
-                </button>
-
-              </div>
+              <button (click)="viewParallels(course)" title="Ver paralelos"
+                class="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600">
+                <i class="fas fa-ellipsis-vertical"></i>
+              </button>
             </td>
           </tr>
 
           <!-- Loading -->
-          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5]; trackBy: trackByIndex">
             <tr *ngIf="loading">
               <td class="p-3 sm:p-4">
                 <div class="h-4 w-48 bg-slate-200 rounded animate-pulse mx-auto"></div>
               </td>
               <td class="p-3 sm:p-4">
                 <div class="h-4 w-28 bg-slate-200 rounded animate-pulse mx-auto"></div>
+              </td>
+              <td class="p-3 sm:p-4">
+                <div class="h-4 w-10 bg-slate-200 rounded animate-pulse mx-auto"></div>
               </td>
               <td class="p-3 sm:p-4">
                 <div class="h-4 w-10 bg-slate-200 rounded animate-pulse mx-auto"></div>
@@ -125,7 +124,7 @@
 
           <!-- Sin resultados -->
           <tr *ngIf="!loading && courses.length === 0">
-            <td colspan="6" class="p-6 text-center text-slate-400 text-sm">
+            <td colspan="7" class="p-6 text-center text-slate-400 text-sm">
               No se encontraron cursos.
             </td>
           </tr>
@@ -162,7 +161,8 @@
 
   <!-- MODAL CREAR PARALELO -->
   <app-base-modal [isOpen]="openModalCreate" title="Crear paralelo" [subtitle]="subtitleNewParallel" size="md"
-    confirmText="Guardar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="save()" (cancel)="cancel()">
+    confirmText="Guardar" cancelText="Cancelar" [loading]="loadingModal" (confirm)="save()" (cancel)="cancel()"
+    [zIndex]="openModalView ? 'z-[60]' : 'z-50'">
     <form [formGroup]="formParallel">
 
       <div class="space-y-6">
@@ -235,10 +235,47 @@
     confirmText="Aceptar" [loading]="loadingModal" (confirm)="cancelView()" [showCancel]="false">
 
     <div class="space-y-6">
-      <!-- Lista de paralelos -->
-      <div class="grid lg:grid-cols-2 gap-4">
+      <!-- Botón crear nuevo paralelo -->
+      <div class="flex justify-end">
+        <button (click)="openModalAddParallelFromView()"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition flex items-center gap-2">
+          <i class="fas fa-plus"></i>
+          Crear nuevo paralelo
+        </button>
+      </div>
 
-        <div *ngFor="let parallel of parallels"
+      <!-- Loading skeleton -->
+      <div *ngIf="loadingModal" class="grid lg:grid-cols-2 gap-4">
+        <div *ngFor="let i of [1, 2, 3, 4]"
+          class="rounded-xl border border-slate-200 p-3 animate-pulse">
+          <div class="flex justify-between">
+            <div class="space-y-2">
+              <div class="h-5 w-full max-w-[140px] bg-slate-200 rounded"></div>
+              <div class="h-3 w-full max-w-[80px] bg-slate-200 rounded"></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-slate-200 rounded-lg"></div>
+              <div class="w-8 h-8 bg-slate-200 rounded-lg"></div>
+              <div class="w-8 h-8 bg-slate-200 rounded-lg"></div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div class="w-full flex items-center gap-4 mt-2">
+              <div class="h-4 w-28 bg-slate-200 rounded shrink-0"></div>
+              <div class="flex-1 h-3 bg-slate-200 rounded-full"></div>
+              <div class="flex items-center gap-2 shrink-0">
+                <div class="w-8 h-8 bg-slate-200 rounded-lg"></div>
+                <div class="w-8 h-8 bg-slate-200 rounded-lg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de paralelos -->
+      <div *ngIf="!loadingModal" class="grid lg:grid-cols-2 gap-4">
+
+        <div *ngFor="let parallel of parallels; trackBy: trackById"
           class="rounded-xl border p-3 cursor-pointer hover:border-blue-500 transition duration-300"
           [class.border-blue-600]="selectedParallel?.id==parallel.id"
           [class.shadow-lg]="selectedParallel?.id==parallel.id">
@@ -308,6 +345,12 @@
 
       </div>
 
+      <!-- Sin resultados -->
+      <div *ngIf="!loadingModal && parallels.length === 0"
+        class="text-center py-10 text-slate-400 text-sm">
+        No hay paralelos registrados para este curso.
+      </div>
+
     </div>
   </app-base-modal>
 
@@ -346,7 +389,7 @@
               <select formControlName="subject_id"
                 class="w-56 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option [value]="null">Seleccione materia</option>
-                <option *ngFor="let sub of subjects" [value]="sub.id">
+                <option *ngFor="let sub of subjects; trackBy: trackById" [value]="sub.id">
                   {{ sub.sigla }} - {{ sub.name }}
                 </option>
               </select>
@@ -360,7 +403,7 @@
               <select formControlName="day"
                 class="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Seleccione día</option>
-                <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+                <option *ngFor="let day of days; trackBy: trackByDay" [value]="day">{{ day }}</option>
               </select>
               <div *ngIf="scheduleForm.get('day')?.invalid && scheduleForm.get('day')?.touched"
                 class="text-xs text-red-500">Requerido</div>
@@ -410,20 +453,20 @@
           <thead>
             <tr>
               <th class="bg-blue-600 border border-blue-700 p-2 text-center text-white font-semibold whitespace-nowrap">Hora</th>
-              <th *ngFor="let day of days" class="bg-blue-600 border border-blue-700 text-white text-center font-semibold min-w-[160px] p-2">
+              <th *ngFor="let day of days; trackBy: trackByDay" class="bg-blue-600 border border-blue-700 text-white text-center font-semibold min-w-[160px] p-2">
                 {{ getDayName(day) }}
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let slot of timeSlots" class="odd:bg-white even:bg-slate-50/50">
+            <tr *ngFor="let slot of timeSlots; trackBy: trackBySlot" class="odd:bg-white even:bg-slate-50/50">
               <td class="border border-slate-200 p-2 bg-slate-100 text-slate-700 text-center font-semibold whitespace-nowrap">
                 <span class="inline-flex items-center gap-1.5">
                   <i class="fas fa-clock text-[10px] text-blue-500"></i>
                   {{ slot.start }} - {{ slot.end }}
                 </span>
               </td>
-              <td *ngFor="let day of days" class="border border-slate-200 p-1.5 text-center align-top"
+              <td *ngFor="let day of days; trackBy: trackByDay" class="border border-slate-200 p-1.5 text-center align-top"
                   style="height: 80px;">
                 <ng-container *ngIf="getScheduleForSlot(day, slot.start) as scheduleSlot">
                   <div [class]="getSubjectColor(scheduleSlot.subject?.id).bg + ' h-full flex flex-col items-center justify-center gap-1 rounded-lg border ' + getSubjectColor(scheduleSlot.subject?.id).border + ' px-1.5 py-1.5 shadow-sm'">
@@ -473,7 +516,7 @@
         No hay materiales enlazados a este paralelo.
       </div>
 
-      <div *ngFor="let material of parallelMaterials"
+      <div *ngFor="let material of parallelMaterials; trackBy: trackById"
         class="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-indigo-300 transition">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
@@ -545,11 +588,10 @@
               <th class="p-3 text-left hidden sm:table-cell">Email</th>
               <th class="p-3 text-center hidden md:table-cell">Celular</th>
               <th class="p-3 text-center">Estado</th>
-              <th class="p-3 text-center" *ngIf="isAdmin">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            <tr *ngFor="let student of parallelStudents; let i = index" class="hover:bg-slate-50 transition">
+            <tr *ngFor="let student of parallelStudents; let i = index; trackBy: trackById" class="hover:bg-slate-50 transition">
               <td class="p-3 text-slate-500">{{ i + 1 }}</td>
               <td class="p-3 font-semibold text-slate-700">{{ student.name }}</td>
               <td class="p-3 text-center text-slate-600">{{ student.ci }}</td>
@@ -560,13 +602,6 @@
                   [ngClass]="student.status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
                   {{ student.status ? 'Activo' : 'Inactivo' }}
                 </span>
-              </td>
-              <td class="p-3 text-center" *ngIf="isAdmin">
-                <button
-                  class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                  (click)="openAdvance(student)">
-                  <i class="fas fa-arrow-up"></i> Avanzar de Nivel
-                </button>
               </td>
             </tr>
           </tbody>
@@ -620,10 +655,6 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
-            <p class="text-2xl font-bold text-slate-800">{{ parallelAdvancePreview.summary.total }}</p>
-            <p class="text-xs text-slate-500 uppercase tracking-wide">Estudiantes</p>
-          </div>
           <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-blue-600">{{ parallelAdvancePreview.summary.advanceable }}</p>
             <p class="text-xs text-blue-500 uppercase tracking-wide">Avanzar&aacute;n</p>
@@ -635,6 +666,10 @@
           <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-orange-600">{{ parallelAdvancePreview.summary.no_active_parallel }}</p>
             <p class="text-xs text-orange-500 uppercase tracking-wide">Sin paralelo</p>
+          </div>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-red-600">{{ parallelAdvancePreview.summary.blocked || 0 }}</p>
+            <p class="text-xs text-red-500 uppercase tracking-wide">Bloqueados</p>
           </div>
           <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-red-600">{{ parallelAdvancePreview.summary.with_alerts }}</p>
@@ -650,11 +685,12 @@
                 <th class="p-3 text-left">Estudiante</th>
                 <th class="p-3 text-center">C.I.</th>
                 <th class="p-3 text-center">Avanza</th>
-                <th class="p-3 text-center">Toma / Repite / Alertas</th>
+                <th class="p-3 text-center">Toma / Repite / Pend / Alertas</th>
+                <th class="p-3 text-center">Acción</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr *ngFor="let student of parallelAdvancePreview.students" class="hover:bg-slate-50 transition">
+              <tr *ngFor="let student of parallelAdvancePreview.students; trackBy: trackById" class="hover:bg-slate-50 transition">
                 <td class="p-3 font-semibold text-slate-700">{{ student.name }}</td>
                 <td class="p-3 text-center text-slate-600">{{ student.ci }}</td>
                 <td class="p-3 text-center">
@@ -666,7 +702,12 @@
                     class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-600">
                     No - &uacute;ltimo nivel
                   </span>
-                  <span *ngIf="!student.no_active_parallel && !student.is_last_level"
+                  <span *ngIf="!student.no_active_parallel && !student.is_last_level && student.can_advance === false"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600 cursor-pointer hover:bg-red-200 transition"
+                    (click)="openBlockDetail(student)">
+                    No
+                  </span>
+                  <span *ngIf="!student.no_active_parallel && !student.is_last_level && student.can_advance !== false"
                     class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">
                     S&iacute;
                   </span>
@@ -674,7 +715,39 @@
                 <td class="p-3 text-center text-xs text-slate-500">
                   <span class="text-emerald-600 font-medium">{{ (student.assigned || []).length }}</span> /
                   <span class="text-amber-600 font-medium">{{ (student.repeated || []).length }}</span> /
-                  <span class="text-red-600 font-medium">{{ (student.prerequisite_alerts || []).length }}</span>
+                  <span class="text-slate-400 font-medium">{{ (student.pending || []).length }}</span> /
+                  <span class="text-red-600 font-medium cursor-pointer hover:underline"
+                    *ngIf="(student.prerequisite_alerts || []).length > 0"
+                    (click)="openAlertsDetail(student)">
+                    {{ (student.prerequisite_alerts || []).length }}
+                  </span>
+                  <span class="text-red-600 font-medium"
+                    *ngIf="(student.prerequisite_alerts || []).length === 0">
+                    0
+                  </span>
+                  <span *ngIf="student.block_reasons?.length > 0"
+                    class="block text-red-500 mt-1 text-[10px]">
+                    {{ student.block_reasons.length }} materia(s) con observación
+                  </span>
+                </td>
+                <td class="p-3 text-center">
+                  <div class="flex items-center justify-center gap-1 flex-wrap">
+                    <button
+                      class="inline-flex items-center gap-1 p-3 text-[10px] font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                      (click)="openAssignmentDetail(student)" title="Ver detalle de asignación">
+                      <i class="fas fa-clipboard-list"></i>
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-1 p-3 text-[10px] font-medium bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition"
+                      (click)="openGradesDetail(student)" title="Ver calificaciones">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button *ngIf="(student.prerequisite_alerts || []).length > 0"
+                      class="inline-flex items-center gap-1 p-2 text-[10px] font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition"
+                      (click)="openAlertsDetail(student)" title="Ver alertas de pre-requisito">
+                      <i class="fas fa-exclamation-triangle"></i> ({{ student.prerequisite_alerts.length }})
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -693,12 +766,19 @@
               class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
               [(ngModel)]="parallelAdvanceParallelId">
               <option [ngValue]="null">Seleccionar turno y paralelo</option>
-              <option *ngFor="let parallel of parallelAdvanceParallels" [ngValue]="parallel.id"
+              <option *ngFor="let parallel of parallelAdvanceParallels; trackBy: trackById" [ngValue]="parallel.id"
                 [disabled]="!parallel.sufficient">
                 Cupo: {{ parallel.available }} - {{ parallel.turno }} - {{ parallel.paralelo }}
                 <span *ngIf="!parallel.sufficient">(cupo insuficiente)</span>
               </option>
             </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Materias máx. por estudiante</label>
+            <input type="number" min="1" max="20"
+              class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+              [(ngModel)]="parallelAdvanceMaxSubjects"
+              (ngModelChange)="onMaxSubjectsChange()">
           </div>
         </div>
 
@@ -706,6 +786,22 @@
           class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">
           Ninguno de los paralelos del siguiente nivel tiene cupo suficiente para los {{ parallelAdvancePreview.summary.advanceable }} estudiante(s) que avanzar&aacute;n. Libere cupos o cree un paralelo nuevo.
         </p>
+
+        <div *ngIf="parallelAdvancePreview.summary.blocked > 0"
+          class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-amber-700 mb-2">
+            <i class="fas fa-exclamation-triangle mr-1"></i> {{ parallelAdvancePreview.summary.blocked }} estudiante(s) no avanzarán
+          </p>
+          <p class="text-xs text-amber-600 mb-2">Tienen materias sin calificación o reprobadas. Serán omitidos del avance.</p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let student of parallelAdvancePreview.students; trackBy: trackById">
+              <span *ngIf="student.can_advance === false" class="flex items-center gap-2">
+                <span class="font-medium">{{ student.name }}</span>
+                <span class="text-xs text-red-500">({{ student.block_reasons.length }} materia(s) con observación)</span>
+              </span>
+            </li>
+          </ul>
+        </div>
 
         <p *ngIf="!parallelAdvancePreview.is_last_level && parallelAdvanceParallels.length === 0"
           class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl p-3">
@@ -718,9 +814,12 @@
             Cerrar
           </button>
           <button *ngIf="!parallelAdvancePreview.is_last_level"
-            class="bg-blue-500 hover:bg-blue-600 px-4 py-2 text-sm rounded-lg text-white"
-            [disabled]="parallelAdvanceSaving || !hasSufficientParallel()" (click)="parallelAdvanceConfirmOpen = true">
-            <i class="fas fa-arrow-up mr-1"></i> Avanzar todos
+            class="px-4 py-2 text-sm rounded-lg text-white"
+            [class]="hasSufficientParallel() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-slate-300 text-slate-500 cursor-not-allowed'"
+            [disabled]="parallelAdvanceSaving || !hasSufficientParallel()"
+            (click)="parallelAdvanceConfirmOpen = true">
+            <i class="fas fa-arrow-up mr-1"></i>
+            Avanzar de nivel
           </button>
         </div>
       </div>
@@ -764,6 +863,10 @@
           <p class="text-xs text-orange-500 uppercase tracking-wide">Sin paralelo</p>
         </div>
         <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+          <p class="text-2xl font-bold text-red-600">{{ parallelAdvanceResult.summary.skipped_blocked || 0 }}</p>
+          <p class="text-xs text-red-500 uppercase tracking-wide">Bloqueados</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
           <p class="text-2xl font-bold text-red-600">{{ parallelAdvanceResult.summary.with_alerts }}</p>
           <p class="text-xs text-red-500 uppercase tracking-wide">Con alertas</p>
         </div>
@@ -775,8 +878,36 @@
           <i class="fas fa-graduation-cap mr-1"></i> No avanzaron (&uacute;ltimo nivel):
         </p>
         <ul class="text-sm text-slate-700 space-y-1">
-          <li *ngFor="let s of parallelAdvanceResult.skipped_last_level">{{ s.name }}</li>
+          <li *ngFor="let s of parallelAdvanceResult.skipped_last_level; trackBy: trackByName">{{ s.name }}</li>
         </ul>
+      </div>
+
+      <div *ngIf="parallelAdvanceResult.skipped_blocked?.length > 0"
+        class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-red-700 mb-3">
+          <i class="fas fa-lock mr-1"></i> No avanzaron (bloqueados - materias con observación):
+        </p>
+        <div class="space-y-2">
+          <div *ngFor="let s of parallelAdvanceResult.skipped_blocked; trackBy: trackByName"
+            class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-700">{{ s.name }}</p>
+              <p class="text-xs text-red-500">
+                {{ s.block_reasons?.length || 0 }} materia(s) con observación
+              </p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition"
+                (click)="openBlockDetailFromResult(s)">
+                <i class="fas fa-eye"></i> Ver detalle
+              </button>
+              <button class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition"
+                (click)="assignFromResult(s)">
+                <i class="fas fa-edit"></i> Asignar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </app-base-modal>
@@ -819,6 +950,24 @@
           </div>
         </div>
 
+        <!-- Bloqueo por materias -->
+        <div *ngIf="advancePreview.can_advance === false" class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-700 mb-2">
+            <i class="fas fa-lock mr-1"></i> No puede avanzar de nivel
+          </p>
+          <p class="text-xs text-red-600 mb-3">El estudiante tiene materias con observación que impiden el avance:</p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li *ngFor="let reason of advancePreview.block_reasons; trackBy: trackBySigla" class="flex items-start gap-2">
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200 shrink-0">{{ reason.sigla }}</span>
+              <span>{{ reason.name }} - <span class="font-medium text-red-600">{{ reason.reason }}</span></span>
+            </li>
+          </ul>
+          <button class="mt-3 bg-amber-500 hover:bg-amber-600 px-4 py-2 text-sm rounded-lg text-white"
+            (click)="closeAssignSubjects(); openAssignSubjects(advanceStudent)">
+            <i class="fas fa-edit mr-1"></i> Asignar materias manualmente
+          </button>
+        </div>
+
         <div *ngIf="advanceIsLastLevel" class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
           <p class="text-sm font-semibold text-emerald-700 mb-3">
             <i class="fas fa-graduation-cap mr-1"></i>
@@ -833,12 +982,15 @@
         <div class="grid md:grid-cols-2 gap-4">
           <div class="bg-green-50 border border-green-200 rounded-xl p-4">
             <p class="text-sm font-semibold text-green-700 mb-2">
-              <i class="fas fa-check-circle mr-1"></i> Toma ahora ({{ (advancePreview.assigned || []).length }})
+              <i class="fas fa-arrow-up mr-1"></i> Se asignan nivel {{ advancePreview.new_level }} ({{ (advancePreview.assigned || []).length }})
             </p>
             <ul class="text-sm text-slate-700 space-y-1">
-              <li *ngFor="let s of advancePreview.assigned">
+              <li *ngFor="let s of advancePreview.assigned; trackBy: trackBySigla">
                 <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-green-200">{{ s.sigla }}</span>
                 {{ s.name }}
+                <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-600">
+                  <i class="fas fa-plus mr-0.5"></i> Registrado
+                </span>
               </li>
               <li *ngIf="(advancePreview.assigned || []).length === 0" class="text-xs text-slate-400">Sin materias asignadas</li>
             </ul>
@@ -846,12 +998,19 @@
 
           <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
             <p class="text-sm font-semibold text-sky-700 mb-2">
-              <i class="fas fa-graduation-cap mr-1"></i> Materias aprobadas ({{ (advancePreview.approved || []).length }})
+              <i class="fas fa-check-circle mr-1"></i> Aprobadas ({{ (advancePreview.approved || []).length }})
             </p>
             <ul class="text-sm text-slate-700 space-y-1">
-              <li *ngFor="let s of advancePreview.approved">
+              <li *ngFor="let s of advancePreview.approved; trackBy: trackBySigla">
                 <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-sky-200">{{ s.sigla }}</span>
                 {{ s.name }}
+                <span class="ml-1 text-[10px] text-slate-400">
+                  Registrado <i class="fas fa-arrow-right mx-0.5"></i>
+                </span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                  [ngClass]="s.observation === 'Aprobado con recuperación' ? 'bg-amber-100 text-amber-600' : 'bg-sky-100 text-sky-600'">
+                  {{ s.observation }}
+                </span>
               </li>
               <li *ngIf="(advancePreview.approved || []).length === 0" class="text-xs text-slate-400">Sin materias aprobadas</li>
             </ul>
@@ -859,12 +1018,24 @@
 
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <p class="text-sm font-semibold text-amber-700 mb-2">
-              <i class="fas fa-sync-alt mr-1"></i> Repite ({{ (advancePreview.repeated || []).length }})
+              <i class="fas fa-sync-alt mr-1"></i> Reprobadas → se reinscriben ({{ (advancePreview.repeated || []).length }})
             </p>
             <ul class="text-sm text-slate-700 space-y-1">
-              <li *ngFor="let s of advancePreview.repeated">
+              <li *ngFor="let s of advancePreview.repeated; trackBy: trackBySigla">
                 <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">{{ s.sigla }}</span>
                 {{ s.name }}
+                <span class="ml-1 text-[10px] text-slate-400">
+                  Registrado <i class="fas fa-arrow-right mx-0.5"></i>
+                </span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-600">
+                  Reprobado
+                </span>
+                <span class="ml-1 text-[10px] text-slate-400">
+                  <i class="fas fa-arrow-right mx-0.5"></i>
+                </span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-600">
+                  <i class="fas fa-plus mr-0.5"></i> Registrado
+                </span>
               </li>
               <li *ngIf="(advancePreview.repeated || []).length === 0" class="text-xs text-slate-400">Sin materias reprobadas</li>
             </ul>
@@ -875,7 +1046,7 @@
               <i class="fas fa-times-circle mr-1"></i> No lleva por pre-requisito ({{ (advancePreview.missing_by_prerequisite || []).length }})
             </p>
             <ul class="text-sm text-slate-700 space-y-1">
-              <li *ngFor="let s of advancePreview.missing_by_prerequisite">
+              <li *ngFor="let s of advancePreview.missing_by_prerequisite; trackBy: trackBySigla">
                 <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200">{{ s.sigla }}</span>
                 {{ s.name }}
               </li>
@@ -891,7 +1062,7 @@
               class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
               [(ngModel)]="advanceParallelId">
               <option [ngValue]="null">Seleccionar turno y paralelo</option>
-              <option *ngFor="let parallel of advanceParallels" [ngValue]="parallel.id">
+              <option *ngFor="let parallel of advanceParallels; trackBy: trackById" [ngValue]="parallel.id">
                 Cupo: {{ parallel.available }} - {{ parallel.turno }} - {{ parallel.paralelo }}
               </option>
             </select>
@@ -909,9 +1080,12 @@
             Cerrar
           </button>
           <button *ngIf="!advanceIsLastLevel"
-            class="bg-blue-500 hover:bg-blue-600 px-4 py-2 text-sm rounded-lg text-white"
-            [disabled]="advanceSaving" (click)="advanceConfirmOpen = true">
-            <i class="fas fa-arrow-up mr-1"></i> Avanzar de Nivel
+            class="px-4 py-2 text-sm rounded-lg text-white"
+            [class]="advancePreview.can_advance !== false ? 'bg-blue-500 hover:bg-blue-600' : 'bg-slate-300 text-slate-500 cursor-not-allowed'"
+            [disabled]="advanceSaving || advancePreview.can_advance === false"
+            (click)="advanceConfirmOpen = true">
+            <i class="fas mr-1" [class]="advancePreview.can_advance !== false ? 'fa-arrow-up' : 'fa-lock'"></i>
+            {{ advancePreview.can_advance !== false ? 'Avanzar de Nivel' : 'No puede avanzar' }}
           </button>
         </div>
       </div>
@@ -943,12 +1117,15 @@
       <div class="grid md:grid-cols-2 gap-4">
         <div class="bg-green-50 border border-green-200 rounded-xl p-4">
           <p class="text-sm font-semibold text-green-700 mb-2">
-            <i class="fas fa-check-circle mr-1"></i> Toma ahora ({{ advanceResult.assigned.length }})
+            <i class="fas fa-arrow-up mr-1"></i> Se asignaron nivel {{ advanceResult.new_level }} ({{ advanceResult.assigned.length }})
           </p>
           <ul class="text-sm text-slate-700 space-y-1">
-            <li *ngFor="let s of advanceResult.assigned">
+            <li *ngFor="let s of advanceResult.assigned; trackBy: trackBySigla">
               <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-green-200">{{ s.sigla }}</span>
               {{ s.name }}
+              <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-600">
+                <i class="fas fa-plus mr-0.5"></i> Registrado
+              </span>
             </li>
             <li *ngIf="advanceResult.assigned.length === 0" class="text-xs text-slate-400">Sin materias asignadas</li>
           </ul>
@@ -956,12 +1133,19 @@
 
         <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
           <p class="text-sm font-semibold text-sky-700 mb-2">
-            <i class="fas fa-graduation-cap mr-1"></i> Materias aprobadas ({{ advanceResult.approved.length }})
+            <i class="fas fa-check-circle mr-1"></i> Aprobadas ({{ advanceResult.approved.length }})
           </p>
           <ul class="text-sm text-slate-700 space-y-1">
-            <li *ngFor="let s of advanceResult.approved">
+            <li *ngFor="let s of advanceResult.approved; trackBy: trackBySigla">
               <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-sky-200">{{ s.sigla }}</span>
               {{ s.name }}
+              <span class="ml-1 text-[10px] text-slate-400">
+                Registrado <i class="fas fa-arrow-right mx-0.5"></i>
+              </span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                [ngClass]="s.observation === 'Aprobado con recuperación' ? 'bg-amber-100 text-amber-600' : 'bg-sky-100 text-sky-600'">
+                {{ s.observation }}
+              </span>
             </li>
             <li *ngIf="advanceResult.approved.length === 0" class="text-xs text-slate-400">Sin materias aprobadas</li>
           </ul>
@@ -969,12 +1153,24 @@
 
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <p class="text-sm font-semibold text-amber-700 mb-2">
-            <i class="fas fa-sync-alt mr-1"></i> Repite ({{ advanceResult.repeated.length }})
+            <i class="fas fa-sync-alt mr-1"></i> Reprobadas → reinscritas ({{ advanceResult.repeated.length }})
           </p>
           <ul class="text-sm text-slate-700 space-y-1">
-            <li *ngFor="let s of advanceResult.repeated">
+            <li *ngFor="let s of advanceResult.repeated; trackBy: trackBySigla">
               <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">{{ s.sigla }}</span>
               {{ s.name }}
+              <span class="ml-1 text-[10px] text-slate-400">
+                Registrado <i class="fas fa-arrow-right mx-0.5"></i>
+              </span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-600">
+                Reprobado
+              </span>
+              <span class="ml-1 text-[10px] text-slate-400">
+                <i class="fas fa-arrow-right mx-0.5"></i>
+              </span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-600">
+                <i class="fas fa-plus mr-0.5"></i> Registrado
+              </span>
             </li>
             <li *ngIf="advanceResult.repeated.length === 0" class="text-xs text-slate-400">Sin materias reprobadas</li>
           </ul>
@@ -985,7 +1181,7 @@
             <i class="fas fa-times-circle mr-1"></i> No lleva por pre-requisito ({{ advanceResult.missing_by_prerequisite.length }})
           </p>
           <ul class="text-sm text-slate-700 space-y-1">
-            <li *ngFor="let s of advanceResult.missing_by_prerequisite">
+            <li *ngFor="let s of advanceResult.missing_by_prerequisite; trackBy: trackBySigla">
               <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200">{{ s.sigla }}</span>
               {{ s.name }}
             </li>
@@ -1017,6 +1213,515 @@
     (confirm)="confirmGraduate()"
     (cancel)="advanceEgressConfirmOpen = false">
   </app-base-modal-confirm>
+
+  <!-- MODAL: ASIGNACIÓN MANUAL DE MATERIAS -->
+  <app-base-modal [isOpen]="modalAssignSubjects" title="Asignar materias"
+    [subtitle]="assignSubjectsStudent ? (assignSubjectsStudent.name + ' - Gestión de materias del nivel actual') : ''"
+    size="xl" [showFooter]="false" (cancel)="closeAssignSubjects()">
+
+    <div class="space-y-4">
+      <div *ngIf="assignSubjectsLoading" class="flex items-center justify-center gap-2 py-10 text-slate-600">
+        <i class="fas fa-spinner fa-spin text-amber-600 text-xl"></i>
+        <span>Cargando materias...</span>
+      </div>
+
+      <div *ngIf="!assignSubjectsLoading && assignSubjectsList.length > 0" class="space-y-4">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
+          <i class="fas fa-info-circle mr-1"></i>
+          Las materias <strong>Aprobadas</strong> son solo lectura. Solo puede modificar materias con estado
+          <strong>Reprobado</strong>, <strong>Sin calificación</strong> o <strong>No inscrito</strong>.
+        </div>
+
+        <div *ngFor="let levelGroup of getAssignSubjectsByLevel(); trackBy: trackByLevel">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Nivel {{ levelGroup.level }}</span>
+            <div class="h-px flex-1 bg-slate-200"></div>
+          </div>
+
+          <div class="space-y-2">
+            <div *ngFor="let subject of levelGroup.subjects; trackBy: trackById"
+              class="border rounded-xl p-3 flex items-center justify-between transition"
+              [ngClass]="{
+                'bg-green-50 border-green-200': subject.observation === 'Aprobado' || subject.observation === 'Aprobado con recuperación',
+                'bg-red-50 border-red-200': subject.observation === 'Reprobado',
+                'bg-amber-50 border-amber-200': subject.observation === 'Sin calificación',
+                'bg-slate-50 border-slate-200': subject.observation === 'No inscrito',
+                'bg-white border-slate-200': subject.status === 'Registrado' && subject.observation !== 'Reprobado' && subject.observation !== 'Sin calificación'
+              }">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-xs bg-white/80 px-2 py-1 rounded border border-slate-200">{{ subject.sigla }}</span>
+                <div>
+                  <p class="text-sm font-medium text-slate-700">{{ subject.name }}</p>
+                  <div class="flex items-center gap-3 mt-0.5">
+                    <span *ngIf="subject.final_grade !== null" class="text-[10px] text-slate-500">
+                      Nota: <strong class="font-mono"
+                        [ngClass]="(subject.final_grade ?? 0) >= 61 ? 'text-green-600' : 'text-red-600'">
+                        {{ subject.final_grade }}
+                      </strong>
+                    </span>
+                    <span *ngIf="subject.recovery_grade !== null" class="text-[10px] text-amber-600">
+                      Recup: <strong class="font-mono">{{ subject.recovery_grade }}</strong>
+                    </span>
+                    <span *ngIf="subject.final_grade === null && subject.recovery_grade === null" class="text-[10px] text-slate-400 italic">
+                      Sin notas
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <!-- Aprobado: solo lectura -->
+                <span *ngIf="subject.observation === 'Aprobado' || subject.observation === 'Aprobado con recuperación'"
+                  class="px-2 py-1 rounded-full text-[10px] font-semibold bg-green-100 text-green-600">
+                  <i class="fas fa-check-circle mr-1"></i>{{ subject.observation }}
+                </span>
+
+                <!-- Reprobado / Sin calificación / No inscrito: editable -->
+                <ng-container *ngIf="subject.observation !== 'Aprobado' && subject.observation !== 'Aprobado con recuperación'">
+                  <select *ngIf="subject.enrolled"
+                    class="px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-amber-500"
+                    [ngModel]="subject.status"
+                    (ngModelChange)="toggleSubjectStatus(subject, $event)">
+                    <option value="Registrado">Registrado</option>
+                    <option value="Falta">Falta</option>
+                  </select>
+                  <button *ngIf="!subject.enrolled"
+                    (click)="toggleSubjectStatus(subject, 'Registrado')"
+                    class="px-3 py-1.5 text-xs rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-plus mr-1"></i>Inscribir
+                  </button>
+                  <span class="px-2 py-1 rounded-full text-[10px] font-semibold"
+                    [ngClass]="{
+                      'bg-red-100 text-red-600': subject.observation === 'Reprobado',
+                      'bg-amber-100 text-amber-600': subject.observation === 'Sin calificación',
+                      'bg-slate-100 text-slate-600': subject.observation === 'No inscrito',
+                      'bg-blue-100 text-blue-600': subject.status === 'Registrado' && subject.observation !== 'Reprobado' && subject.observation !== 'Sin calificación',
+                      'bg-orange-100 text-orange-600': subject.status === 'Falta'
+                    }">
+                    {{ subject.observation }}
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!assignSubjectsLoading && assignSubjectsList.length === 0"
+        class="text-center py-6 text-slate-400 text-sm">
+        No se encontraron materias para esta carrera.
+      </div>
+
+      <div *ngIf="!assignSubjectsLoading" class="flex justify-end gap-2 pt-2">
+        <button class="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition"
+          (click)="closeAssignSubjects()">
+          Cerrar
+        </button>
+        <button class="bg-amber-500 hover:bg-amber-600 px-4 py-2 text-sm rounded-lg text-white"
+          [disabled]="assignSubjectsSaving" (click)="saveAssignSubjects()">
+          <i class="fas fa-save mr-1"></i> {{ assignSubjectsSaving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: DETALLE DE BLOQUEO -->
+  <app-base-modal [isOpen]="modalBlockDetail" title="Detalle de bloqueo"
+    [subtitle]="blockDetailStudent ? blockDetailStudent.name : ''"
+    size="lg" [showFooter]="false" (cancel)="closeBlockDetail()">
+
+    <div *ngIf="loadingBlockDetail" class="flex items-center justify-center gap-2 py-10 text-slate-600">
+      <i class="fas fa-spinner fa-spin text-red-600 text-xl"></i>
+      <span>Cargando detalle...</span>
+    </div>
+
+    <div *ngIf="!loadingBlockDetail && blockDetailStudent" class="space-y-4">
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-red-700 mb-2">
+          <i class="fas fa-lock mr-1"></i> Este estudiante no puede avanzar de nivel
+        </p>
+        <p class="text-xs text-red-600">Tiene las siguientes materias pendientes:</p>
+      </div>
+
+      <div class="space-y-2">
+        <div *ngFor="let reason of blockDetailStudent.block_reasons; trackBy: trackBySigla"
+          class="bg-white border border-slate-200 rounded-xl p-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">{{ reason.sigla }}</span>
+              <div>
+                <p class="text-sm font-medium text-slate-700">{{ reason.name }}</p>
+                <p class="text-xs text-slate-400">Nivel {{ reason.level }}</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="px-2 py-1 rounded-full text-[10px] font-semibold"
+                [ngClass]="{
+                  'bg-red-100 text-red-600': reason.status === 'Reprobado',
+                  'bg-amber-100 text-amber-600': reason.status === 'Sin calificación',
+                  'bg-slate-100 text-slate-600': reason.status === 'No inscrito'
+                }">
+                {{ reason.status }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Detalle de calificación -->
+          <div *ngIf="reason.final_grade !== null || reason.recovery_grade !== null"
+            class="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <div class="flex flex-wrap items-center gap-4 text-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">Nota final:</span>
+                <span class="font-mono font-bold text-base"
+                  [ngClass]="(reason.final_grade ?? 0) >= 61 ? 'text-green-600' : 'text-red-600'">
+                  {{ reason.final_grade ?? '—' }}
+                </span>
+              </div>
+              <div *ngIf="reason.recovery_grade !== null" class="flex items-center gap-2">
+                <span class="text-slate-500">Recuperación:</span>
+                <span class="font-mono font-bold text-base text-amber-600">{{ reason.recovery_grade }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">Observación:</span>
+                <span class="font-semibold text-sm"
+                  [ngClass]="{
+                    'text-green-600': reason.observation === 'Aprobado',
+                    'text-amber-600': reason.observation === 'Aprobado con recuperación',
+                    'text-red-600': reason.observation === 'Reprobado',
+                    'text-slate-400': reason.observation === 'Sin calificación' || reason.observation === 'No inscrito'
+                  }">
+                  {{ reason.observation }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="reason.final_grade === null && reason.recovery_grade === null"
+            class="mt-2 text-xs text-slate-400 italic">{{ reason.reason }}</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button class="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition"
+          (click)="closeBlockDetail()">
+          Cerrar
+        </button>
+        <button class="bg-amber-500 hover:bg-amber-600 px-4 py-2 text-sm rounded-lg text-white"
+          (click)="assignFromBlockDetail()">
+          <i class="fas fa-edit mr-1"></i> Asignar materias
+        </button>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: DETALLE DE ASIGNACIÓN POR ESTUDIANTE -->
+  <app-base-modal [isOpen]="modalAssignmentDetail" title="Detalle de asignación"
+    [subtitle]="assignmentDetailStudent ? assignmentDetailStudent.name : ''"
+    size="lg" [showFooter]="false" (cancel)="closeAssignmentDetail()">
+
+    <div *ngIf="assignmentDetailStudent" class="space-y-4">
+
+      <!-- Aprobadas (historial) -->
+      <div *ngIf="(assignmentDetailStudent.approved || []).length > 0"
+        class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-sky-700 mb-2">
+          <i class="fas fa-check-circle mr-1"></i> Aprobadas ({{ assignmentDetailStudent.approved.length }})
+        </p>
+        <ul class="text-sm text-slate-700 space-y-1">
+          <li *ngFor="let s of assignmentDetailStudent.approved; trackBy: trackBySigla"
+            class="flex items-center justify-between">
+            <div>
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-sky-200">{{ s.sigla }}</span>
+              {{ s.name }}
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+              [ngClass]="getObservationClass(s.observation)">
+              {{ s.observation }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Reprobadas → se reinscriben -->
+      <div *ngIf="(assignmentDetailStudent.repeated || []).length > 0"
+        class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-amber-700 mb-2">
+          <i class="fas fa-sync-alt mr-1"></i> Reprobadas → se reinscriben ({{ assignmentDetailStudent.repeated.length }})
+        </p>
+        <ul class="text-sm text-slate-700 space-y-1">
+          <li *ngFor="let s of assignmentDetailStudent.repeated; trackBy: trackBySigla"
+            class="flex items-center justify-between">
+            <div>
+              <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">{{ s.sigla }}</span>
+              {{ s.name }}
+              <span class="text-xs text-slate-400"> → nivel {{ s.level }}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="font-mono text-xs font-bold"
+                [ngClass]="getGradeColor(s.final_grade)">
+                {{ s.final_grade ?? '—' }}
+              </span>
+              <span *ngIf="s.recovery_grade !== null"
+                class="font-mono text-xs font-bold text-amber-600">
+                (Rec: {{ s.recovery_grade }})
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sin calificación -->
+      <div *ngIf="(assignmentDetailStudent.pending || []).length > 0"
+        class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-slate-600 mb-2">
+          <i class="fas fa-clock mr-1"></i> Sin calificación ({{ assignmentDetailStudent.pending.length }})
+        </p>
+        <ul class="text-sm text-slate-700 space-y-1">
+          <li *ngFor="let s of assignmentDetailStudent.pending; trackBy: trackBySigla">
+            <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-slate-200">{{ s.sigla }}</span>
+            {{ s.name }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Asignadas del siguiente nivel -->
+      <div *ngIf="(assignmentDetailStudent.assigned || []).length > 0"
+        class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-emerald-700 mb-2">
+          <i class="fas fa-arrow-up mr-1"></i> Se asignan en nivel {{ parallelAdvancePreview?.summary?.new_level || '?' }} ({{ assignmentDetailStudent.assigned.length }})
+        </p>
+        <ul class="text-sm text-slate-700 space-y-1">
+          <li *ngFor="let s of assignmentDetailStudent.assigned; trackBy: trackBySigla">
+            <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-emerald-200">{{ s.sigla }}</span>
+            {{ s.name }}
+            <span *ngIf="s.subject_sigla" class="text-xs text-slate-400 ml-1">
+              (pre-req: {{ s.subject_sigla }} ✓)
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- No lleva por pre-requisito -->
+      <div *ngIf="(assignmentDetailStudent.missing_by_prerequisite || []).length > 0"
+        class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-red-700 mb-2">
+          <i class="fas fa-times-circle mr-1"></i> No lleva por pre-requisito ({{ assignmentDetailStudent.missing_by_prerequisite.length }})
+        </p>
+        <ul class="text-sm text-slate-700 space-y-1">
+          <li *ngFor="let s of assignmentDetailStudent.missing_by_prerequisite; trackBy: trackBySigla">
+            <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-red-200">{{ s.sigla }}</span>
+            {{ s.name }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sin datos -->
+      <div *ngIf="(assignmentDetailStudent.assigned || []).length === 0
+        && (assignmentDetailStudent.repeated || []).length === 0
+        && (assignmentDetailStudent.pending || []).length === 0
+        && (assignmentDetailStudent.approved || []).length === 0"
+        class="text-center py-6 text-slate-400 text-sm">
+        Sin datos de asignación para este estudiante.
+      </div>
+    </div>
+
+    <div class="flex justify-end pt-2">
+      <button class="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition"
+        (click)="closeAssignmentDetail()">
+        Cerrar
+      </button>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: DETALLE DE CALIFICACIONES POR ESTUDIANTE -->
+  <app-base-modal [isOpen]="modalGradesDetail" title="Detalle de calificaciones"
+    [subtitle]="gradesDetailData ? (gradesDetailData.student.name + ' - ' + gradesDetailData.career.name) : ''"
+    size="xl" [showFooter]="false" (cancel)="closeGradesDetail()">
+
+    <div *ngIf="loadingGradesDetail" class="flex items-center justify-center gap-2 py-10 text-slate-600">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+      <span>Cargando calificaciones...</span>
+    </div>
+
+    <div *ngIf="!loadingGradesDetail && gradesDetailData" class="space-y-4">
+      <!-- Resumen del nivel actual -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Nivel actual</p>
+          <p class="font-semibold text-slate-800 text-lg">{{ ordinalLabel(gradesDetailData.current_level) }}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs font-medium text-blue-500 uppercase tracking-wide">Resumen</p>
+          <div class="flex gap-3 mt-1">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+              {{ getApprovedCount() }} Aprobadas
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+              {{ getRepeatedCount() }} Reprobadas
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+              {{ getPendingCount() }} Pendientes
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de materias -->
+      <div class="space-y-2">
+        <div *ngFor="let subject of gradesDetailData.subjects; trackBy: trackById"
+          class="border rounded-xl p-4 transition"
+          [ngClass]="{
+            'bg-emerald-50 border-emerald-200': subject.observation === 'Aprobado',
+            'bg-amber-50 border-amber-200': subject.observation === 'Aprobado con recuperación',
+            'bg-red-50 border-red-200': subject.observation === 'Reprobado',
+            'bg-slate-50 border-slate-200': subject.observation === 'Sin calificación' || subject.observation === 'No inscrito',
+            'bg-white border-slate-200': !subject.observation
+          }">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs bg-white/80 px-2 py-1 rounded border border-slate-200">{{ subject.sigla }}</span>
+              <div>
+                <p class="text-sm font-medium text-slate-700">{{ subject.name }}</p>
+                <p class="text-[10px] text-slate-400">Nivel {{ subject.level }}</p>
+              </div>
+              <span *ngIf="subject.is_current_level"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-600 font-semibold uppercase">
+                Actual
+              </span>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="px-2 py-1 rounded-full text-[10px] font-semibold"
+                [ngClass]="getObservationClass(subject.observation)">
+                {{ subject.observation }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Detalle de notas -->
+          <div class="mt-3 p-3 bg-white/60 rounded-lg border border-slate-100">
+            <div class="flex flex-wrap items-center gap-4 text-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">Nota final:</span>
+                <span class="font-mono font-bold text-base"
+                  [ngClass]="getGradeColor(subject.final_grade)">
+                  {{ subject.final_grade ?? '—' }}
+                </span>
+              </div>
+              <div *ngIf="subject.recovery_grade !== null" class="flex items-center gap-2">
+                <span class="text-slate-500">Recuperación:</span>
+                <span class="font-mono font-bold text-base text-amber-600">{{ subject.recovery_grade }}</span>
+              </div>
+              <div *ngIf="subject.enrolled" class="flex items-center gap-2">
+                <span class="text-slate-500">Estado inscripción:</span>
+                <span class="text-xs font-semibold"
+                  [ngClass]="{
+                    'text-emerald-600': subject.status === 'Aprobado',
+                    'text-amber-600': subject.status === 'Registrado',
+                    'text-red-600': subject.status === 'Reprobado',
+                    'text-slate-500': subject.status === 'Falta'
+                  }">
+                  {{ subject.status }}
+                </span>
+              </div>
+              <div *ngIf="!subject.enrolled" class="flex items-center gap-2">
+                <span class="text-xs text-slate-400 italic">No inscrito</span>
+              </div>
+            </div>
+
+            <!-- Detalle de evaluaciones (columnas) -->
+            <div *ngIf="subject.details && subject.details.length > 0" class="mt-3 pt-3 border-t border-slate-100">
+              <p class="text-[10px] font-semibold text-slate-500 uppercase mb-2">Evaluaciones</p>
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let detail of subject.details; trackBy: trackByIndex"
+                  class="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs">
+                  <span class="text-slate-500">{{ detail.evaluation }}</span>
+                  <span *ngIf="detail.parcial" class="text-slate-400"> (P{{ detail.parcial }})</span>
+                  <span class="font-mono font-semibold ml-1"
+                    [ngClass]="getGradeColor(detail.grade)">
+                    {{ detail.grade ?? '—' }}
+                  </span>
+                  <span *ngIf="detail.weight" class="text-slate-400 text-[10px]"> [{{ detail.weight }}%]</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
+
+  <!-- MODAL: DETALLE DE ALERTAS DE PRE-REQUISITO -->
+  <app-base-modal [isOpen]="modalAlertsDetail" title="Alertas de pre-requisito"
+    [subtitle]="alertsDetailStudent ? alertsDetailStudent.name : ''"
+    size="lg" [showFooter]="false" (cancel)="closeAlertsDetail()">
+
+    <div class="space-y-4">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-amber-700 mb-1">
+          <i class="fas fa-exclamation-triangle mr-1"></i> Materias bloqueadas por pre-requisito
+        </p>
+        <p class="text-xs text-amber-600">
+          Estas materias del siguiente nivel no se pueden asignar porque requieren que la materia pre-requisito est&eacute; aprobada con nota &ge; 61.
+        </p>
+      </div>
+
+      <div *ngIf="alertsDetailAlerts.length === 0"
+        class="text-center py-8 text-slate-400 text-sm">
+        <i class="fas fa-check-circle text-emerald-400 text-2xl mb-2 block"></i>
+        No hay alertas de pre-requisito. Todas las materias del siguiente nivel pueden ser asignadas.
+      </div>
+
+      <div *ngFor="let alert of alertsDetailAlerts; trackBy: trackByIndex"
+        class="border border-slate-200 rounded-xl p-4 bg-white">
+        <div class="flex items-center gap-3">
+          <!-- Materia bloqueada -->
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-mono text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-200">
+                {{ alert.blocked.sigla }}
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
+                Nivel {{ alert.blocked.level }}
+              </span>
+            </div>
+            <p class="text-sm font-medium text-slate-700">{{ alert.blocked.name }}</p>
+          </div>
+
+          <!-- Flecha -->
+          <div class="flex flex-col items-center shrink-0 px-2">
+            <i class="fas fa-arrow-left text-red-400 text-lg"></i>
+            <span class="text-[9px] text-red-400 mt-0.5">requiere</span>
+          </div>
+
+          <!-- Materia pre-requisito con nota -->
+          <div class="flex-1 text-right">
+            <div class="flex items-center justify-end gap-2 mb-1">
+              <span class="font-mono text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-200">
+                {{ alert.prerequisite.sigla }}
+              </span>
+            </div>
+            <p class="text-sm font-medium text-slate-700">{{ alert.prerequisite.name }}</p>
+            <div class="flex items-center justify-end gap-3 mt-1">
+              <div class="flex items-center gap-1">
+                <span class="text-[10px] text-slate-500">Nota:</span>
+                <span class="font-mono font-bold text-sm"
+                  [ngClass]="getGradeColor(alert.prerequisite.final_grade)">
+                  {{ alert.prerequisite.final_grade ?? '—' }}
+                </span>
+              </div>
+              <div *ngIf="alert.prerequisite.recovery_grade !== null" class="flex items-center gap-1">
+                <span class="text-[10px] text-slate-500">Recup:</span>
+                <span class="font-mono font-bold text-sm text-amber-600">{{ alert.prerequisite.recovery_grade }}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                [ngClass]="getObservationClass(alert.prerequisite.observation)">
+                {{ alert.prerequisite.observation }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-base-modal>
 
   <app-base-modal-confirm
     [isOpen]="confirmDeleteScheduleOpen"

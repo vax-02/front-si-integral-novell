@@ -27,6 +27,7 @@
               }
             ],
             "styles": [
+              "src/tailwind.css",
               "src/custom-theme.scss",
               "src/styles.css"
             ],

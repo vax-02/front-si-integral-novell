@@ -14,6 +14,9 @@ export const API_ENDPOINTS = {
     index: `${API_BASE_URL}/students`,
     advanceLevel: (id: number) => `${API_BASE_URL}/students/${id}/advance-level`,
     advancePreview: (id: number) => `${API_BASE_URL}/students/${id}/preview-advance`,
+    careerSubjects: (id: number) => `${API_BASE_URL}/students/${id}/career-subjects`,
+    gradesDetail: (id: number) => `${API_BASE_URL}/students/${id}/grades-detail`,
+    assignSubjects: (id: number) => `${API_BASE_URL}/students/${id}/assign-subjects`,
     graduate: (id: number) => `${API_BASE_URL}/students/${id}/graduate`,
     academicHistoryExport: (id: number) => `${API_BASE_URL}/students/${id}/academic-history/export`,
     workshopEnrollments: (id: number) => `${API_BASE_URL}/students/${id}/workshop-enrollments`,
@@ -33,6 +36,7 @@ export const API_ENDPOINTS = {
     studentsByParallel: (id: number) => `${API_BASE_URL}/parallels/${id}/students`,
     previewAdvance: (id: number) => `${API_BASE_URL}/parallels/${id}/preview-advance`,
     advanceLevel: (id: number) => `${API_BASE_URL}/parallels/${id}/advance-level`,
+    autoAdvance: (id: number) => `${API_BASE_URL}/parallels/${id}/auto-advance`,
   },
   schedules: {
     byCareer: (careerId: number) => `${API_BASE_URL}/subjects/${careerId}/by-career`,

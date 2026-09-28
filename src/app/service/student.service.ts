@@ -98,6 +98,24 @@ export class StudentService {
     });
   }
 
+  getCareerSubjects(studentId: number, careerId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl.students.careerSubjects(studentId)}?career_id=${careerId}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getStudentGradesDetail(studentId: number, careerId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl.students.gradesDetail(studentId)}?career_id=${careerId}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  assignSubjects(studentId: number, careerId: number, subjects: {subject_id: number, status: string}[]): Observable<any> {
+    return this.http.put<any>(this.apiUrl.students.assignSubjects(studentId), { career_id: careerId, subjects }, {
+      headers: this.getHeaders(),
+    });
+  }
+
   exportAcademicHistory(studentId: number, careerId?: number): Observable<Blob> {
     let url = this.apiUrl.students.academicHistoryExport(studentId);
     if (careerId) {

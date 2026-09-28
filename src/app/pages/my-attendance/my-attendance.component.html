@@ -64,8 +64,36 @@
 </div>
 
 <!-- Loading -->
-<div *ngIf="detailLoading" class="flex justify-center py-16">
-  <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
+<div *ngIf="detailLoading" class="space-y-6">
+  <!-- Skeleton resumen -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div *ngFor="let i of [1, 2, 3, 4]" class="bg-white rounded-xl border border-slate-200 p-4">
+      <div class="h-3 w-24 bg-slate-200 rounded animate-pulse"></div>
+      <div class="h-8 w-12 bg-slate-200 rounded animate-pulse mt-2"></div>
+    </div>
+  </div>
+  <!-- Skeleton controles -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-slate-200 rounded-lg animate-pulse"></div>
+      <div class="h-4 w-48 bg-slate-200 rounded animate-pulse"></div>
+      <div class="w-8 h-8 bg-slate-200 rounded-lg animate-pulse"></div>
+      <div class="h-8 w-14 bg-slate-200 rounded-lg animate-pulse ml-2"></div>
+    </div>
+    <div class="flex rounded-lg border border-slate-200 overflow-hidden">
+      <div class="w-16 h-8 bg-slate-200 animate-pulse"></div>
+      <div class="w-20 h-8 bg-slate-200 animate-pulse"></div>
+    </div>
+  </div>
+  <!-- Skeleton calendario -->
+  <div class="grid grid-cols-7 gap-1.5">
+    <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]"
+      class="rounded-lg min-h-[5.5rem] p-2 bg-slate-100 animate-pulse"></div>
+  </div>
+  <div class="grid grid-cols-7 gap-1.5">
+    <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]"
+      class="rounded-lg min-h-[5.5rem] p-2 bg-slate-100 animate-pulse"></div>
+  </div>
 </div>
 
 <!-- Sin datos -->
