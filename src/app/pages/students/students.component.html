@@ -253,14 +253,24 @@
             </option>
           </select>
 
-          <select
+<select
             class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
             [(ngModel)]="enrollment.parallel_id">
             <option [ngValue]="null">Seleccionar turno y paralelo</option>
             <option *ngFor="let parallel of parallels" [ngValue]="parallel.id">
-              Cupo: {{ parallel.available }} - {{ parallel.paralelo }} - {{ parallel.turno }}
+              Cupo: {{ parallel.available }} - {{ parallel.turno }} - {{ parallel.paralelo }}
             </option>
           </select>
+
+          <div class="mt-2">
+            <label class="block text-sm font-medium text-slate-700">Matrícula</label>
+            <input
+              type="text"
+              [(ngModel)]="enrollment.matricula"
+              class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
+              [readonly]="!enrollment.career_id"
+              placeholder="Se generará automáticamente al seleccionar carrera">
+          </div>
         </div>
       </div>
 

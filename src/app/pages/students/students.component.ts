@@ -29,6 +29,7 @@ export interface Student {
     status: number
   };
   careers: (CareerForSelect & { pivot?: { status: string } })[];
+  matricula: string;
 }
 interface Card {
   total: number;
@@ -94,6 +95,7 @@ export class StudentsComponent {
     birth_certificate: false,
     school_diploma: false,
     carnet: false,
+    matricula: '',
   };
 
   // Convalidación
@@ -225,6 +227,7 @@ export class StudentsComponent {
       birth_certificate: false,
       school_diploma: false,
       carnet: false,
+      matricula: '',
     };
     this.parallels = [];
     this.saving = false;
@@ -249,8 +252,14 @@ export class StudentsComponent {
   onCareerChange() {
     if (!this.enrollment.career_id) {
       this.parallels = [];
+      this.enrollment.matricula = '';
       return;
     }
+    // Auto-generate matricula preview only if empty (respect manual entry)
+    if (!this.enrollment.matricula) {
+      this.enrollment.matricula = this.generateMatriculaPreview();
+    }
+    
     const startLevel = this.getConvalidationStartLevel();
     this.parallelService.getParallelsForCareerAtLevel(this.enrollment.career_id, startLevel).subscribe({
         next: (response) =>{
@@ -260,6 +269,28 @@ export class StudentsComponent {
           this.parallels = [];
         }
     });
+  }
+
+generateMatriculaPreview(): string {
+    // Get career initial from careersForSelect
+    const career = this.careersForSelect.find(c => c.id === this.enrollment.career_id);
+    const careerInitial = career ? career.name.charAt(0).toUpperCase() : 'X';
+    
+    // Get student count (simulate - will be validated by backend)
+    const studentCount = this.students.length + 1;
+    const number = studentCount.toString().padStart(3, '0');
+    
+    // Get current year (2 digits)
+    const year = new Date().getFullYear().toString().slice(-2);
+    
+    // Get student initials: AP (Apellido Paterno) + AM (Apellido Materno) + N (Nombre)
+    const firstLastname = this.enrollment.first_lastname || '';
+    const secondLastname = this.enrollment.second_lastname || '';
+    const name = this.enrollment.name || '';
+    const initials = (firstLastname.charAt(0) + secondLastname.charAt(0) + name.charAt(0)).toUpperCase();
+    
+    // Return preview format: I015-26-PGJ
+    return careerInitial + number + '-' + year + '-' + initials;
   }
 
   onIngresoTypeChange() {
@@ -298,6 +329,7 @@ export class StudentsComponent {
       birth_certificate: this.enrollment.birth_certificate,
       school_diploma: this.enrollment.school_diploma,
       carnet: this.enrollment.carnet,
+      matricula: this.enrollment.matricula,
     };
 
     // Agregar datos de convalidación si aplica
@@ -447,6 +479,10 @@ export class StudentsComponent {
 
   openModalEdit(student: any) {
     this.selectedStudent = student;
+    // Get matricula from first student career if available
+    const firstCareer = student.student_careers?.[0];
+    const matricula = firstCareer?.matricula || '';
+    
     this.enrollment = {
       name: student.user.name,
       first_lastname: student.user.first_lastname,
@@ -460,6 +496,7 @@ export class StudentsComponent {
       birth_certificate: student.birth_certificate,
       school_diploma: student.school_diploma,
       carnet: student.carnet,
+      matricula: matricula,
     };
 
     this.editModalStudent = true;

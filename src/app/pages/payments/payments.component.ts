@@ -71,6 +71,7 @@ paymentForm = {
       status: 0,
     },
     careers: [],
+    matricula: '',
   };
 
   totalPays : number = 0
