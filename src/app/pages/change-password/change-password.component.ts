@@ -85,7 +85,7 @@ export class ChangePasswordComponent {
         this.loading = false;
       },
       error: (err) => {
-        const message = err.error?.message || 'Error al actualizar la contraseña';
+        const message = 'Error al actualizar la contraseña';
         this.toast.error(message);
         this.loading = false;
       },
