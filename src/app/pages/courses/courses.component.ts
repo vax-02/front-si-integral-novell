@@ -660,10 +660,19 @@ export class CoursesComponent implements OnInit {
     }
     const s = this.parallelAdvancePreview.summary || {};
     const blocked = s.blocked ?? 0;
+    const advanceable = s.advanceable ?? 0;
     const skipped = (s.last_level ?? 0) + (s.no_active_parallel ?? 0);
-    let msg = `Se avanzarán ${s.advanceable ?? 0} estudiante(s) del nivel ${this.ordinalLabel(this.parallelAdvancePreview.current_level)} al ${this.ordinalLabel(this.parallelAdvancePreview.new_level)}.`;
+    const total = (advanceable ?? 0) + blocked + skipped;
+    let msg = `Se avanzarán ${advanceable} estudiante(s) del nivel ${this.ordinalLabel(this.parallelAdvancePreview.current_level)} al ${this.ordinalLabel(this.parallelAdvancePreview.new_level)}.`;
     if (skipped > 0) msg += ` ${skipped} se omiten (último nivel o sin paralelo).`;
     if (blocked > 0) msg += ` ${blocked} quedarán bloqueados (sin calificación completa).`;
+    // NUEVO: Alerta cuando nadie puede avanzar por falta de calificaciones
+    if (advanceable === 0 && blocked > 0 && total === blocked) {
+      msg = '⚠️ No hay calificaciones registradas (todas las notas son < 61 o inexistentes). No se puede analizar el avance. Esta acción no se puede deshacer.';
+    }
+    if (advanceable === 0 && blocked === 0 && skipped === 0 && total === 0) {
+      msg = 'No hay estudiantes con datos suficientes para avanzar. Esta acción no se puede deshacer.';
+    }
     msg += ' Esta acción no se puede deshacer.';
     return msg;
   }

@@ -724,6 +724,13 @@ generateMatriculaPreview(): string {
   }
 
   // ── Toggle status (bloquear/activar acceso al sistema) ───────────────────
+  confirmToggleStatus(student: any): void {
+    const action = student.user.status ? '¿Bloquear acceso a este estudiante?' : '¿Activar acceso a este estudiante?';
+    if (confirm(action)) {
+      this.toggleStatus(student);
+    }
+  }
+
   toggleStatus(student: any): void {
     this.studentService.toggleStatus(student.id).subscribe({
       next: (res) => {

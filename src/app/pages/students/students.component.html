@@ -96,30 +96,25 @@
               </span>
             </td>
             <td class="p-4 text-center" *ngIf="!isSecretaria">
-              <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-                <button title="Ver"
-                  class="bg-blue-500 text-white px-2 rounded-lg hover:bg-blue-300 hover:border-3 hover:border-blue-500 transition"
-                  (click)="openModalView(student)">
-                  <i class="text-lg fas fa-eye"></i>
-                </button>
+<div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
+                <app-button title="Ver" icon="fas fa-eye" variant="primary" (click)="openModalView(student)"></app-button>
 
-                <button (click)="openModalEdit(student)" title="Editar"
-                  class="bg-amber-500 text-white px-2 rounded-lg hover:bg-amber-300 hover:border-3 hover:border-amber-500 transition">
-                  <i class="text-lg fas fa-edit"></i>
-                </button>
+                <app-button title="Editar" icon="fas fa-edit" variant="secondary" (click)="openModalEdit(student)"></app-button>
 
-                <button (click)="toggleStatus(student)"
-                  [title]="student.user.status ? 'Bloquear acceso' : 'Activar acceso'"
-                  [class]="student.user.status
-                    ? 'bg-rose-500 text-white px-2 rounded-lg hover:bg-rose-300 hover:border-3 hover:border-rose-500 transition'
-                    : 'bg-emerald-500 text-white px-2 rounded-lg hover:bg-emerald-300 hover:border-3 hover:border-emerald-500 transition'">
-                  <i class="text-lg fas" [class.fa-user-lock]="student.user.status" [class.fa-user-check]="!student.user.status"></i>
-                </button>
+                <app-button title="Bajas/readmisión" icon="fa-solid fa-ellipsis" variant="secondary" (click)="openModalOption(student)"></app-button>
 
-                <button (click)="openModalOption(student)" title="Bajas/readmisi&oacute;n"
-                  class="bg-gray-500 text-white px-2 rounded-lg hover:bg-gray-300 hover:border-3 hover:border-gray-500 transition">
-                  <i class="text-lg fa-solid fa-ellipsis"></i>
-                </button>
+                <app-button
+                  variant="tertiary"
+                  [ngClass]="{
+                    'bg-emerald-100 text-emerald-600': !student.user.status,
+                    'bg-rose-100 text-rose-600': student.user.status
+                  }"
+                  (click)="confirmToggleStatus(student)"
+                >
+                  <i class="fas" [class.fa-user-lock]="student.user.status" [class.fa-user-check]="!student.user.status"></i>
+                </app-button>
+
+                <app-button title="Descargar historial" icon="fas fa-file-excel" variant="primary" (click)="selectedStudent = student; exportAcademicHistory()"></app-button>
               </div>
             </td>
             <td class="p-4 text-center" *ngIf="isSecretaria">
