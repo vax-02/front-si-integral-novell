@@ -1,4 +1,20 @@
-export const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const resolveApiBaseUrl = (): string => {
+  if (typeof window === 'undefined' || !window.location) {
+    return 'http://127.0.0.1:8000/api';
+  }
+
+  const { protocol, hostname } = window.location;
+
+  // Desarrollo local: backend en php artisan serve / 127.0.0.1:8000
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://127.0.0.1:8000/api';
+  }
+
+  // Producción/LAN: el backend se expone en el puerto 8080 del mismo host.
+  return `${protocol}//${hostname}:8080/api`;
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 export const API_ENDPOINTS = {
   dashboard: `${API_BASE_URL}/dashboard`,
@@ -12,6 +28,7 @@ export const API_ENDPOINTS = {
   docenteMySubjects: `${API_BASE_URL}/docente/my-subjects`,
   students: {
     index: `${API_BASE_URL}/students`,
+    nextMatricula: `${API_BASE_URL}/students/next-matricula`,
     advanceLevel: (id: number) => `${API_BASE_URL}/students/${id}/advance-level`,
     advancePreview: (id: number) => `${API_BASE_URL}/students/${id}/preview-advance`,
     careerSubjects: (id: number) => `${API_BASE_URL}/students/${id}/career-subjects`,

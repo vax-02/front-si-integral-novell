@@ -215,9 +215,9 @@
         </h3>
 
           <div class="grid md:grid-cols-3 gap-4">
-            <app-base-input text="Nombre" [(ngModel)]="enrollment.name" />
-            <app-base-input text="Apellido paterno" [(ngModel)]="enrollment.first_lastname" />
-            <app-base-input text="Apellido Materno" [(ngModel)]="enrollment.second_lastname" />
+            <app-base-input text="Nombre" [ngModel]="enrollment.name" (ngModelChange)="enrollment.name = $event; onStudentNameChange()" />
+            <app-base-input text="Apellido paterno" [ngModel]="enrollment.first_lastname" (ngModelChange)="enrollment.first_lastname = $event; onStudentNameChange()" />
+            <app-base-input text="Apellido Materno" [ngModel]="enrollment.second_lastname" (ngModelChange)="enrollment.second_lastname = $event; onStudentNameChange()" />
             <app-base-input text="C.I." [(ngModel)]="enrollment.ci" />
           </div>
       </div>
@@ -261,10 +261,12 @@
             <label class="block text-sm font-medium text-slate-700">Matrícula</label>
             <input
               type="text"
-              [(ngModel)]="enrollment.matricula"
+              [ngModel]="enrollment.matricula"
+              (ngModelChange)="enrollment.matricula = $event; onMatriculaInput()"
               class="w-full px-4 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 transition"
               [readonly]="!enrollment.career_id"
               placeholder="Se generará automáticamente al seleccionar carrera">
+            <p class="text-xs text-slate-500 mt-1">Correlativo según la carrera. Puede editarlo manualmente.</p>
           </div>
         </div>
       </div>

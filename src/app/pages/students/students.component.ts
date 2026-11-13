@@ -98,6 +98,11 @@ export class StudentsComponent {
     matricula: '',
   };
 
+  // Indica si la matrícula fue editada manualmente por el usuario.
+  // Si es false, el backend calcula el siguiente correlativo de la carrera.
+  matriculaManual = false;
+  private matriculaTimeout: any;
+
   // Convalidación
   ingresoType: 'nuevo' | 'convalidacion' = 'nuevo';
   convalidation_type: 'BTH' | 'Tecnico_Medio' | '' = '';
@@ -233,6 +238,8 @@ export class StudentsComponent {
     this.saving = false;
     this.ingresoType = 'nuevo';
     this.convalidation_type = '';
+    this.matriculaManual = false;
+    clearTimeout(this.matriculaTimeout);
   }
 
   getConvalidationStartLevel(): number {
@@ -253,11 +260,12 @@ export class StudentsComponent {
     if (!this.enrollment.career_id) {
       this.parallels = [];
       this.enrollment.matricula = '';
+      this.matriculaManual = false;
       return;
     }
-    // Auto-generate matricula preview only if empty (respect manual entry)
-    if (!this.enrollment.matricula) {
-      this.enrollment.matricula = this.generateMatriculaPreview();
+    // Consulta al backend el siguiente correlativo de la carrera
+    if (!this.matriculaManual) {
+      this.refreshMatriculaPreview();
     }
     
     const startLevel = this.getConvalidationStartLevel();
@@ -271,26 +279,53 @@ export class StudentsComponent {
     });
   }
 
-generateMatriculaPreview(): string {
-    // Get career initial from careersForSelect
-    const career = this.careersForSelect.find(c => c.id === this.enrollment.career_id);
-    const careerInitial = career ? career.name.charAt(0).toUpperCase() : 'X';
-    
-    // Get student count (simulate - will be validated by backend)
-    const studentCount = this.students.length + 1;
-    const number = studentCount.toString().padStart(3, '0');
-    
-    // Get current year (2 digits)
-    const year = new Date().getFullYear().toString().slice(-2);
-    
-    // Get student initials: AP (Apellido Paterno) + AM (Apellido Materno) + N (Nombre)
-    const firstLastname = this.enrollment.first_lastname || '';
-    const secondLastname = this.enrollment.second_lastname || '';
-    const name = this.enrollment.name || '';
-    const initials = (firstLastname.charAt(0) + secondLastname.charAt(0) + name.charAt(0)).toUpperCase();
-    
-    // Return preview format: I015-26-PGJ
-    return careerInitial + number + '-' + year + '-' + initials;
+  onStudentNameChange() {
+    if (!this.matriculaManual) {
+      this.refreshMatriculaPreview();
+    }
+  }
+
+  onMatriculaInput() {
+    // Si el usuario modifica la matrícula, se respeta su valor manual.
+    this.matriculaManual = true;
+  }
+
+  refreshMatriculaPreview() {
+    if (!this.enrollment.career_id || this.matriculaManual) {
+      return;
+    }
+    if (!this.enrollment.first_lastname || !this.enrollment.name) {
+      return;
+    }
+
+    clearTimeout(this.matriculaTimeout);
+    this.matriculaTimeout = setTimeout(() => {
+      if (
+        this.matriculaManual ||
+        !this.enrollment.career_id ||
+        !this.enrollment.first_lastname ||
+        !this.enrollment.name
+      ) {
+        return;
+      }
+
+      this.studentService
+        .getNextMatricula(this.enrollment.career_id as number, {
+          name: this.enrollment.name,
+          first_lastname: this.enrollment.first_lastname,
+          second_lastname: this.enrollment.second_lastname,
+        })
+        .subscribe({
+          next: (response) => {
+            if (!this.matriculaManual) {
+              this.enrollment.matricula = response.matricula || '';
+            }
+          },
+          error: () => {
+            // El backend generará la matrícula final al guardar.
+          },
+        });
+    }, 250);
   }
 
   onIngresoTypeChange() {
@@ -353,6 +388,11 @@ generateMatriculaPreview(): string {
         }
       });
     } else {
+      // Si la matrícula no fue editada manualmente, no se envía: el backend
+      // calcula el siguiente correlativo real de la carrera al guardar.
+      if (!this.matriculaManual) {
+        delete data.matricula;
+      }
       this.studentService.createStudent(data).subscribe({
         next: (response) => {
           this.saving = false;
@@ -499,6 +539,7 @@ generateMatriculaPreview(): string {
       matricula: matricula,
     };
 
+    this.matriculaManual = true;
     this.editModalStudent = true;
   }
 

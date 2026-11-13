@@ -38,6 +38,21 @@ export class StudentService {
     });
   }
 
+  getNextMatricula(
+    careerId: number,
+    data: { name: string; first_lastname: string; second_lastname?: string },
+  ): Observable<any> {
+    return this.http.get<any>(this.apiUrl.students.nextMatricula, {
+      params: {
+        career_id: careerId.toString(),
+        name: data.name || '',
+        first_lastname: data.first_lastname || '',
+        second_lastname: data.second_lastname || '',
+      },
+      headers: this.getHeaders(),
+    });
+  }
+
   createStudentFromUser(data: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl.students.index}/from-user`, data, {
       headers: this.getHeaders(),
